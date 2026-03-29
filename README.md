@@ -4,6 +4,52 @@ This repo is **local operator tooling** for **yt-dlp–oriented** batch workflow
 
 You bring **yt-dlp**, **Python**, and compliance with **site terms**; this tree does **not** ship secrets (no real `cookies.txt`; use [`cookies.txt.example`](cookies.txt.example)). **[`LICENSE`](LICENSE)** applies to the code and docs here.
 
+## Screenshots
+
+These are **static captures** from a **fresh Archive Console** session: demo `state` only, **no** real `cookies.txt`, **no** job started (so the Run log is empty—no live yt-dlp output or URLs). Some panels normally echo your real **archive root** or resolved paths; those strips are **overlaid** in the PNGs with a placeholder line so the repo stays free of machine-specific roots. *(PNG width ≈1040px—GitHub scales them; open the file for 1:1.)*
+
+### Run
+
+Primary dashboard: the three **`monthly_*.bat`** drivers, env toggles (`ARCHIVE_DRY_RUN`, pip/skip options), log controls, and an idle log pane.
+
+![Run tab: monthly drivers, toggles, empty log](docs/screenshots/01-run.png)
+
+### History & reports
+
+Run ledger, per-job **reports / downloads** cards (pointer files under `logs/`), and recent `archive_run_*` folders.
+
+![History & reports: ledger and report cards](docs/screenshots/02-history.png)
+
+### Files
+
+Allowlisted **read-only** tree browser (`logs`, `playlists`, `channels`, `videos`, …).
+
+![Files: allowlisted browser](docs/screenshots/03-files.png)
+
+### Inputs & config
+
+Output-folder hints, tabbed editor for `*_input.txt`, `yt-dlp.conf`, and **locked** `cookies.txt` workflow.
+
+![Inputs & config: output folders and editor tabs](docs/screenshots/04-inputs.png)
+
+### Download settings
+
+Tiered **`yt-dlp.conf`** UI (presets, Tier A/B/C, CLI preview). Same file on disk the batch drivers use.
+
+![Download settings: presets and Tier A controls](docs/screenshots/05-download-settings.png)
+
+### Settings
+
+Port / allowlist, **storage & retention**, **operator backups**, in-process **scheduling** toggles, **cookie hygiene** — plus the in-page **Headless / tray** instructions.
+
+![Settings: runtime, retention, backups, scheduling](docs/screenshots/06-settings.png)
+
+### Tray (Windows)
+
+The tray app is **not** a web view; it ships with the repo (**`start_archive_console_tray.bat`** → **`tray_app.py`**). Motif used for the notification-area icon:
+
+![Tray icon asset (notification area)](archive_console/assets/tray_64.png)
+
 ---
 
 ## Archive Console
