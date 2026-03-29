@@ -6,7 +6,7 @@ You bring **yt-dlp**, **Python**, and compliance with **site terms**; this tree 
 
 ## Screenshots
 
-These are **static captures** from a **fresh Archive Console** session: demo `state` only, **no** real `cookies.txt`, **no** job started (so the Run log is empty—no live yt-dlp output or URLs). Some panels normally echo your real **archive root** or resolved paths; those strips are **overlaid** in the PNGs with a placeholder line so the repo stays free of machine-specific roots. *(PNG width ≈1040px—GitHub scales them; open the file for 1:1.)*
+These are **static captures** from a **fresh Archive Console** session: demo `state` only, **no** real `cookies.txt`, **no** job started (so the Run log is empty—no live yt-dlp output or URLs). Some panels normally echo your real **archive root** or resolved paths; those strips are **overlaid** in the PNGs with a placeholder line so the repo stays free of machine-specific roots. *(PNG width ≈1040px—GitHub scales them; open the file for 1:1.)* **Run** / **Settings** screenshots may not show every newest line of cookie copy; behavior is described in prose below and in **[`archive_console/ARCHIVE_CONSOLE.md`](archive_console/ARCHIVE_CONSOLE.md)**.
 
 ### Run
 
@@ -42,7 +42,7 @@ Tiered **`yt-dlp.conf`** UI (presets, Tier A/B/C, CLI preview). Same file on dis
 
 Port / allowlist, **storage & retention**, **operator backups**, in-process **scheduling** toggles, **cookie hygiene** — plus the in-page **Headless / tray** instructions.
 
-![Settings: runtime, retention, backups, scheduling](docs/screenshots/06-settings.png)
+![Settings: runtime, retention, backups, scheduling, cookie hygiene](docs/screenshots/06-settings.png)
 
 ### Tray (Windows)
 
@@ -54,16 +54,32 @@ The tray app is **not** a web view; it ships with the repo (**`start_archive_con
 
 ## Archive Console
 
-**Archive Console** is a small **FastAPI** app with a browser UI, bound to **`127.0.0.1` only** (not LAN-exposed). It runs the same **`monthly_*.bat`** entrypoints the repo documents in **[`BAT_FILES.md`](BAT_FILES.md)**—no forked download logic.
+**Archive Console** is a small **FastAPI** app with a browser UI, bound to **`127.0.0.1` only** (not LAN-exposed). It runs the same **`monthly_*.bat`** entrypoints the repo documents in **[`BAT_FILES.md`](BAT_FILES.md)**—no forked download logic. **Not affiliated with YouTube, Google, or the yt-dlp project**; you are responsible for site terms and compliance.
 
-**What you can do there** (see **[`archive_console/ARCHIVE_CONSOLE.md`](archive_console/ARCHIVE_CONSOLE.md)** for detail):
+### Cookies (`cookies.txt`)
 
-- **Run** — Start **`monthly_watch_later_archive.bat`**, **`monthly_channels_archive.bat`**, or **`monthly_videos_archive.bat`** with **live log streaming**, optional line highlighting, monospace sizing, and **Stop run** (Windows: targeted **cmd** tree kill). Console sets **`ARCHIVE_CONSOLE_UNATTENDED=1`** so interactive `pause` steps are skipped when launched from the UI.
-- **History & reports** — Run ledger with links into **`report.html`** and related artifacts under the allowlisted archive tree.
-- **Files** — Browse paths under an **allowlisted** prefix set (e.g. `logs/`, `playlists/`, …); traversal like `..` is rejected.
-- **Inputs & config** — Edit **`playlists_input.txt`**, **`channels_input.txt`**, **`videos_input.txt`**, **`yt-dlp.conf`**, and operator-provided **`cookies.txt`** via API-backed editors (cookies default **locked** until explicitly unlocked). Optional download-dir fields map to env vars **`ARCHIVE_OUT_*`** on spawned runs.
-- **Download settings** — Structured editor + presets for the **same** root **`yt-dlp.conf`** file the batch jobs use (single source of truth on disk).
-- **Settings** — **Operator backups** (ZIP under an allowlisted path), **storage & retention** (manual preview/cleanup of old run folders / backup zips), **scheduling** (in-process **APScheduler** when `features.scheduler_enabled` is true—missed ticks after sleep/wake are **not** replayed), **cookie hygiene** / **pre-run reminders** (in-app prompts; **no** browser automation). **`features.notifications_stub`** is reserved for future use (no Windows toasts in core P0).
+There is **no** silent browser automation or cookie harvesting in this UI. You maintain **`cookies.txt`** next to **`yt-dlp.conf`** at `<ARCHIVE_ROOT>` (or use other cookie options documented in **`yt-dlp.conf`** / **`ARCHIVE_PLAYLIST_RUN_LOGS.txt`**). Typical **Firefox → YouTube** sessions can leave cookies **short-lived**; refresh the file when you see auth-style failures.
+
+### Manual Run: confirm before start (default on)
+
+**Settings → Cookie hygiene** includes **Require cookie confirmation before each manual run** (default **on**). When enabled, **Run WL / Run channels / Run videos** opens **Confirm cookies before run**: export **Netscape** cookies for **youtube.com**, save as **`cookies.txt`** under **Inputs & config**, check **I’ve updated cookies.txt**, then **Continue**. The batch **starts only after** that confirmation; **Cancel** aborts. The server may answer **HTTP 428** (`cookie_confirm_required`) until you confirm. **Dry-run** skips the gate. **Scheduled** in-process jobs are **not** blocked by this modal.
+
+### Scheduled runs: tray reminder (optional)
+
+Enable **Notify via tray …** in **Cookie hygiene** and run **`tray_app.py`** (see **Tray** below). During the **pre-run window**—from **N minutes before** the earliest enabled schedule until **just before** that run fires (same rule as the in-app pre-run banner)—the console can trigger a **pystray** taskbar balloon to refresh cookies. If the tray app is **off**, you still get **server logs**, optional **last tray notify** text in Settings, and the **web banner** when the UI is open.
+
+### Settings: reminders (honest about cookie lifetime)
+
+**Cookie hygiene** offers **short snoozes** (**15 min** on the Run banner, **1 h / 3 h** in Settings) and an optional **N-day** nudge (**capped**; described in-app as a low-priority hint, **not** a substitute for the Run gate and **not** a promise that cookies stay valid that long). Legacy **multi-day snooze** controls are **not** used.
+
+**What you can do in the app** (see **[`archive_console/ARCHIVE_CONSOLE.md`](archive_console/ARCHIVE_CONSOLE.md)** for APIs and edge cases):
+
+- **Run** — Same as above, plus env toggles (`ARCHIVE_DRY_RUN`, pip/skip-yt-dlp), live log, **Stop run**.
+- **History & reports** — Ledger, **`report.html`**, artifacts under the allowlist.
+- **Files** — Allowlisted tree browser; `..` rejected.
+- **Inputs & config** — Tabbed editors; **`cookies.txt`** locked until unlocked; optional **`ARCHIVE_OUT_*`** via download-dir fields.
+- **Download settings** — Presets + Tier A/B for the shared **`yt-dlp.conf`** on disk.
+- **Settings** — Port/allowlist, retention/cleanup, operator backup ZIPs, monthly **schedules**, cookie hygiene / pre-run minutes / tray notify / manual confirmation toggle. **`features.notifications_stub`** remains reserved (**P2**).
 
 Full behavior, port conflicts, `stop_server.ps1`, and report URL rewriting: **`archive_console/ARCHIVE_CONSOLE.md`**.
 
@@ -73,7 +89,7 @@ Full behavior, port conflicts, `stop_server.ps1`, and report URL rewriting: **`a
 
 **Why:** In-process **schedules** only fire while the **uvicorn** process is running. Closing a one-off CMD window stops the server; the tray path keeps a small process alive with a menu (**Open UI**, **Open logs folder**, **Restart server**, **Quit**).
 
-**How:** From `<ARCHIVE_ROOT>`, run **`start_archive_console_tray.bat`** (creates/uses **`archive_console\.venv`**, installs **`archive_console/requirements.txt`**, then runs **`tray_app.py`**). The tray can spawn or attach to the same **`http://127.0.0.1:<port>/`** session documented in **`ARCHIVE_CONSOLE.md`**.
+**How:** From `<ARCHIVE_ROOT>`, run **`start_archive_console_tray.bat`** (creates/uses **`archive_console\.venv`**, installs **`archive_console/requirements.txt`**, then runs **`tray_app.py`**). The tray can spawn or attach to the same **`http://127.0.0.1:<port>/`** session documented in **`ARCHIVE_CONSOLE.md`**. While the tray is running it also hosts a **localhost-only** HTTP endpoint so the console can request **pre-run cookie balloons** when that option is enabled (see **Archive Console** above).
 
 **Also documented:** `ARCHIVE_CONSOLE_ATTACHED=1` keeps uvicorn in the **current** terminal instead of a separate window—useful from an IDE.
 
