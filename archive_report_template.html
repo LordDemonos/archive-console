@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Archive run report</title>
+  <style>
+    :root {
+      --bg: #0f1218;
+      --bg-elevated: #171b24;
+      --border: #2a3140;
+      --text: #e6e9ef;
+      --text-muted: #8b93a7;
+      --accent: #6ea8fe;
+      --accent-dim: #4a7dc4;
+      --warn: #e6b35a;
+      --danger: #e07070;
+      --ok: #6bcd9a;
+      --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+      --radius: 10px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4f5f8;
+        --bg-elevated: #fff;
+        --border: #d8dde8;
+        --text: #1a1d24;
+        --text-muted: #5c6478;
+        --accent: #1a5fb4;
+        --accent-dim: #3584e4;
+        --warn: #b45309;
+        --danger: #b42318;
+        --ok: #1b7f5a;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+    .page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.25rem 1.5rem 3rem;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 650;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem; }
+    .nav-runs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.25rem;
+      align-items: center;
+    }
+    .nav-runs span.label { color: var(--text-muted); font-size: 0.8rem; margin-right: 0.35rem; }
+    .nav-runs a {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-runs a:hover { border-color: var(--accent-dim); }
+    .nav-runs a.current {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .summary-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      max-width: 32rem;
+    }
+    .summary-card h2 { margin: 0 0 0.75rem; font-size: 1rem; }
+    .summary-card dl {
+      margin: 0;
+      display: grid;
+      grid-template-columns: 11rem 1fr;
+      gap: 0.35rem 1rem;
+      font-size: 0.9rem;
+    }
+    .summary-card dt { color: var(--text-muted); }
+    .summary-card dd { margin: 0; font-weight: 600; }
+    details.section {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+    details.section > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.75rem 1rem;
+      font-weight: 650;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
+    }
+    details.section > summary::-webkit-details-marker { display: none; }
+    details.section > summary::before {
+      content: "▸";
+      display: inline-block;
+      transition: transform 0.15s;
+      color: var(--text-muted);
+    }
+    details.section[open] > summary::before { transform: rotate(90deg); }
+    .count-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      background: var(--border);
+      color: var(--text-muted);
+    }
+    .count-badge.filtered {
+      background: var(--accent);
+      color: var(--bg);
+    }
+    .section-body { padding: 0 1rem 1rem; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.65rem;
+    }
+    .toolbar input[type="search"],
+    .toolbar input[type="text"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.85rem;
+      min-width: 12rem;
+    }
+    .toolbar button {
+      background: var(--border);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .toolbar button:hover { border-color: var(--accent-dim); }
+    .table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      max-width: 100%;
+    }
+    table.data {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    table.data th, table.data td {
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.55rem;
+      text-align: left;
+      vertical-align: top;
+      max-width: 28rem;
+      word-break: break-word;
+    }
+    table.data th {
+      background: rgba(0,0,0,.15);
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    @media (prefers-color-scheme: light) {
+      table.data th { background: #eef1f6; }
+    }
+    table.data th.sortable { cursor: pointer; user-select: none; }
+    table.data th.sortable:hover { color: var(--accent); }
+    table.data th .sort-ind { opacity: 0.45; font-size: 0.7rem; margin-left: 0.2rem; }
+    table.data tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+    @media (prefers-color-scheme: light) {
+      table.data tbody tr:nth-child(even) { background: rgba(0,0,0,.02); }
+    }
+    tr.row-missing td { background: rgba(224, 112, 112, 0.12); outline: 1px solid var(--danger); }
+    tr.row-missing td:first-child { box-shadow: inset 3px 0 0 var(--danger); }
+    tr.row-merged td { background: rgba(107, 205, 154, 0.1); outline: 1px solid var(--ok); }
+    tr.row-merged td:first-child { box-shadow: inset 3px 0 0 var(--ok); }
+    a.path-link { color: var(--accent); word-break: break-all; }
+    a.path-link:hover { text-decoration: underline; }
+    .filter-row th { padding: 0.25rem; background: var(--bg); position: sticky; top: 2.2rem; z-index: 1; }
+    .filter-row input {
+      width: 100%;
+      min-width: 4rem;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.35rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 4px;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+    .btn-row button {
+      font-size: 0.68rem;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .btn-row button:hover { color: var(--accent); border-color: var(--accent-dim); }
+    .nested-status {
+      margin: 0.5rem 0 0.75rem 0.5rem;
+      border-left: 2px solid var(--border);
+      padding-left: 0.75rem;
+    }
+    details.sub {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      background: var(--bg);
+    }
+    details.sub > summary {
+      padding: 0.45rem 0.65rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      list-style: none;
+    }
+    details.sub > summary::-webkit-details-marker { display: none; }
+    .muted { color: var(--text-muted); font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1 id="report-title">Archive run report</h1>
+    <p class="subtitle" id="report-subtitle"></p>
+    <div class="nav-runs" id="run-nav" hidden>
+      <span class="label">Runs</span>
+    </div>
+    <div class="summary-card">
+      <h2>Run summary</h2>
+      <dl id="summary-dl">__STATIC_SUMMARY_DL__</dl>
+      __SUMMARY_COUNT_HINT__
+      <p class="muted" style="margin:0.75rem 0 0">Summary and tables are pre-rendered at generation time (works even if JavaScript is blocked on file://). Search, sort, and filters require JavaScript. The <strong>remediation</strong> column points to config/docs for that row.</p>
+    </div>
+    <details class="section" id="sec-downloaded" open>
+      <summary>Downloaded <span class="count-badge" id="cnt-downloaded">__CNT_DOWNLOADED__</span></summary>
+      <div class="section-body" id="body-downloaded">__STATIC_BODY_DOWNLOADED__</div>
+    </details>
+    <details class="section" id="sec-skipped" open>
+      <summary>Skipped <span class="count-badge" id="cnt-skipped">__CNT_SKIPPED__</span></summary>
+      <div class="section-body" id="body-skipped">__STATIC_BODY_SKIPPED__</div>
+    </details>
+    <details class="section" id="sec-private-unavailable" open>
+      <summary>Private / unavailable <span class="count-badge" id="cnt-private-unavailable">__CNT_PRIVATE_UNAVAILABLE__</span></summary>
+      <div class="section-body" id="body-private-unavailable">__STATIC_BODY_PRIVATE_UNAVAILABLE__</div>
+    </details>
+    <details class="section" id="sec-failed" open>
+      <summary>Failed <span class="count-badge" id="cnt-failed">__CNT_FAILED__</span></summary>
+      <div class="section-body" id="body-failed">__STATIC_BODY_FAILED__</div>
+    </details>
+    <details class="section" id="sec-warnings" open>
+      <summary>Warnings / notes <span class="count-badge" id="cnt-warnings">__CNT_WARNINGS__</span></summary>
+      <div class="section-body" id="body-warnings">__STATIC_BODY_WARNINGS__</div>
+    </details>
+  </div>
+
+  __REPORT_DATA__
+
+  <script>
+(function () {
+  function escapeHtml(s) {
+    if (s == null) return '';
+    const d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
+  }
+
+  function pathToFileUrl(path) {
+    const p = String(path || '').trim();
+    if (!p) return '';
+    const norm = p.replace(/\\/g, '/');
+    if (/^[A-Za-z]:\//.test(norm)) {
+      return 'file:///' + encodeURI(norm);
+    }
+    if (norm.startsWith('//')) return 'file:' + encodeURI(norm);
+    if (norm.startsWith('/')) return 'file://' + encodeURI(norm);
+    return '';
+  }
+
+  function looksLikeHttpUrl(s) {
+    return /^https?:\/\//i.test(String(s || '').trim());
+  }
+
+  function renderCell(col, val) {
+    const v = val == null ? '' : String(val);
+    if ((col === 'filepath' || col === '_path') && v) {
+      const href = pathToFileUrl(v);
+      if (href) {
+        return '<a class="path-link" href="' + escapeHtml(href) + '">' + escapeHtml(v) + '</a>';
+      }
+    }
+    if ((col === 'webpage_url' || col === 'suggested_url') && v && looksLikeHttpUrl(v)) {
+      return '<a class="path-link" href="' + escapeHtml(v) + '">' + escapeHtml(v) + '</a>';
+    }
+    return escapeHtml(v);
+  }
+
+  function rowToTsv(columns, row) {
+    return columns.map(function (c) {
+      const x = row[c] == null ? '' : String(row[c]).replace(/\t/g, ' ');
+      return x;
+    }).join('\t');
+  }
+
+  function mountTable(host, columns, rows, options) {
+    options = options || {};
+    var showTree = options.showTree;
+    var treeKey = options.treeKey || 'status';
+
+    if (showTree && rows.length) {
+      var groups = {};
+      rows.forEach(function (r) {
+        var k = r[treeKey] == null ? '' : String(r[treeKey]);
+        if (!groups[k]) groups[k] = [];
+        groups[k].push(r);
+      });
+      var keys = Object.keys(groups).sort();
+      var gbar = document.createElement('div');
+      gbar.className = 'toolbar';
+      var gsearch = document.createElement('input');
+      gsearch.type = 'search';
+      gsearch.placeholder = 'Filter status groups (matches any column in group)…';
+      gbar.appendChild(gsearch);
+      host.appendChild(gbar);
+      var wrap = document.createElement('div');
+      var subs = [];
+      keys.forEach(function (key) {
+        var sub = document.createElement('details');
+        sub.className = 'sub';
+        sub.open = keys.length <= 3;
+        var n = groups[key].length;
+        sub.innerHTML = '<summary><strong>' + escapeHtml(key || '(empty)') + '</strong> <span class="count-badge">' + n + '</span></summary>';
+        var inner = document.createElement('div');
+        inner.style.padding = '0.5rem';
+        var subOpts = {};
+        for (var k in options) { if (options.hasOwnProperty(k)) subOpts[k] = options[k]; }
+        subOpts.updateCountBadge = false;
+        mountTableFlat(inner, columns, groups[key], subOpts);
+        sub.appendChild(inner);
+        wrap.appendChild(sub);
+        subs.push({ key: key, sub: sub, grp: groups[key] });
+      });
+      gsearch.addEventListener('input', function () {
+        var q = gsearch.value.trim().toLowerCase();
+        subs.forEach(function (item) {
+          if (!q) {
+            item.sub.hidden = false;
+            return;
+          }
+          var hit = item.grp.some(function (row) {
+            return columns.some(function (c) {
+              return String(row[c] == null ? '').toLowerCase().indexOf(q) !== -1;
+            });
+          });
+          item.sub.hidden = !hit;
+        });
+      });
+      host.appendChild(wrap);
+      return;
+    }
+    mountTableFlat(host, columns, rows, options);
+  }
+
+  function mountTableFlat(host, columns, allRows, options) {
+    options = options || {};
+    var extraRowClass = options.extraRowClass || function () { return ''; };
+    var updateCountBadge = options.updateCountBadge !== false;
+
+    var wrap = document.createElement('div');
+    const toolbar = document.createElement('div');
+    toolbar.className = 'toolbar';
+    const search = document.createElement('input');
+    search.type = 'search';
+    search.placeholder = 'Search all columns…';
+    const btnExpand = document.createElement('button');
+    btnExpand.type = 'button';
+    btnExpand.textContent = 'Expand section';
+    const btnCollapse = document.createElement('button');
+    btnCollapse.type = 'button';
+    btnCollapse.textContent = 'Collapse section';
+    toolbar.appendChild(search);
+    toolbar.appendChild(btnExpand);
+    toolbar.appendChild(btnCollapse);
+    wrap.appendChild(toolbar);
+
+    const scroll = document.createElement('div');
+    scroll.className = 'table-scroll';
+    const table = document.createElement('table');
+    table.className = 'data';
+
+    var thead = document.createElement('thead');
+    var trh = document.createElement('tr');
+    var actionCol = 'actions';
+    var displayCols = [actionCol].concat(columns.filter(function (c) { return c.charAt(0) !== '_'; }));
+
+    var sortState = { col: null, dir: 1 };
+
+    displayCols.forEach(function (col) {
+      var th = document.createElement('th');
+      if (col === actionCol) {
+        th.textContent = 'Actions';
+      } else {
+        th.className = 'sortable';
+        th.textContent = col;
+        th.dataset.col = col;
+        var ind = document.createElement('span');
+        ind.className = 'sort-ind';
+        ind.textContent = '↕';
+        th.appendChild(ind);
+        th.addEventListener('click', function () {
+          if (sortState.col === col) sortState.dir = -sortState.dir;
+          else { sortState.col = col; sortState.dir = 1; }
+          trh.querySelectorAll('th.sortable .sort-ind').forEach(function (el) { el.textContent = '↕'; });
+          ind.textContent = sortState.dir > 0 ? '↑' : '↓';
+          renderBody();
+        });
+      }
+      trh.appendChild(th);
+    });
+    thead.appendChild(trh);
+
+    var trf = document.createElement('tr');
+    trf.className = 'filter-row';
+    displayCols.forEach(function (col) {
+      var th = document.createElement('th');
+      if (col === actionCol) th.innerHTML = ' ';
+      else {
+        var inp = document.createElement('input');
+        inp.type = 'text';
+        inp.placeholder = 'Filter…';
+        inp.dataset.filterCol = col;
+        th.appendChild(inp);
+      }
+      trf.appendChild(th);
+    });
+    thead.appendChild(trf);
+
+    var tbody = document.createElement('tbody');
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    scroll.appendChild(table);
+    wrap.appendChild(scroll);
+    host.appendChild(wrap);
+
+    var section = host.closest('details.section');
+    var sectionBadge = section && section.querySelector('summary .count-badge');
+    btnExpand.addEventListener('click', function () { if (section) section.open = true; });
+    btnCollapse.addEventListener('click', function () { if (section) section.open = false; });
+
+    function getFilters() {
+      const f = {};
+      trf.querySelectorAll('input[data-filter-col]').forEach(function (inp) {
+        const q = inp.value.trim().toLowerCase();
+        if (q) f[inp.dataset.filterCol] = q;
+      });
+      return f;
+    }
+
+    function cmp(a, b, col) {
+      const va = a[col] == null ? '' : String(a[col]);
+      const vb = b[col] == null ? '' : String(b[col]);
+      const na = parseFloat(va);
+      const nb = parseFloat(vb);
+      if (!isNaN(na) && !isNaN(nb) && va === String(na) && vb === String(nb)) {
+        return na < nb ? -1 : na > nb ? 1 : 0;
+      }
+      return va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' });
+    }
+
+    function renderBody() {
+      const q = search.value.trim().toLowerCase();
+      const filters = getFilters();
+      let filtered = allRows.slice();
+
+      filtered = filtered.filter(function (row) {
+        for (var fk in filters) {
+          if (!filters.hasOwnProperty(fk)) continue;
+          const cell = String(row[fk] == null ? '').toLowerCase();
+          if (cell.indexOf(filters[fk]) === -1) return false;
+        }
+        if (q) {
+          var hit = false;
+          columns.forEach(function (c) {
+            if (String(row[c] == null ? '').toLowerCase().indexOf(q) !== -1) hit = true;
+          });
+          if (!hit) return false;
+        }
+        return true;
+      });
+
+      if (sortState.col) {
+        var col = sortState.col;
+        var dir = sortState.dir;
+        filtered.sort(function (a, b) { return cmp(a, b, col) * dir; });
+      }
+
+      tbody.innerHTML = '';
+      filtered.forEach(function (row) {
+        const tr = document.createElement('tr');
+        var cls = extraRowClass(row);
+        if (cls) tr.className = cls;
+        displayCols.forEach(function (col) {
+          const td = document.createElement('td');
+          if (col === actionCol) {
+            td.innerHTML = '<div class="btn-row">' +
+              '<button type="button" data-copy="path">Copy path</button>' +
+              '<button type="button" data-copy="row">Copy row</button></div>';
+            td.querySelector('[data-copy="path"]').addEventListener('click', function () {
+              var p = row.filepath || '';
+              if (p) navigator.clipboard.writeText(p).catch(function () {});
+            });
+            td.querySelector('[data-copy="row"]').addEventListener('click', function () {
+              navigator.clipboard.writeText(rowToTsv(columns, row)).catch(function () {});
+            });
+          } else {
+            td.innerHTML = renderCell(col, row[col]);
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      if (updateCountBadge && sectionBadge) {
+        sectionBadge.textContent = filtered.length + ' / ' + allRows.length;
+        sectionBadge.classList.toggle('filtered', filtered.length !== allRows.length || q || Object.keys(getFilters()).length);
+      }
+    }
+
+    trf.querySelectorAll('input').forEach(function (inp) {
+      inp.addEventListener('input', function () { renderBody(); });
+    });
+    search.addEventListener('input', function () { renderBody(); });
+
+    renderBody();
+  }
+
+  var DATA;
+  var rawEl = document.getElementById('report-data');
+  if (!rawEl) {
+    return;
+  }
+  try {
+    DATA = JSON.parse(rawEl.textContent);
+  } catch (e) {
+    var warn = document.createElement('div');
+    warn.style.cssText = 'padding:1rem;margin:0 0 1rem 0;background:#421;border:1px solid #800;color:#fca;border-radius:8px;font-size:0.9rem;';
+    warn.textContent = 'Could not parse embedded JSON (interactive features disabled). Pre-rendered summary and tables below should still show the run data. ' + String(e);
+    var pageEl = document.querySelector('.page');
+    if (pageEl) pageEl.insertBefore(warn, pageEl.firstChild);
+    return;
+  }
+
+  document.getElementById('summary-dl').innerHTML = '';
+  document.getElementById('body-downloaded').innerHTML = '';
+  document.getElementById('body-skipped').innerHTML = '';
+  document.getElementById('body-private-unavailable').innerHTML = '';
+  document.getElementById('body-failed').innerHTML = '';
+  document.getElementById('body-warnings').innerHTML = '';
+
+  document.getElementById('report-title').textContent = 'Archive run — ' + (DATA.runLabel || '');
+  document.getElementById('report-subtitle').textContent =
+    'Generated at ' + (DATA.generatedAtUtc || '') +
+    ' · manifest + issues embedded below' +
+    (DATA.regeneratedFromCsv ? ' · Regenerated from CSV' : '');
+
+  var dl = document.getElementById('summary-dl');
+  var s = DATA.summary || {};
+  [
+    ['Attempted (approx.)', s.attempted],
+    ['Downloaded (verified)', s.downloaded],
+    ['Skipped', s.skipped],
+    ['Failed', s.failed],
+    ['Private / unavailable', s.private_unavailable]
+  ].forEach(function (pair) {
+    var dt = document.createElement('dt');
+    dt.textContent = pair[0];
+    var dd = document.createElement('dd');
+    dd.textContent = pair[1] == null ? '' : String(pair[1]);
+    dl.appendChild(dt);
+    dl.appendChild(dd);
+  });
+
+  var nav = document.getElementById('run-nav');
+  var navList = DATA.navigation || [];
+  if (navList.length) {
+    nav.hidden = false;
+    navList.forEach(function (item) {
+      var a = document.createElement('a');
+      a.href = item.href;
+      a.textContent = item.label;
+      if (item.current) a.className = 'current';
+      nav.appendChild(a);
+    });
+  }
+
+  function prepDownloaded(rows) {
+    return (rows || []).map(function (r) {
+      var o = {};
+      Object.keys(r).forEach(function (k) { o[k] = r[k]; });
+      if (o._missingFile == null) o._missingFile = o.file_verified_ok === 'no';
+      return o;
+    });
+  }
+
+  var downloaded = prepDownloaded(DATA.downloaded || []);
+  var manifestCols = DATA.manifestColumns || [];
+  var sum = DATA.summary || {};
+
+  document.getElementById('cnt-downloaded').textContent = String(
+    sum.downloaded != null ? sum.downloaded : downloaded.length
+  );
+
+  mountTable(document.getElementById('body-downloaded'), manifestCols, downloaded, {
+    showTree: !!(DATA.downloadedGroupTree !== false),
+    treeKey: 'status',
+    extraRowClass: function (row) {
+      if (row._missingFile) return 'row-missing';
+      if (row.status === 'downloaded_merged') return 'row-merged';
+      return '';
+    }
+  });
+
+  var issueCols = DATA.issueColumns || [];
+  var skipped = DATA.skipped || [];
+  var privateU = DATA.privateUnavailable || [];
+  var failed = DATA.failed || [];
+  var warnings = DATA.warnings || [];
+
+  document.getElementById('cnt-skipped').textContent = String(skipped.length);
+  document.getElementById('cnt-private-unavailable').textContent = String(privateU.length);
+  document.getElementById('cnt-failed').textContent = String(failed.length);
+  document.getElementById('cnt-warnings').textContent = String(warnings.length);
+
+  mountTable(document.getElementById('body-skipped'), issueCols, skipped, {});
+  mountTable(document.getElementById('body-private-unavailable'), issueCols, privateU, {});
+  mountTable(document.getElementById('body-failed'), issueCols, failed, {});
+  mountTable(document.getElementById('body-warnings'), issueCols, warnings, {});
+})();
+  </script>
+</body>
+</html>

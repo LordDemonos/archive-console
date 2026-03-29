@@ -1,0 +1,5 @@
+# Sample playlist identifiers. One per line.
+# Use full playlist URLs or PL... ids as supported by yt-dlp.
+https://www.youtube.com/playlist?list=PLaceholder00ExamplePlaylist00
+WL
+https://www.youtube.com/playlist?list=PLaceholder01ExamplePlaylist01

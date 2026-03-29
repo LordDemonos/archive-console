@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Archive Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Primary">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <div class="brand-title">Archive Console</div>
+          <div class="brand-sub">
+            Local <strong>yt-dlp</strong> &amp; batch job operator.
+            <span class="brand-sub-fine">Third-party UI—not affiliated with yt-dlp. You provide installs, scripts, and config.</span>
+          </div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button type="button" class="nav-item is-active" data-view="run">Run</button>
+        <button type="button" class="nav-item" data-view="history">History &amp; reports</button>
+        <button type="button" class="nav-item" data-view="files">Files</button>
+        <button type="button" class="nav-item" data-view="inputs">Inputs &amp; config</button>
+        <button type="button" class="nav-item" data-view="ytdlp">Download settings</button>
+        <button type="button" class="nav-item" data-view="settings">Settings</button>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="pill" id="globalStatusPill" data-phase="idle">idle</span>
+      </div>
+    </aside>
+    <main class="main">
+      <p id="reminderBannerError" class="reminder-error" hidden role="alert"></p>
+      <div id="cookieReminderBanner" class="cookie-reminder-banner cookie-reminder-banner--with-actions" hidden role="region" aria-label="Cookie hygiene reminder">
+        <span id="cookieReminderText" class="cookie-reminder-banner__text"></span>
+        <span class="reminder-banner-actions">
+          <button type="button" class="btn ghost small" id="btnCookieBannerAck">Acknowledge</button>
+          <button type="button" class="btn ghost small" id="btnCookieBannerSnooze15">Snooze 15 min</button>
+        </span>
+      </div>
+      <div id="preRunReminderBanner" class="cookie-reminder-banner pre-run-reminder-banner" hidden role="status">
+        <span id="preRunReminderText"></span>
+        <span class="reminder-banner-actions">
+          <button type="button" class="btn ghost small" id="btnPreRunAck">Acknowledge</button>
+          <button type="button" class="btn ghost small" id="btnPreRunSnooze">Snooze 15 min</button>
+        </span>
+      </div>
+      <section class="view is-active" id="view-run" aria-label="Run jobs">
+        <header class="view-head">
+          <h1>Run</h1>
+          <p class="lede">Run the same <strong>yt-dlp</strong>-oriented <code>monthly_*.bat</code> drivers, <code>yt-dlp.conf</code>, and cookies you use on disk—live batch output below.</p>
+        </header>
+        <div class="grid-cards">
+          <div class="card">
+            <h2>Playlist / Watch Later</h2>
+            <p class="muted small">monthly_watch_later_archive.bat</p>
+            <button type="button" class="btn primary btn-run" data-job="watch_later">Run WL</button>
+          </div>
+          <div class="card">
+            <h2>Channels</h2>
+            <p class="muted small">monthly_channels_archive.bat</p>
+            <button type="button" class="btn primary btn-run" data-job="channels">Run channels</button>
+          </div>
+          <div class="card">
+            <h2>Video list</h2>
+            <p class="muted small">monthly_videos_archive.bat</p>
+            <button type="button" class="btn primary btn-run" data-job="videos">Run videos</button>
+          </div>
+        </div>
+        <div class="card toggles">
+          <label class="chk"><input type="checkbox" id="optDryRun" /> ARCHIVE_DRY_RUN=1</label>
+          <label class="chk"><input type="checkbox" id="optSkipPip" checked /> SKIP_PIP_UPDATE=1 <span class="muted small">(skip <code>pip</code> self-upgrade; off runs it before yt-dlp)</span></label>
+          <label class="chk"><input type="checkbox" id="optSkipYtdlp" /> SKIP_YTDLP_UPDATE=1 <span class="muted small">(skip <code>yt-dlp[default]</code> install)</span></label>
+        </div>
+        <div class="card run-status-card" id="runStatusCard">
+          <p class="run-status-summary muted" id="runStatusSummary">No job running.</p>
+          <div class="run-detail" id="runDetail" hidden>
+            <div class="run-detail-actions">
+              <button type="button" class="btn danger small" id="btnStopRun" hidden>Stop run</button>
+            </div>
+            <dl class="run-dl">
+              <div class="run-dl-row">
+                <dt><span class="help-term" title="Short id for this job in logs and history (server-generated).">Job id</span> <button type="button" class="btn-icon" id="btnCopyRunId" title="Copy job id">Copy</button></dt>
+                <dd><code id="runMetaId">—</code></dd>
+              </div>
+              <div class="run-dl-row">
+                <dt><span class="help-term" title="Windows process id of the child cmd.exe that started your batch (root of the process tree).">Process id</span></dt>
+                <dd><code id="runMetaPid">—</code></dd>
+              </div>
+              <div class="run-dl-row">
+                <dt><span class="help-term" title="0 = success. Non-zero = failure. &quot;stopped&quot; = you ended the run from the console.">Exit code</span></dt>
+                <dd><code id="runMetaExit">—</code></dd>
+              </div>
+              <div class="run-dl-row" id="runMetaDurationRow" hidden>
+                <dt>Duration</dt>
+                <dd id="runMetaDuration">—</dd>
+              </div>
+              <div class="run-dl-row" id="runMetaEndedRow" hidden>
+                <dt>Ended</dt>
+                <dd id="runMetaEnded">—</dd>
+              </div>
+              <div class="run-dl-row" id="runMetaFolderRow" hidden>
+                <dt>Open folder</dt>
+                <dd><a id="runMetaFolder" href="#" class="link" target="_blank" rel="noopener noreferrer"></a> <span class="muted small">(report)</span></dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+        <div class="log-panel card">
+          <div class="log-toolbar">
+            <span class="muted small">Output</span>
+            <label class="chk small"><input type="checkbox" id="optStickBottom" checked /> Stick to bottom</label>
+            <label class="chk small"><input type="checkbox" id="optLogWrap" /> Wrap long lines</label>
+            <label class="chk small"><input type="checkbox" id="optLogHighlight" title="Severity-style colors and borders in the stream only; disk logs stay plain." /> Highlight output</label>
+            <span class="log-font-controls muted small" aria-label="Log text size">
+              <button type="button" class="btn ghost tiny" id="btnLogFontMinus" title="Smaller log text">A−</button>
+              <button type="button" class="btn ghost tiny" id="btnLogFontPlus" title="Larger log text">A+</button>
+            </span>
+            <button type="button" class="btn ghost small" id="btnClearLog">Clear view</button>
+          </div>
+          <div class="log-progress-row" id="logProgressRow" aria-live="polite" aria-atomic="true">
+            <span class="log-progress-label muted small">Last progress</span>
+            <div class="log-progress-main">
+              <code class="log-progress-hint" id="logProgressHint">—</code>
+              <div class="log-progress-bar-track" aria-hidden="true">
+                <div class="log-progress-bar-fill" id="logProgressFill"></div>
+              </div>
+            </div>
+          </div>
+          <div class="log-frame" id="logFrame" tabindex="0" role="log" aria-live="polite">
+            <div class="log-gutter" id="logGutter" aria-hidden="true"></div>
+            <pre class="log-body" id="logBody"></pre>
+          </div>
+        </div>
+      </section>
+      <section class="view" id="view-history" aria-label="Run history and reports">
+        <header class="view-head">
+          <h1>History &amp; reports</h1>
+          <p class="lede">See how past jobs finished, then open HTML summaries or download artifacts from each run folder.</p>
+          <p class="muted small">Data sources: saved run outcomes in console state; latest run paths from small pointer files under <code>logs/</code> (e.g. <code>latest_run.txt</code>). Times use your browser’s local timezone.</p>
+        </header>
+
+        <div class="card history-subsection">
+          <h2 id="run-outcomes">Run history</h2>
+          <p class="muted small">Process ledger: job name, start time, process <strong>exit</strong> (batch), per-run <strong>item stats</strong> from <code>summary.txt</code> / <code>run_summary.json</code> when present (business-level counts, not the same as exit). Narrow screens fold stats under Job.</p>
+          <div class="table-wrap">
+            <table class="table" id="historyTable">
+              <thead>
+                <tr>
+                  <th>Job</th>
+                  <th>Started</th>
+                  <th>Exit</th>
+                  <th class="hist-stat hist-stat-wide">
+                    <abbr title="Items counted for this run (attempted = downloads + skips + failures + private/unavailable).">Tried</abbr>
+                  </th>
+                  <th class="hist-stat hist-stat-wide">
+                    <abbr title="Verified downloads plus skips (no error bucket). OK + Fail = Tried.">OK</abbr>
+                  </th>
+                  <th class="hist-stat hist-stat-wide">
+                    <abbr title="Failed rows plus private/unavailable (per driver rules).">Fail</abbr>
+                  </th>
+                  <th class="hist-stat hist-stat-wide">
+                    <abbr title="Verified media on disk (manifest downloaded / merged).">Saved</abbr>
+                  </th>
+                  <th>Run folder</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="history-more" id="historyMoreWrap" hidden>
+            <button type="button" class="btn ghost small" id="btnHistoryMore">Show more</button>
+          </div>
+        </div>
+
+        <div class="history-subsection">
+          <h2 id="reports-downloads">Reports &amp; downloads</h2>
+          <p class="muted small">Latest completed run per job type (from pointer files). Use <strong>Open report</strong> for the in-app HTML view or <strong>Download</strong> for a file save.</p>
+        </div>
+        <div class="grid-cards" id="reportPointers"></div>
+
+        <div class="card">
+          <h2>Recent run folders</h2>
+          <p class="muted small">Browse other <code>archive_run_*</code> directories under <code>logs/</code> (newest first).</p>
+          <ul class="link-list" id="reportRuns"></ul>
+        </div>
+      </section>
+      <section class="view" id="view-files" aria-label="Files">
+        <header class="view-head">
+          <h1>Files</h1>
+          <p class="lede">Allowlisted roots only — read-only listing.</p>
+        </header>
+        <div class="card files-layout">
+          <nav class="breadcrumb" id="fileBreadcrumb" aria-label="Path"></nav>
+          <div class="files-split" id="filesSplit">
+            <ul class="file-list" id="fileList" aria-label="Files and folders"></ul>
+            <div
+              class="files-split-handle"
+              id="filesSplitHandle"
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="Resize file list panel"
+              tabindex="0"
+            ></div>
+            <div class="file-detail" id="fileDetail">
+              <p class="muted">Select a file or folder from the list.</p>
+            </div>
+          </div>
+          <div class="file-actions">
+            <button
+              type="button"
+              class="btn ghost"
+              id="btnExplorer"
+              disabled
+              aria-label="Open in Windows Explorer"
+            >
+              Open in Explorer
+            </button>
+            <p class="muted small file-actions-hint" id="fileExplorerHint">
+              Opens the <strong>current folder</strong> here, or <strong>reveals the selected file</strong> when one is highlighted.
+            </p>
+            <p class="muted small" id="fileExplorerMsg" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+      <section class="view" id="view-inputs" aria-label="Inputs and config">
+        <header class="view-head">
+          <h1>Inputs &amp; config</h1>
+          <p class="lede"><span class="pill dim">P0.5</span> Edit allowlisted repo files only. Saves are blocked while a <strong>Run</strong> job is active.</p>
+        </header>
+        <div class="card">
+          <h2>Download output folders</h2>
+          <p class="muted small">Paths are <strong>relative to the archive root</strong> (no <code>..</code>). Leave blank to keep defaults: <code>playlists</code>, <code>channels</code>, <code>videos</code> — same layout as today’s drivers. Use <strong>…</strong> to pick a folder on <strong>this PC</strong> (the machine running Archive Console). On Windows the server opens a native folder dialog via <strong>PowerShell</strong> (falls back to tkinter if needed); an interactive desktop session is required. This only changes where those three runs write media; it does not move <code>cookies.txt</code>, <code>yt-dlp.conf</code>, or input lists. Picked paths must match <strong>Settings → allowlisted paths</strong> (add a prefix first for new trees).</p>
+          <label class="field download-dir-field">
+            <span>Watch Later / monthly watch list → output root</span>
+            <span class="field-inline-browse">
+              <input type="text" id="dlDirWatchLater" placeholder="playlists" autocomplete="off" />
+              <button type="button" class="btn ghost small btn-dl-browse" data-dl-field="watch_later" aria-label="Choose folder for Watch Later output" title="Browse for folder on this machine">…</button>
+            </span>
+          </label>
+          <label class="field download-dir-field">
+            <span>Channels batch → output root</span>
+            <span class="field-inline-browse">
+              <input type="text" id="dlDirChannels" placeholder="channels" autocomplete="off" />
+              <button type="button" class="btn ghost small btn-dl-browse" data-dl-field="channels" aria-label="Choose folder for Channels output" title="Browse for folder on this machine">…</button>
+            </span>
+          </label>
+          <label class="field download-dir-field">
+            <span>Videos list batch → output root</span>
+            <span class="field-inline-browse">
+              <input type="text" id="dlDirVideos" placeholder="videos" autocomplete="off" />
+              <button type="button" class="btn ghost small btn-dl-browse" data-dl-field="videos" aria-label="Choose folder for Videos list output" title="Browse for folder on this machine">…</button>
+            </span>
+          </label>
+          <button type="button" class="btn ghost" id="btnSaveDownloadDirs">Save output folders</button>
+          <p class="muted small" id="downloadDirsMsg" role="status"></p>
+          <div class="muted small" id="downloadDirsEffective" aria-live="polite"></div>
+        </div>
+        <div class="tabs" id="editorTabs" role="tablist" aria-label="Config files">
+          <button type="button" class="tab is-active" role="tab" data-file="playlists_input.txt" aria-selected="true">Watch Later</button>
+          <button type="button" class="tab" role="tab" data-file="channels_input.txt" aria-selected="false">Channels</button>
+          <button type="button" class="tab" role="tab" data-file="videos_input.txt" aria-selected="false">Videos</button>
+          <button type="button" class="tab" role="tab" data-file="yt-dlp.conf" aria-selected="false">yt-dlp.conf</button>
+          <button type="button" class="tab" role="tab" data-file="cookies.txt" aria-selected="false">cookies.txt</button>
+        </div>
+        <div class="card editor-card">
+          <div class="editor-toolbar">
+            <div class="editor-meta muted small">
+              <span id="editorRelLabel"></span>
+              <span id="editorMtime"></span>
+              <span id="editorDirtyPill" class="pill warn" hidden>unsaved</span>
+            </div>
+          </div>
+          <label class="field"><span class="sr-only">Editor</span>
+            <textarea id="editorTextarea" class="editor-area" spellcheck="false" rows="22" autocomplete="off"></textarea>
+          </label>
+          <div class="editor-options" id="editorOptionsStrip">
+            <label class="chk small"><input type="checkbox" id="optStripBlanks" /> Strip blank lines on save (input lists)</label>
+          </div>
+          <div class="editor-options" id="editorOptionsConf" hidden>
+            <label class="chk small"><input type="checkbox" id="optConfSmoke" /> Soft syntax smoke after edit (non-fatal hints only)</label>
+          </div>
+          <div class="callout warn" id="cookiesCallout" hidden>
+            <p class="small"><strong>cookies.txt</strong> is sensitive. Content is hidden until you unlock. Avoid leaving this open where screen captures or shared logs could leak tokens.</p>
+            <label class="chk small"><input type="checkbox" id="optUnlockCookies" /> Unlock cookies (load &amp; save)</label>
+          </div>
+          <div class="editor-actions">
+            <button type="button" class="btn primary" id="btnSaveEditor">Save</button>
+            <span class="muted small" id="editorSaveHint" hidden>Saving disabled while a run is active.</span>
+          </div>
+          <p class="muted small" id="editorMsg" role="status"></p>
+        </div>
+      </section>
+      <section class="view" id="view-ytdlp" aria-label="Download settings">
+        <header class="view-head">
+          <h1>Download settings</h1>
+          <p class="lede">Interactive <strong>yt-dlp.conf</strong> — Tier A maps common flags from the <a class="link link--info" href="https://github.com/yt-dlp/yt-dlp/blob/master/README.md" target="_blank" rel="noopener">yt-dlp README</a>; Tier B round-trips extra options; Tier C shows the serialized conf.</p>
+        </header>
+        <div class="callout warn" id="ytdlpEmptyState" hidden>
+          <p><strong>No yt-dlp.conf on disk yet.</strong> Defaults load below — click <em>Save yt-dlp.conf</em> to create <code id="ytdlpEmptyPath"></code>.</p>
+        </div>
+        <div class="callout" id="ytdlpParseWarnings" hidden role="region" aria-label="Parse notes"></div>
+        <div class="card ytdlp-presets" id="ytdlpPresetBar">
+          <h2>Presets</h2>
+          <p class="muted small" id="ytdlpPresetHint"></p>
+          <div class="ytdlp-preset-cards" id="ytdlpPresetCards"></div>
+          <div class="ytdlp-actions">
+            <button type="button" class="btn ghost" id="btnYtdlpReload">Reload from disk</button>
+            <button type="button" class="btn ghost" id="btnYtdlpCapture">Capture current as User preferences</button>
+            <label class="field inline-field"><span>Note (banner comment)</span>
+              <input type="text" id="ytdlpHumanNote" placeholder="optional short note" />
+            </label>
+            <label class="chk small"><input type="checkbox" id="ytdlpConfSmoke" checked /> Run conf smoke on save</label>
+            <button type="button" class="btn primary" id="btnYtdlpSave">Save yt-dlp.conf</button>
+          </div>
+          <p class="muted small" id="ytdlpMsg" role="status"></p>
+        </div>
+        <div class="ytdlp-layout">
+          <div class="card ytdlp-controls" id="ytdlpControls"></div>
+          <div class="card ytdlp-side">
+            <h2>Effective CLI preview</h2>
+            <pre class="ytdlp-preview" id="ytdlpCliPreview"></pre>
+            <h2>Tier B — extra options</h2>
+            <p class="muted small">Hyphenated keys only; cookies paths use Tier A. Blocked: shell metacharacters / newlines.</p>
+            <div id="ytdlpExtraKv"></div>
+            <button type="button" class="btn ghost small" id="btnYtdlpAddExtra">Add option</button>
+            <h2>Tier C — serialized mirror</h2>
+            <p class="muted small">Live preview from the model (matches disk after Save). For raw hand-edits use <strong>Inputs &amp; config → yt-dlp.conf</strong>, then <em>Reload from disk</em> here.</p>
+            <pre class="ytdlp-raw" id="ytdlpRawMirror"></pre>
+            <h2>Preserved tail</h2>
+            <p class="muted small">Comments, blank lines, and options this parser keeps verbatim (appended after the managed block on save). Unrecognized <code>--</code> flags stay here unless moved to Tier B.</p>
+            <pre class="ytdlp-raw ytdlp-tail" id="ytdlpPreservedTail"></pre>
+          </div>
+        </div>
+      </section>
+      <section class="view" id="view-settings" aria-label="Settings">
+        <header class="view-head">
+          <h1>Settings</h1>
+          <p class="lede">Runtime, backups, schedule records, and cookie reminders. Schedules only run while the <strong>server process</strong> stays up (use the tray launcher or a Windows service — not a closed CMD window).</p>
+        </header>
+
+        <div class="card settings-section">
+          <h2>General &amp; runtime</h2>
+          <p class="muted small">Binds to <strong>127.0.0.1</strong> only (not LAN). Changing the port requires restarting the console process.</p>
+          <p class="muted small" id="settingsArchiveRoot"></p>
+          <label class="field">
+            <span>Port</span>
+            <input type="number" id="setPort" min="1024" max="65535" />
+          </label>
+          <label class="field">
+            <span>Allowlisted path prefixes (comma-separated, under archive root)</span>
+            <input type="text" id="setAllow" placeholder="logs, playlists, channels, videos" />
+          </label>
+          <label class="field">
+            <span>Editor file backup count (inputs / yt-dlp.conf overwrites)</span>
+            <input type="number" id="setEditorBackupMax" min="1" max="100" />
+          </label>
+          <button type="button" class="btn primary" id="btnSaveSettings">Save general</button>
+          <p class="muted small" id="settingsMsg" role="status"></p>
+        </div>
+
+        <div class="card settings-section">
+          <h2>Storage &amp; retention</h2>
+          <p class="muted small">Manual cleanup only—nothing deletes on server start. Eligible paths must sit under the archive root and allowlist. Run folders use <strong>directory mtime</strong>; operator ZIPs use <strong>file mtime</strong>. <code>logs/latest_run*.txt</code> targets are always kept (even if older than retention). A job <strong>must not</strong> be running. <code>cookies.txt</code>, <code>yt-dlp.conf</code>, and console <code>state.json</code> are never deleted. <strong>History</strong> may reference removed folders—the report link can 404 until you run again. Editor <code>.bak</code> files live under <code>archive_console/backups</code> (outside the archive tree) and are <strong>not</strong> pruned here.</p>
+          <p class="muted small"><strong>Not affiliated with yt-dlp.</strong></p>
+          <label class="field">
+            <span>Retention age (days)</span>
+            <input type="number" id="setRetentionDays" min="1" max="3650" step="1" />
+          </label>
+          <label class="chk"><input type="checkbox" id="optPruneArchiveRuns" /> Prune old <code>logs/archive_run_*</code> folders</label>
+          <label class="chk"><input type="checkbox" id="optPruneOperatorZips" /> Prune old operator backup ZIPs (<code>archive_console_backup_*.zip</code> in backup destination)</label>
+          <p class="settings-row-actions">
+            <button type="button" class="btn ghost small" id="btnSaveRetention">Save retention prefs</button>
+            <button type="button" class="btn ghost small" id="btnStorageCleanupPreview">Preview cleanup</button>
+            <button type="button" class="btn danger small" id="btnStorageCleanupRun">Run cleanup now…</button>
+          </p>
+          <p class="muted small" id="storageCleanupMsg" role="status"></p>
+          <pre class="storage-preview-pre" id="storageCleanupPreview" hidden></pre>
+        </div>
+
+        <div class="card settings-section">
+          <h2>Headless / tray (Windows)</h2>
+          <p class="muted small">Use <code>start_archive_console_tray.bat</code> (repo root) or <code>python tray_app.py</code> from <code>archive_console</code> with venv + <code>pystray</code>. This calls the same <code>uvicorn</code> argv as CLI (<code>app.server_cli.uvicorn_argv</code>). If the port is already serving <code>/api/health</code>, the tray <strong>attaches</strong> and <strong>Exit</strong> closes only the tray. Otherwise it spawns the server and <strong>Exit</strong> stops it (blocks if a job is running unless you confirm). See <code>ARCHIVE_CONSOLE.md</code>.</p>
+        </div>
+
+        <div class="card settings-section">
+          <h2>Operator backups (ZIP)</h2>
+          <p class="muted small">Creates <code>archive_console_backup_*.zip</code> under a path you choose (must match an allowlisted prefix, e.g. <code>logs/…</code>). Includes optional copies of console <code>state.json</code> and <code>logs/</code>. Does not read <code>cookies.txt</code> unless you add that path under allowlist and include it manually (not recommended in shared backups).</p>
+          <label class="field">
+            <span>Destination (relative to archive root)</span>
+            <input type="text" id="setBackupDest" placeholder="logs/archive_console_backups" />
+          </label>
+          <label class="chk"><input type="checkbox" id="setBackupIncState" /> Include <code>archive_console/state.json</code></label>
+          <label class="chk"><input type="checkbox" id="setBackupIncLogs" /> Include entire <code>logs/</code> tree</label>
+          <label class="field">
+            <span>Extra include prefixes (comma-separated, optional)</span>
+            <input type="text" id="setBackupExtraPrefixes" placeholder="playlists" />
+          </label>
+          <label class="field">
+            <span>Retention — keep newest N ZIPs</span>
+            <input type="number" id="setBackupRetentionFiles" min="1" max="500" />
+          </label>
+          <label class="field">
+            <span>Retention — delete ZIPs older than (days, 0 = off)</span>
+            <input type="number" id="setBackupRetentionDays" min="0" max="3650" />
+          </label>
+          <div class="settings-row-actions">
+            <button type="button" class="btn ghost" id="btnSaveBackupSettings">Save backup options</button>
+            <button type="button" class="btn primary" id="btnRunOperatorBackup">Run backup now</button>
+          </div>
+          <p class="muted small" id="operatorBackupMsg" role="status"></p>
+          <div id="lastBackupResult" class="muted small"></div>
+        </div>
+
+        <div class="card settings-section" id="p1SchedulerCard">
+          <h2>Scheduling (saved entries)</h2>
+          <p class="muted small" id="schedulerStatusLine"></p>
+          <p class="muted small">Day of month <strong>1–31</strong>: in short months the day is <strong>clamped</strong> to the last valid day (e.g. 31 → Feb 28/29). Next-run hints and the in-process scheduler use <strong>this machine’s local timezone</strong>. Enable <code>features.scheduler_enabled</code> in <code>state.json</code> and restart the server to run jobs here; missed minutes while the PC sleeps are not replayed.</p>
+          <div id="scheduleEditor" class="schedule-editor" aria-label="Schedule list"></div>
+          <button type="button" class="btn ghost" id="btnAddSchedule">Add schedule</button>
+          <button type="button" class="btn primary" id="btnSaveSchedules">Save schedules</button>
+          <p class="muted small" id="scheduleSaveMsg" role="status"></p>
+        </div>
+
+        <div class="card settings-section">
+          <h2>Cookie hygiene (reminders)</h2>
+          <p class="muted small">In-app reminders only. No browser automation or silent export. Use <strong>Inputs &amp; config → cookies.txt</strong> after you export from the browser yourself.</p>
+          <label class="field">
+            <span>Remind every N days (0 = off)</span>
+            <input type="number" id="setCookieRemindDays" min="0" max="365" />
+          </label>
+          <label class="field">
+            <span>Remind N minutes before the next scheduled run (0 = off; applies to earliest upcoming enabled schedule)</span>
+            <input type="number" id="setPreRunMinutes" min="0" max="1440" value="0" />
+          </label>
+          <div class="settings-row-actions">
+            <button type="button" class="btn ghost" id="btnSaveCookieSettings">Save reminder settings</button>
+            <button type="button" class="btn ghost" id="btnCookieAck">Acknowledge (clear until next interval)</button>
+            <button type="button" class="btn ghost" id="btnCookieSnooze">Snooze 7 days</button>
+          </div>
+          <p class="muted small" id="cookieSettingsMsg" role="status"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="/static/app.js" defer></script>
+  <script src="/static/ytdlp_setup.js" defer></script>
+</body>
+</html>

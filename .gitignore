@@ -1,0 +1,36 @@
+# Runtime / local
+logs/
+archive_run_*/
+latest_run*.txt
+cookies.txt
+.env
+.env.local
+archive_console/state.json
+archive_console/yt_dlp_ui_state.json
+archive_console/.run/
+archive_console/backups/
+playlists/
+channels/
+videos/
+*_downloaded.txt
+*_backup.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Node (if added later)
+node_modules/
+
+# Editors
+.idea/
+.vscode/
+
+# OS
+Thumbs.db
+Desktop.ini

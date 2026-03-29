@@ -1,0 +1,277 @@
+Archive playlist advanced — run logs
+======================================
+
+Quick start and driver names: **README.md**. Full **.bat** inventory: **BAT_FILES.md**.
+Primary batch entrypoints: **monthly_watch_later_archive.bat**, **monthly_channels_archive.bat**,
+**monthly_videos_archive.bat** (legacy stub names still forward to these).
+
+What gets created each run
+--------------------------
+Under your scripts folder:
+
+  logs\archive_run_<UTC_YYYYMMDD_HHMMSS>\
+    manifest.csv   — Downloaded items: video_id, title, filepath, file_size_bytes,
+                     status, reason, timestamp_utc, plus file_verified_ok (post-run
+                     check), playlist_id, webpage_url
+    issues.csv     — Skipped / failed / unavailable (same core columns as manifest)
+    summary.txt    — Counts: attempted, downloaded, skipped, failed, private/unavailable
+    report.html    — Self-contained interactive report (dark-mode friendly): embedded
+                     JSON from manifest.csv + issues.csv, collapsible sections, search,
+                     per-column filters, sortable headers, file:// links, copy buttons.
+                     Template source: archive_report_template.html (copied next to script).
+    rerun_urls.txt — One URL per line when a suggested watch URL was recorded
+    run.log        — Plain-text capture of yt-dlp screen/stderr lines this run
+
+Also:
+
+  logs\latest_run.txt — Single line: full path to the last **playlist / Watch Later** run’s
+    log directory (archive_playlist_run.py).
+
+  logs\latest_run_channel.txt — Same for **channel** runs (archive_channel_run.py).
+
+  logs\latest_run_videos.txt — Same for **video-list** runs (archive_video_run.py).
+
+  Playlist, channel, and video pointers are separate so `regenerate_report` defaults and
+  “open latest report” don’t pick the wrong mode.
+
+Example layouts (illustrative) live in:
+
+  logs\example_run\
+
+Verification
+------------
+1) During the run, a row is added to manifest.csv only if yt-dlp’s hook saw a file
+   path and the file existed at that moment.
+
+2) After the run, every manifest row is checked again on disk. file_verified_ok is
+   set to yes/no; size is refreshed from the resolved path when a file exists.
+
+3) Merge / final output: hooks often record a pre-merge DASH path like ``*.f315.webm``;
+   after ``--merge-output-format mkv`` that fragment may be gone while ``… - <id>.mkv``
+   exists beside it. The verifier resolves to that final ``<id>.mkv`` (or .mp4/.webm/.mov
+   without ``.fNNN.`` in the name), sets status ``downloaded_merged``, and does *not*
+   emit ``downloaded_file_missing_on_verify`` when only the merged file remains.
+
+4) If no hook path and no qualifying ``<id>.<ext>`` final exists in that folder, an
+   issues.csv row is added (file_missing_on_verify) and manifest status is
+   ``downloaded_file_missing_on_verify``.
+
+5) playlists_downloaded.txt, channels_downloaded.txt, or videos_downloaded.txt (yt-dlp
+   --download-archive; each driver uses its own file)
+   - At run start yt-dlp still *reads* this file to skip already-finished IDs.
+   - During download, yt-dlp does *not* append to the file immediately; ManifestYoutubeDL
+     defers the on-disk write until after verify (see archive_playlist_run.py).
+   - After verify, sync_playlist_download_archive() removes lines youtube <id> for any
+     manifest row with file_verified_ok=no, and appends youtube <id> only for rows with
+     file_verified_ok=yes and status in {downloaded, downloaded_merged}.
+
+One-time cleanup (IDs stuck from older behavior)
+------------------------------------------------
+If bad IDs were written before deferred-archive was added, run:
+
+  python repair_playlist_download_archive.py
+
+(uses logs\latest_run.txt), or pass the archive_run_… folder that has the bad manifest.
+
+After a false ``downloaded_file_missing_on_verify`` (only .mkv on disk): open that run
+folder in ``regenerate_report.py`` so manifest paths repair from disk, then run
+``repair_playlist_download_archive.py`` — IDs are appended only when the updated verifier
+sees the final file. No need to hand-delete youtube lines for fragment-vs-mkv cases.
+
+How report.html is built
+------------------------
+After manifest.csv and issues.csv are written, archive_playlist_run.py reads
+archive_report_template.html, injects a <script type="application/json"> block
+built from the same in-memory rows (manifest columns + _missingFile + remediation
+hint per row; issues split into skipped / private-unavailable / failed / warnings),
+plus summary counts and sibling-run links.
+
+Summary numbers and section badges are aligned: Downloaded badge = verified rows
+(file_verified_ok=yes, including downloaded_merged), not raw manifest row count.
+run.log ends with a COUNT_CHECK line when counts match partitioned CSV rows (or lists mismatches).
+
+The summary <dl> and all tables are also pre-rendered in HTML so file:// works
+without JavaScript; JS adds search, sort, and filters when allowed.
+
+Full channel archive (creator takedown / whole-channel backup)
+----------------------------------------------------------------
+Primary entrypoint: **monthly_channels_archive.bat** → **archive_channel_run.py**.
+Legacy: **archive_youtube_channels.bat** still works (deprecation stub).
+
+- Same verification and reporting model as the playlist driver: manifest/issues/summary/
+  report under `logs\archive_run_<UTC>\`, rerun_urls.txt, run.log, COUNT_CHECK.
+- **channels_input.txt** — one channel or tab URL per line (# comments ok). Output:
+  `channels\%(uploader).100B\...` (same pattern as legacy channel bats).
+- **channels_downloaded.txt** — deferred sync like playlists: an ID is written only when
+  the run verified a final media file on disk (`file_verified_ok=yes`, downloaded or
+  downloaded_merged). Failed or unverified rows are not permanently marked complete.
+- **Tab expansion (default on):** bare channel home URLs on `youtube.com` / `www.youtube.com`
+  / `m.youtube.com` (no trailing `/videos`, `/shorts`, etc.) are expanded to **two** queue
+  entries: `.../videos` and `.../shorts`, so Shorts are not silently omitted. If you already
+  list explicit tabs, lines are left unchanged. **Opt out:** `set ARCHIVE_CHANNEL_EXPAND_TABS=0`.
+- **Deduplication:** yt-dlp archive lines are `youtube <id>`; the same video reached via
+  `/watch?v=`, Shorts, or embed URL shares one ID—no duplicate downloads once verified.
+- **Cookies / Premium / EJS:** identical rules as monthly Watch Later—use `yt-dlp.conf`
+  (--cookies or --cookies-from-browser, `--js-runtimes node`, `player_client=tv,web_safari,mweb`,
+  pip `yt-dlp[default]`). Do not expect Android client + cookies to bypass sign-in.
+- **Rerun safely:** run the bat again; already-verified IDs stay in channels_downloaded.txt
+  and are skipped. Inspect issues.csv / rerun_urls.txt for real failures.
+- **Counts look wrong?** Compare to a bounded listing, e.g.:
+    `python -m yt_dlp --config-locations yt-dlp.conf --flat-playlist "CHANNEL_TAB_URL"`
+  Pagination is yt-dlp’s extractor (no script-enforced “max downloads” cap).
+- **repair_playlist_download_archive.py** updates **playlists_downloaded.txt** only. For a bad
+  channel archive, pass the channel run folder to `regenerate_report.py` first, then either
+  hand-fix `channels_downloaded.txt` using the same rules as sync, or extend the repair script
+  to accept `channels_downloaded_path()` (not shipped yet).
+
+Env toggles match the playlist bat where applicable: `SKIP_YTDLP_UPDATE`, `ARCHIVE_DRY_RUN`
+(`--simulate`). Optional: `ARCHIVE_CHANNEL_EXPAND_TABS=0`.
+
+Batch video list (videos_input.txt)
+-----------------------------------
+Primary entrypoint: **monthly_videos_archive.bat** → **archive_video_run.py**.  
+Legacy **archive_videos.bat** is a stub to the monthly driver.
+
+- **videos_input.txt** — one URL per line, or a line `youtube VIDEO_ID` (11 characters), `#`
+  comments allowed. Unsupported lines become issues.csv rows; the run continues with valid URLs.
+- **videos_downloaded.txt** — deferred verified archive sync (same rules as playlist/channel).
+- Output directory: `videos\%(uploader).100B\...` (same pattern as the old one-liner bat).
+- **logs\latest_run_videos.txt** — newest video-list run (does not clobber playlist/channel pointers).
+- **Non-YouTube URLs:** downloads use the same config; post-verify archive lines today follow the
+  same **youtube <id>** sync as other drivers when the extractor reports YouTube ids. For other sites,
+  idempotent skip behavior may be incomplete until archive sync learns more extractor keys.
+- **repair_playlist_download_archive.py** only rewrites **playlists_downloaded.txt** (pass folder or
+  use latest_run.txt). For **videos_downloaded.txt**, use the same manifest + sync philosophy manually
+  or extend the repair tool later.
+
+Regenerate report.html from existing CSVs (no download)
+-------------------------------------------------------
+  regenerate_report.bat
+
+Uses logs\latest_run.txt (playlist) by default. For channel or video-list runs, open
+logs\latest_run_channel.txt or logs\latest_run_videos.txt, or pass the folder explicitly:
+
+  python regenerate_report.py "<ARCHIVE_ROOT>logs\archive_run_YYYYMMDD_HHMMSS"
+
+This reloads CSVs, re-verifies paths on disk (merged outputs), rewrites manifest.csv +
+issues.csv, then summary + report — use after false verify rows when the final file exists.
+
+Summary numbers are recomputed from the CSVs (same rules as a fresh run).
+
+Legacy runs (manifest.tsv / issues.tsv only)
+--------------------------------------------
+Older script versions wrote tab-separated files. regenerate_report now reads those
+too, writes canonical manifest.csv + issues.csv + summary.txt + report.html, and
+re-checks file paths on disk for file_verified_ok when possible.
+
+Optional: fixed run id
+----------------------
+  python archive_playlist_run.py 20260328_manual
+
+Otherwise the script picks UTC run id automatically.
+
+Monthly checklist (repeatable run)
+----------------------------------
+Primary entrypoint: monthly_watch_later_archive.bat  (updates yt-dlp via pip unless
+SKIP_YTDLP_UPDATE=1). Legacy name archive_playlists_advanced.bat still works (deprecation stub).
+
+Before a run:
+  1) If playlists_input.txt uses Watch Later (list=WL): refresh cookies.txt or switch
+     to --cookies-from-browser in yt-dlp.conf (see comments there and in playlists_input.txt).
+  2) Confirm Node.js 20+ is installed and on PATH (for EJS / “n” challenge). The batch file
+     runs: pip install -U "yt-dlp[default]" so yt-dlp-ejs stays matched to yt-dlp.
+  3) Skim yt-dlp.conf for format / player_client / --js-runtimes if YouTube changed behavior.
+
+After a run:
+  1) Open logs\latest_run.txt → that folder’s report.html.
+  2) Read the Run summary <dl>; confirm COUNT_CHECK line at end of run.log.
+  3) Skim issues tables: remediation column → one line per row (config/docs pointer).
+  4) Rerun monthly_watch_later_archive.bat anytime: playlists_downloaded.txt skips completed IDs
+     (--ignore-errors keeps the rest moving).
+
+When to change what (no AI required)
+------------------------------------
+  pip update failed        — Safe to continue; fix network or pip later. Or set
+                             SKIP_YTDLP_UPDATE=1 until resolved.
+  WL “playlist does not exist” — Auth; cookies / browser cookies / normal playlist URL.
+  Format / “only images” / n challenge / SABR (#12482)
+    — Primary fix: yt-dlp.conf has --js-runtimes node + pip "yt-dlp[default]" (yt-dlp-ejs).
+      Reproduce:  python -m yt_dlp -Uv
+                  python -m yt_dlp --config-locations yt-dlp.conf --simulate -F "WATCH_URL"
+      Verbose log must show JS runtimes: node-… and [jsc:node] Solving JS challenges.
+    — Also keep player_client=tv,web_safari,mweb (cookie-safe; avoids web_creator-only path).
+    — Fallback: install Deno 2+ (wiki recommends); then you may omit --js-runtimes node if
+      deno is on PATH.
+    — If EJS scripts won’t install from PyPI: see wiki “remote-components ejs:github”.
+  Removed / private / account closed — Expected content loss; no yt-dlp fix.
+
+Optional dry run
+----------------
+  set ARCHIVE_DRY_RUN=1
+  monthly_watch_later_archive.bat
+Passes --simulate to yt-dlp (no real downloads; manifest/hooks differ from a full run).
+Use only to test config parsing, not to validate archive behavior.
+
+Cookie / session heuristics and pause-on-auth (playlist + channel drivers)
+--------------------------------------------------------------------------
+When ``ARCHIVE_PAUSE_ON_COOKIE_ERROR=1`` (or ``true``/``yes``/``on``), yt-dlp lines passed
+through ``ManifestYoutubeDL.to_stderr`` / ``report_error`` are scanned for **narrow** substrings
+that usually mean expired cookies, login, or bot checks — **not** generic HTTP 403 alone.
+
+**Likely cookie/auth (pause can trigger):** phrases such as ``sign in to confirm``, ``not a bot``,
+``CookieLoadError``, cookie file/database copy or invalid/missing messages, ``login required``,
+``authentication failed/required``, and **403 only when** the same line also mentions cookie,
+login, sign-in, consent, bot, or challenge (avoids pausing on unrelated 403s).
+
+**Other buckets (no pause from these patterns alone):** ``Requested format is not available``,
+bare ``HTTP Error 403`` without auth keywords, rate limits (429), removed/private wording,
+EJS / n-challenge strings (fix via Node + yt-dlp-ejs per checklist).
+
+**False-positive risk:** rare lines that mention login/bot/403 for non-cookie reasons could
+still match; member-only or age-gate text can resemble auth failures. If pause triggers
+wrongly, clear the env var and rerun.
+
+**Pause behavior:** On first matching line (debounced ~3s to avoid double fire from stderr +
+``report_error``), the driver prints a banner to the console and ``run.log``, appends one
+**warning** issue row explaining the operator pause, then blocks:
+  - If ``ARCHIVE_COOKIE_AUTH_POLL_SEC`` is set to a positive number (e.g. ``30``), it polls
+    the configured ``--cookies`` file path from yt-dlp options (default hint:
+    ``cookies.txt`` next to the scripts) and resumes when the file's modification time
+    increases, or when ``ARCHIVE_COOKIE_AUTH_POLL_MAX_SEC`` elapses (default ``7200``).
+  - Otherwise, if stdin is a TTY, it waits for **Enter** after you refresh cookies.
+  - Non-interactive runs (Task Scheduler) without poll: it logs a one-line hint and returns
+    immediately — use ``ARCHIVE_COOKIE_AUTH_POLL_SEC`` for unattended wait.
+
+**Safety:** Pause does **not** write to ``playlists_downloaded.txt`` / ``channels_downloaded.txt``
+or mark videos verified; it only delays further yt-dlp progress. With ``--ignore-errors``,
+the current URL still records an **error** row as today, then the queue continues after the
+wait. Rerunning the batch remains idempotent (archive skips completed IDs).
+
+**Tests (developer / CI):**
+  set ARCHIVE_SELFTEST_COOKIE_AUTH=1
+  python archive_playlist_run.py
+Optional poll-path smoke: also set ``ARCHIVE_SELFTEST_COOKIE_PAUSE=1``.
+
+**Mitigations:** Export fresh ``cookies.txt`` before long runs; keep batch sizes reasonable;
+on Windows, ``--cookies-from-browser`` may fail if the browser profile is locked — prefer a
+file export or close extra profiles. See ``yt-dlp.conf`` comments on cookies.
+
+Failure families (for reading issues.csv / run.log)
+---------------------------------------------------
+  Auth / WL / session — playlist does not exist, sign in, cookies, bot check; see
+                        "Cookie / session heuristics" above for pause-on-auth patterns.
+  Extractor / client — n challenge, EJS, SABR, Only images, PO token messages.
+  Format / mux       — Requested format is not available, ffmpeg, merge.
+  Network / throttle — 429, rate limit, timeouts.
+  Removed content     — Video unavailable, removed by uploader, account terminated.
+  Other               — See remediation column and full reason in run.log.
+
+Config / release notes (what we fixed when)
+---------------------------------------------
+  2026-03 — “Only images” + format not available (Premium + cookies, IDs like ONkIiTO9ruw):
+    Cause: No JS runtime and/or missing yt-dlp-ejs → “n” challenge unsolved; SABR left no
+    plain HTTPS URLs for web_safari/mweb. Fix: pip "yt-dlp[default]" + --js-runtimes node
+    in yt-dlp.conf (see EJS wiki). player_client=tv,web_safari,mweb remains; tv-only was
+    still image-only without EJS in reproduction tests.
+  Revisit when: yt-dlp major upgrade (re-run pip [default]); new YouTube experiments; if
+    verbose shows “JS runtimes: none” again, restore Node/Deno or fix PATH.

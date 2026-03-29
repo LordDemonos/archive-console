@@ -1,0 +1,5 @@
+# Sample channel / playlist lines (replace with your own). One entry per line.
+# Lines starting with # are ignored by the drivers when used as input (verify drivers if you rely on this).
+https://www.youtube.com/@ExampleChannelOne
+https://www.youtube.com/@ExampleChannelTwo/videos
+https://www.youtube.com/c/ExampleBroadcastChannel

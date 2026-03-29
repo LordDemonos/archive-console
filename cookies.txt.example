@@ -1,0 +1,8 @@
+# Replace this file with cookies.txt (Netscape format) or remove this stub.
+# Do not commit real cookies to git.
+#
+# Options:
+# 1. Export cookies from your browser in Netscape format and save as cookies.txt next to yt-dlp.conf.
+# 2. Or comment --cookies in yt-dlp.conf and use --cookies-from-browser (see yt-dlp documentation).
+#
+# This repository ships no cookie data.

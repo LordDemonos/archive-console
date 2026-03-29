@@ -1,0 +1,44 @@
+{
+  "settings_schema_version": 1,
+  "host": "127.0.0.1",
+  "port": 8756,
+  "archive_root": "",
+  "allowlisted_rel_prefixes": ["logs", "playlists", "channels", "videos"],
+  "features": {
+    "scheduler_enabled": false,
+    "notifications_stub": false
+  },
+  "schedules": [],
+  "operator_backup": {
+    "destination_rel": "logs/archive_console_backups",
+    "include_state_json": true,
+    "include_logs_dir": true,
+    "include_extra_rel_prefixes": [],
+    "retention_max_files": 20,
+    "retention_days": 0
+  },
+  "last_operator_backup": null,
+  "cookie_hygiene": {
+    "remind_interval_days": 0,
+    "last_acknowledged_unix": 0.0,
+    "snooze_until_unix": 0.0
+  },
+  "pre_run_reminder": {
+    "minutes_before": 0,
+    "snooze_until_unix": 0.0,
+    "acknowledged_fire_key": ""
+  },
+  "download_dirs": {
+    "watch_later": "",
+    "channels": "",
+    "videos": ""
+  },
+  "run_history": [],
+  "run_history_max": 50,
+  "editor_backup_max": 10,
+  "storage_retention": {
+    "retention_days": 90,
+    "prune_archive_runs": true,
+    "prune_operator_backup_zips": true
+  }
+}
