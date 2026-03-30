@@ -19,6 +19,7 @@ from app.paths import PathNotAllowedError
 def test_parse_editor_filename_ok():
     assert parse_editor_filename("playlists_input.txt") == "playlists_input.txt"
     assert parse_editor_filename("yt-dlp.conf") == "yt-dlp.conf"
+    assert parse_editor_filename("gallery-dl.conf") == "gallery-dl.conf"
 
 
 def test_parse_editor_rejects():
@@ -65,3 +66,7 @@ def test_backup_rotation_deletes_old(tmp_path, monkeypatch):
 
 def test_editable_set_includes_cookies():
     assert COOKIES_TXT in EDITABLE_FILENAMES
+
+
+def test_editable_set_includes_gallery_dl_conf():
+    assert "gallery-dl.conf" in EDITABLE_FILENAMES

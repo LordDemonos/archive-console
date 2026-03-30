@@ -1,52 +1,69 @@
 # Batch files inventory (`*.bat`)
 
-Complete catalog of **every** `*.bat` under this repo (recursive search: **12 files**, all in repo root).  
-**Operational narrative:** use **`README.md`**. This file is the **authoritative** per-file inventory.
+Authoritative **per-file** inventory for batch entrypoints in this repo. **Operational narrative:** `README.md`. **Content-backed audit (classes, line evidence, staging caveats):** **`BAT_AUDIT.md`**.
 
-**Three PRIMARY drivers** (same stack: `yt-dlp.conf`, optional `python -m pip install --upgrade pip` unless `SKIP_PIP_UPDATE=1` (unset in batch defaults to skip), then pip `yt-dlp[default]` unless `SKIP_YTDLP_UPDATE=1`, `archive_playlist_run`/`ManifestYoutubeDL` pattern, deferred archive lines until verify, `logs\archive_run_<UTC>\`, `COUNT_CHECK` in `run.log`, separate `latest_run*.txt` per pipeline; all three honor **`ARCHIVE_CONSOLE_UNATTENDED=1`** to skip interactive `pause` steps for the **Archive Console**):
+## Supported monthly drivers (PRIMARY)
 
-| Batch | Python entry | Input | Archive file | Output tree | `latest_run` pointer | Env (representative) |
-|-------|--------------|-------|--------------|-------------|----------------------|----------------------|
-| `monthly_watch_later_archive.bat` | `archive_playlist_run.py` | `playlists_input.txt` | `playlists_downloaded.txt` | `playlists\…` (or `ARCHIVE_OUT_PLAYLIST` if set) | `logs\latest_run.txt` | … + optional **`ARCHIVE_OUT_PLAYLIST`** (absolute output root for playlist tree; **Archive Console** sets this per saved settings) |
-| `monthly_channels_archive.bat` | `archive_channel_run.py` | `channels_input.txt` | `channels_downloaded.txt` | `channels\…` or **`ARCHIVE_OUT_CHANNEL`** | `logs\latest_run_channel.txt` | Above + `ARCHIVE_CHANNEL_EXPAND_TABS` (set `=0` to disable tab split); optional **`ARCHIVE_OUT_CHANNEL`** |
-| `monthly_videos_archive.bat` | `archive_video_run.py` | `videos_input.txt` | `videos_downloaded.txt` | `videos\…` or **`ARCHIVE_OUT_VIDEOS`** | `logs\latest_run_videos.txt` | Same cookie/pip/dry-run toggles as playlist; optional **`ARCHIVE_OUT_VIDEOS`** |
+Exactly **three** batch entrypoints run the instrumented Python stack (manifest, deferred archive, `logs\archive_run_<UTC>\`, `report.html`, separate `latest_run*.txt` pointers). All honor **`ARCHIVE_CONSOLE_UNATTENDED=1`** for Archive Console:
 
-Verified against the `.bat` and `.py` sources (2026-03): each primary bat backs up its `*_downlisted.txt` before run, runs the matching `python "%~dp0archive_*_run.py"`, and prints paths from the correct `logs\latest_run*.txt`.
+| Batch | Python entry | Input | Archive file | Output tree | `latest_run` pointer |
+|-------|--------------|-------|--------------|-------------|----------------------|
+| `monthly_watch_later_archive.bat` | `archive_playlist_run.py` | `playlists_input.txt` | `playlists_downloaded.txt` | `playlists\…` (or `ARCHIVE_OUT_PLAYLIST`) | `logs\latest_run.txt` |
+| `monthly_channels_archive.bat` | `archive_channel_run.py` | `channels_input.txt` | `channels_downloaded.txt` | `channels\…` (or `ARCHIVE_OUT_CHANNEL`) | `logs\latest_run_channel.txt` |
+| `monthly_videos_archive.bat` | `archive_video_run.py` | `videos_input.txt` | `videos_downloaded.txt` | `videos\…` (or `ARCHIVE_OUT_VIDEOS`) | `logs\latest_run_videos.txt` |
 
 ---
 
-## Per-file inventory
+## Per-file inventory (files that exist here)
 
-| File | Purpose (one line) | Calls / entry | Status | Safe to delete? |
-|------|---------------------|---------------|--------|------------------|
-| `monthly_watch_later_archive.bat` | Monthly / batch **playlist** archive (Watch Later + `playlists_input.txt`). | `python "%~dp0archive_playlist_run.py"` | **PRIMARY** | **no** |
-| `monthly_channels_archive.bat` | Monthly / batch **whole-channel** archive from `channels_input.txt`. | `python "%~dp0archive_channel_run.py"` | **PRIMARY** | **no** |
-| `monthly_videos_archive.bat` | Batch **ad-hoc video URL list** from `videos_input.txt`. | `python "%~dp0archive_video_run.py"` | **PRIMARY** | **no** |
-| `archive_playlists_advanced.bat` | Back-compat entry for renamed playlist driver. | `call "%~dp0monthly_watch_later_archive.bat"` | **STUB** | **no** — keep until shortcuts/Task Scheduler use `monthly_*` only |
-| `archive_youtube_channels.bat` | Back-compat entry for renamed channel driver. | `call "%~dp0monthly_channels_archive.bat"` | **STUB** | **no** — same |
-| `archive_videos.bat` | Back-compat entry for renamed video-list driver. | `call "%~dp0monthly_videos_archive.bat"` | **STUB** | **no** — same |
-| `archive_channels_robust.bat` | Legacy name → channel driver (old direct-yt-dlp wrapper retired). | `call "%~dp0monthly_channels_archive.bat"` | **STUB** | **no** — optional **delete candidate** only after grep + shortcut audit |
-| `regenerate_report.bat` | Rebuild `report.html` (+ CSV refresh) from an existing run folder. | `python "%~dp0regenerate_report.py" %*` | **UTILITY** | **no** |
-| `verify_downloads.bat` | Rough comparison: `playlists\WL` `*.mp4` count vs `playlists_downloaded.txt` lines. | Inline `dir` / `find` (no Python) | **UTILITY** (legacy heuristic) | **only after** you rely on manifest/`report.html` only; does not understand `.mkv` or merged outputs |
-| `archive_playlists.bat` | Minimal playlist download: raw `python -m yt_dlp` + `yt-dlp.conf`; **no** manifest, **no** deferred archive verify. | `python -m yt_dlp … --batch-file=playlists_input.txt` | **LEGACY / UNUSED** | **only after** you confirm you never want uninstrumented playlist runs; **no** other repo file references it |
-| `archive_playlists_robust.bat` | Same raw `yt_dlp` playlist path as above with friendlier echoes/retry UI. | `python -m yt_dlp …` (same args pattern) | **LEGACY / UNUSED** | Same as `archive_playlists.bat` |
-| `archive_channels.bat` | Minimal channel download: raw `python -m yt_dlp`; **no** manifest / verify stack. | `python -m yt_dlp … --batch-file=channels_input.txt` | **LEGACY / UNUSED** | **only after** confirming no use; **no** other repo file references it |
+Excludes **`archive_console\.venv\Scripts\*.bat`** (Python venv; not archive drivers).
+
+| File | Purpose (one line) | Calls / entry | Class | Safe to delete? |
+|------|---------------------|---------------|-------|------------------|
+| `monthly_watch_later_archive.bat` | Playlist / Watch Later + `playlists_input.txt`. | `python "%~dp0archive_playlist_run.py"` (see file L89) | **PRIMARY** | **no** |
+| `monthly_channels_archive.bat` | Whole-channel archive from `channels_input.txt`. | `python "%~dp0archive_channel_run.py"` (L89) | **PRIMARY** | **no** |
+| `monthly_videos_archive.bat` | Video URL list from `videos_input.txt`. | `python "%~dp0archive_video_run.py"` (L89) | **PRIMARY** | **no** |
+| `oneoff_archive.bat` | Thin wrapper for **`archive_oneoff_run.py`** (expects UTC log stamp argv). | `python -u "%~dp0archive_oneoff_run.py" %1` | **OPTIONAL** (UI-primary path is Archive Console) | optional |
+| `archive_playlists_advanced.bat` | Deprecated name → forwards to playlist monthly. | `call "%~dp0monthly_watch_later_archive.bat" %*` then `exit /b %errorlevel%` | **WRAPPER_FORWARD** | **no** — keep for Task Scheduler / shortcuts |
+| `archive_youtube_channels.bat` | Deprecated name → forwards to channel monthly. | `call "%~dp0monthly_channels_archive.bat" %*` then `exit /b %errorlevel%` | **WRAPPER_FORWARD** | **no** |
+| `archive_videos.bat` | Deprecated name → forwards to video monthly. | `call "%~dp0monthly_videos_archive.bat" %*` then `exit /b %errorlevel%` | **WRAPPER_FORWARD** | **no** |
+| `archive_channels_robust.bat` | Deprecated name → forwards to channel monthly. | `call "%~dp0monthly_channels_archive.bat" %*` then `exit /b %errorlevel%` | **WRAPPER_FORWARD** | **no** |
+| `regenerate_report.bat` | Rebuild `report.html` from existing run folder. | `python "%~dp0regenerate_report.py" %*` | **UTILITY** | **no** |
+| `verify_downloads.bat` | Rough `dir` / `find` count vs archive lines (playlist WL heuristic only). | No Python driver; no `monthly_*` | **UTILITY (legacy)** | optional if you rely only on manifest / `report.html` |
+| `start_archive_console.bat` (repo root) | Create/use venv, health check, start or open Archive Console. | PowerShell helpers, `uvicorn` via `_launch_uvicorn.bat` or attached | **LAUNCHER** | **no** |
+| `start_archive_console_tray.bat` | Start tray (`tray_app.py`) with **no lingering CMD** (venv/`pip` then `pythonw` + `start /D`). | `pythonw.exe tray_app.py` detached under `archive_console` | **LAUNCHER** | **no** |
+| `archive_console/_launch_uvicorn.bat` | Dedicated window: run uvicorn with host/port env. | `python -m uvicorn app.main:app …` | **LAUNCHER** | **no** |
+| `archive_console/start_archive_console.bat` | Wrapper: `cd` to parent and `call start_archive_console.bat`. | `call start_archive_console.bat %*` | **WRAPPER_FORWARD** | **no** |
+
+---
+
+## Names documented historically but not in this tree
+
+These **do not exist** as `.bat` files in the full developer tree:
+
+- `archive_playlists.bat`
+- `archive_playlists_robust.bat`
+- `archive_channels.bat`
+
+**Public / GitHub snapshot:** `tools/publish_staging.py` may create **placeholder** files with those names that **only** echo a message and **`exit /b 2`** — they **do not** call `monthly_*`. Do not treat them as archive entrypoints; point Task Scheduler at the **`monthly_*`** names or the **WRAPPER_FORWARD** stubs above. See **`BAT_AUDIT.md`** and **`README.md`** (snapshot note).
 
 ---
 
 ## Cross-check (repo references)
 
 - **`yt-dlp.conf`** header lists the three **`monthly_*`** drivers + Python modules (not stub names).
-- **`ARCHIVE_PLAYLIST_RUN_LOGS.txt`** documents all three pipelines + `regenerate_report.bat`; legacy stub names appear only in “legacy still works” lines where applicable.
-- **Ripgrep** for basenames `archive_playlists.bat`, `archive_playlists_robust.bat`, `archive_channels.bat`: matches **only this file** — safe to treat as **optional delete candidates**, not **required** stubs.
+- **`ARCHIVE_PLAYLIST_RUN_LOGS.txt`** documents all three pipelines + `regenerate_report.bat`; legacy stub names are noted where applicable.
+- **Archive Console** `run_manager.py` spawns **`monthly_watch_later_archive.bat`**, **`monthly_channels_archive.bat`**, **`monthly_videos_archive.bat`**, and (for **One-off**) **`python -u archive_oneoff_run.py`** directly.
 
-Stubs (`archive_playlists_advanced`, `archive_youtube_channels`, `archive_videos`, `archive_channels_robust`) **are** referenced by name in this inventory and in deprecation echoes; keep unless you migrate external launchers.
+**WRAPPER_FORWARD** stubs **are** referenced by name in `README.md`, this file, and operator docs; keep unless you migrate **external** launchers.
 
 ---
 
 ## Task Scheduler / shortcuts
 
-Prefer actions that target **`monthly_watch_later_archive.bat`**, **`monthly_channels_archive.bat`**, and **`monthly_videos_archive.bat`** directly. Stubs exist so **old paths keep working** without silent failure.
+**Prefer** actions that target **`monthly_watch_later_archive.bat`**, **`monthly_channels_archive.bat`**, and **`monthly_videos_archive.bat`** directly.
+
+If a task still uses **`archive_playlists_advanced.bat`**, **`archive_youtube_channels.bat`**, **`archive_videos.bat`**, or **`archive_channels_robust.bat`**, those files **`call`** the correct **`monthly_*`** driver — safe **compatibility** paths.
 
 ---
 

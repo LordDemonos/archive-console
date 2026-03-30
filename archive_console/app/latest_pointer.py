@@ -8,6 +8,8 @@ LATEST_POINTER_REL: dict[str, str] = {
     "watch_later": "logs/latest_run.txt",
     "channels": "logs/latest_run_channel.txt",
     "videos": "logs/latest_run_videos.txt",
+    "oneoff": "logs/latest_run_oneoff.txt",
+    "galleries": "logs/latest_run_galleries.txt",
 }
 
 

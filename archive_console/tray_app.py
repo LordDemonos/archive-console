@@ -3,8 +3,22 @@ Tray helper for Archive Console (Windows-first). Starts the same process line as
 
   python -m uvicorn app.main:app --host 127.0.0.1 --port <port>
 
-Run from ``archive_console`` with venv active: ``python tray_app.py``
-See ARCHIVE_CONSOLE.md (single codepath: ``app.server_cli.uvicorn_argv``; attach vs spawn).
+Run from ``archive_console`` with venv active: ``pythonw tray_app.py`` (no console) or
+``python tray_app.py`` when debugging.
+
+Process layout (Windows-first):
+
+- **Spawn mode:** this file is the **parent** process (tray). It ``Popen``s a **child**
+  ``python -m uvicorn app.main:app`` (see ``spawn()``). Stopping the HTTP server
+  (Settings ``POST /api/shutdown`` → ``os._exit`` on the child) ends **only** the child
+  unless the tray also exits — a **watchdog** calls ``icon.stop()`` when ``proc.poll()``
+  is non-``None`` so the tray icon does not orphan.
+- **Attach mode:** health check saw an existing listener; ``proc`` stays ``None``. The
+  tray is just a menu + notify listener; **Exit** does not stop uvicorn (use Settings or
+  kill the server process). **Settings → Stop** stops the server; the tray icon remains
+  until **Exit** in the menu.
+
+See ARCHIVE_CONSOLE.md (``app.server_cli.uvicorn_argv``; attach vs spawn).
 """
 
 from __future__ import annotations
@@ -15,8 +29,11 @@ import os
 import subprocess
 import sys
 import threading
+import time
 import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+from urllib.parse import urlparse
 
 HERE = Path(__file__).resolve().parent
 STATE = HERE / "state.json"
@@ -104,6 +121,92 @@ def _bind() -> tuple[str, int]:
     return "127.0.0.1", int(data.get("port", 8756))
 
 
+def _tray_notify_bind_port() -> int:
+    """Match app.settings.effective_tray_notify_port without importing the app package early."""
+    data: dict = {}
+    if STATE.is_file():
+        data = json.loads(STATE.read_text(encoding="utf-8"))
+    elif EXAMPLE.is_file():
+        data = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+    raw = int(data.get("tray_notify_port", 0) or 0)
+    if raw > 0:
+        return raw
+    main_p = int(data.get("port", 8756))
+    cand = main_p + 101
+    return cand if cand <= 65535 else 8860
+
+
+def _start_notify_http(notify_port: int, icon_holder: dict) -> None:
+    """POST /notify {title, body} on 127.0.0.1 only → pystray balloon."""
+
+    class NotifyHandler(BaseHTTPRequestHandler):
+        def log_message(self, _format: str, *_args) -> None:  # noqa: A003
+            return
+
+        def do_POST(self) -> None:  # noqa: N802
+            ip = self.client_address[0]
+            if ip not in ("127.0.0.1", "::1"):
+                self.send_error(403)
+                return
+            parsed = urlparse(self.path)
+            if parsed.path.rstrip("/") != "/notify":
+                self.send_error(404)
+                return
+            length = int(self.headers.get("Content-Length", "0") or "0")
+            if length <= 0 or length > 8192:
+                self.send_error(400)
+                return
+            raw = self.rfile.read(length)
+            try:
+                payload = json.loads(raw.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                self.send_error(400)
+                return
+            title = str(payload.get("title") or "Archive Console").strip() or "Archive Console"
+            body = str(payload.get("body") or "").strip()
+            if not body:
+                self.send_error(400)
+                return
+            icon = icon_holder.get("icon")
+            if icon is None:
+                self.send_error(503)
+                return
+            try:
+                icon.notify(body, title)
+            except Exception as e:
+                log.warning("Tray notify failed: %s", e)
+                self.send_error(500)
+                return
+            self.send_response(204)
+            self.end_headers()
+
+    def serve() -> None:
+        try:
+            server = HTTPServer(("127.0.0.1", notify_port), NotifyHandler)
+        except OSError as e:
+            log.warning(
+                "Tray notify HTTP server not started on 127.0.0.1:%s (%s). "
+                "Change tray_notify_port in state if needed.",
+                notify_port,
+                e,
+            )
+            return
+        log.info("Tray notify listener on http://127.0.0.1:%s/notify", notify_port)
+        server.serve_forever()
+
+    threading.Thread(target=serve, name="archive_console_tray_notify", daemon=True).start()
+
+
+def _server_python_executable() -> str:
+    """Use python.exe for the uvicorn child when the tray runs as pythonw (no console)."""
+    p = Path(sys.executable)
+    if p.name.lower() == "pythonw.exe":
+        cand = p.with_name("python.exe")
+        if cand.is_file():
+            return str(cand)
+    return sys.executable
+
+
 def _archive_root() -> Path:
     data: dict = {}
     if STATE.is_file():
@@ -127,6 +230,29 @@ def _health_ok(host: str, port: int) -> bool:
         )
         return True
     except (OSError, urllib.error.URLError, ValueError):
+        return False
+
+
+def _try_shutdown_server_http(host: str, port: int) -> bool:
+    """Ask the running server to exit via POST /api/shutdown (same primitive as Settings UI)."""
+    try:
+        import urllib.error
+        import urllib.request
+
+        payload = json.dumps({"confirm": "SHUTDOWN"}).encode("utf-8")
+        req = urllib.request.Request(
+            f"http://{host}:{port}/api/shutdown",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        tok = (os.environ.get("ARCHIVE_SHUTDOWN_TOKEN") or "").strip()
+        if tok:
+            req.add_header("X-Archive-Shutdown-Token", tok)
+        with urllib.request.urlopen(req, timeout=6.0) as resp:
+            return int(resp.status) == 200
+    except Exception as e:
+        log.debug("Tray: HTTP shutdown failed (%s); falling back to terminate.", e)
         return False
 
 
@@ -165,7 +291,21 @@ def main() -> None:
     try:
         import pystray  # noqa: F401
     except ImportError as e:
-        print("Install tray deps: pip install pystray Pillow", file=sys.stderr)
+        if sys.platform == "win32":
+            try:
+                import ctypes
+
+                ctypes.windll.user32.MessageBoxW(
+                    0,
+                    "Install tray deps (from archive_console folder):\n"
+                    "  .venv\\Scripts\\python.exe -m pip install -r requirements.txt",
+                    "Archive Console tray",
+                    0x10,
+                )
+            except Exception:
+                print("Install tray deps: pip install pystray Pillow", file=sys.stderr)
+        else:
+            print("Install tray deps: pip install pystray Pillow", file=sys.stderr)
         raise SystemExit(1) from e
 
     import pystray
@@ -186,7 +326,7 @@ def main() -> None:
         creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
     def spawn() -> subprocess.Popen:
-        argv = [sys.executable, "-m", *uvicorn_argv(host=host, port=port)]
+        argv = [_server_python_executable(), "-m", *uvicorn_argv(host=host, port=port)]
         log.info("Starting server: %s", " ".join(argv[2:]))
         return subprocess.Popen(
             argv,
@@ -240,16 +380,44 @@ def main() -> None:
         stop_server()
         ensure_server(None)
 
-    def on_quit(icon, _item) -> None:
+    _tray_stopping = False
+    _tray_stop_lock = threading.Lock()
+
+    def stop_tray_once() -> None:
+        """End ``icon.run()``; safe if ``pystray`` is already stopping."""
+        nonlocal _tray_stopping
+        with _tray_stop_lock:
+            if _tray_stopping:
+                return
+            _tray_stopping = True
+        try:
+            icon.stop()
+        except Exception:
+            pass
+
+    def on_quit(_icon, _item) -> None:
         nonlocal attached
         if attached:
             log.info("Tray exit (attached mode - server left running)")
-            icon.stop()
+            stop_tray_once()
             return
         if _run_in_progress(host, port) and not _confirm_force_quit():
             return
-        stop_server()
-        icon.stop()
+        if _try_shutdown_server_http(host, port):
+            with lock:
+                if proc is not None and proc.poll() is None:
+                    try:
+                        proc.wait(timeout=14)
+                    except subprocess.TimeoutExpired:
+                        log.warning(
+                            "Tray: server did not exit after HTTP shutdown; terminating pid %s",
+                            proc.pid,
+                        )
+                        stop_server()
+                proc = None
+        else:
+            stop_server()
+        stop_tray_once()
 
     if attached:
         log.info(
@@ -280,6 +448,33 @@ def main() -> None:
         tip,
         menu,
     )
+    notify_port = _tray_notify_bind_port()
+    _start_notify_http(notify_port, {"icon": icon})
+
+    if not attached:
+        def watch_uvicorn_child() -> None:
+            while True:
+                time.sleep(0.45)
+                with lock:
+                    p = proc
+                if p is None:
+                    continue
+                if p.poll() is None:
+                    continue
+                log.info(
+                    "Tray-spawned server exited (pid %s, return code %s); exiting tray.",
+                    p.pid,
+                    p.returncode,
+                )
+                stop_tray_once()
+                return
+
+        threading.Thread(
+            target=watch_uvicorn_child,
+            name="archive_console_tray_child_watch",
+            daemon=True,
+        ).start()
+
     try:
         icon.run()
     finally:

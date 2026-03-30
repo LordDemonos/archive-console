@@ -2,11 +2,16 @@
   "settings_schema_version": 1,
   "host": "127.0.0.1",
   "port": 8756,
+  "tray_notify_port": 0,
+  "tray_notify_last_failure_unix": 0.0,
+  "tray_notify_last_failure_message": "",
   "archive_root": "",
-  "allowlisted_rel_prefixes": ["logs", "playlists", "channels", "videos"],
+  "allowlisted_rel_prefixes": ["logs", "playlists", "channels", "videos", "galleries"],
   "features": {
     "scheduler_enabled": false,
-    "notifications_stub": false
+    "notifications_stub": false,
+    "require_cookie_confirm_manual": true,
+    "tray_notify_before_schedule": false
   },
   "schedules": [],
   "operator_backup": {
@@ -31,8 +36,24 @@
   "download_dirs": {
     "watch_later": "",
     "channels": "",
-    "videos": ""
+    "videos": "",
+    "oneoff": "",
+    "galleries": ""
   },
+  "oneoff_report_retention_days": 90,
+  "oneoff_cookie_reminder_last_unix": 0.0,
+  "ffmpeg_exe": "",
+  "mediainfo_exe": "",
+  "exiftool_exe": "",
+  "exiftool_timeout_sec": 45.0,
+  "duplicates_quarantine_rel": "logs/_duplicates_quarantine",
+  "duplicates_prefer_quarantine": true,
+  "deepl_api_key": "",
+  "deepl_endpoint_mode": "auto",
+  "deepl_source_lang": "",
+  "deepl_target_lang": "EN-US",
+  "rename_runs": [],
+  "rename_runs_max": 50,
   "run_history": [],
   "run_history_max": 50,
   "editor_backup_max": 10,

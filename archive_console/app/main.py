@@ -9,28 +9,50 @@ import os
 import shutil
 import subprocess
 import time
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, AsyncIterator, Literal
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request
 from fastapi.responses import (
     FileResponse,
     HTMLResponse,
+    JSONResponse,
     RedirectResponse,
     Response,
     StreamingResponse,
 )
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 
+from .clip_export import ClipExportManager, validate_ffmpeg_exe_setting
+from .mediainfo_cli import (
+    mediainfo_for_file,
+    resolve_mediainfo_bin,
+    validate_mediainfo_exe_setting,
+)
+from .duplicate_scan import apply_duplicate_removals
+from .duplicate_scan_manager import DuplicateScanManager
 from .cookie_reminder import cookie_hygiene_anchor_if_needed, cookie_reminder_payload
 from .download_output import (
     abs_folder_to_rel,
     download_dirs_api_payload,
+    extra_env_for_galleries,
     extra_env_for_job,
+    extra_env_for_oneoff,
     validate_download_dirs,
+)
+from .gallery_cli import (
+    gallery_dl_executable_ready,
+    resolve_gallery_dl_exe,
+    run_gallery_dl_json_dump,
+)
+from .gallery_util import (
+    cookie_likely_needed,
+    normalize_gallery_url,
+    parse_gallery_dl_json_lines,
 )
 from .folder_browse import pick_directory_host
 from .config_smoke import conf_syntax_smoke
@@ -41,7 +63,11 @@ from .editor_files import (
     resolve_editor_file,
     strip_blank_lines,
 )
-from .file_serve import allowlisted_file_response, assert_reports_file_not_sensitive
+from .file_serve import (
+    allowlisted_file_response,
+    assert_reports_file_not_sensitive,
+    collect_playable_rels_under_dir,
+)
 from .report_html_rewrite import rewrite_report_html
 from .yt_dlp_config_model import FORMAT_PRESETS, TIER_A_GROUPS, YtdlpUiModel
 from .yt_dlp_conf_io import (
@@ -54,13 +80,37 @@ from .yt_dlp_conf_io import (
 )
 from .yt_dlp_presets import PRESET_META, apply_builtin_preset
 from .yt_dlp_ui_state import load_ui_state, save_ui_state
-from .latest_pointer import list_recent_archive_runs, read_latest_run_folder_rel
+from .latest_pointer import (
+    LATEST_POINTER_REL,
+    list_recent_archive_runs,
+    read_latest_run_folder_rel,
+)
 from .operator_backup import run_operator_backup
 from .run_summary import enrich_history_entry_for_api, merge_run_summary_into_history_entry
-from .paths import PathNotAllowedError, assert_allowed_path, normalize_rel
-from .run_manager import BATCH_NAMES, JobName, RunManager, RunState
+from .oneoff_report_read import oneoff_rolling_payload
+from .oneoff_url import normalize_oneoff_youtube_url
+from .paths import (
+    PathNotAllowedError,
+    assert_allowed_path,
+    is_allowed,
+    normalize_rel,
+    resolve_under_root,
+)
+from .exiftool_read import validate_exiftool_exe_setting
+from .rename_pipeline import (
+    RenamePreviewOptions,
+    apply_rename_preview,
+    build_rename_preview,
+)
+from .run_manager import BATCH_NAMES, JobName, MonthlyJobName, RunManager, RunState
 from .schedule_util import next_run_iso
 from .storage_cleanup import build_preview, execute_cleanup, preview_to_api_dict
+from .supported_sites import build_supported_sites_payload
+from .pre_run_notify import pre_run_reminder_banner
+from .deepl_translate import (
+    DeepLClientError,
+    effective_deepl_api_key,
+)
 from .settings import (
     CONSOLE_DIR,
     CookieHygieneSettings,
@@ -71,11 +121,22 @@ from .settings import (
     ScheduleEntry,
     StorageRetentionConfig,
     append_history,
+    append_rename_run,
+    effective_tray_notify_port,
     load_state,
     save_state,
 )
 
 logger = logging.getLogger(__name__)
+
+# POST /api/settings/download-dirs/browse — body.field must be one of these (includes One-off).
+DOWNLOAD_DIR_BROWSE_FIELDS: tuple[str, ...] = (
+    "watch_later",
+    "channels",
+    "videos",
+    "oneoff",
+    "galleries",
+)
 
 APP_DIR = Path(__file__).resolve().parent
 STATIC_DIR = APP_DIR.parent / "static"
@@ -90,6 +151,8 @@ jinja = Environment(
 
 _state: ConsoleState | None = None
 _manager: RunManager | None = None
+_clip_manager: ClipExportManager | None = None
+_dup_manager: DuplicateScanManager | None = None
 
 
 def _get_state() -> ConsoleState:
@@ -106,6 +169,29 @@ def _get_manager() -> RunManager:
     if _manager is None or _manager.archive_root.resolve() != root:
         _manager = RunManager(archive_root=root)
     return _manager
+
+
+def _persist_state(st: ConsoleState) -> None:
+    save_state(st)
+    global _state
+    _state = st
+
+
+def _get_clip_manager() -> ClipExportManager:
+    global _clip_manager
+    if _clip_manager is None:
+        _clip_manager = ClipExportManager(
+            get_state=_get_state,
+            persist_state=_persist_state,
+        )
+    return _clip_manager
+
+
+def _get_dup_manager() -> DuplicateScanManager:
+    global _dup_manager
+    if _dup_manager is None:
+        _dup_manager = DuplicateScanManager(get_state=_get_state)
+    return _dup_manager
 
 
 async def _on_run_complete(finished: RunState | None) -> None:
@@ -129,7 +215,7 @@ async def _on_run_complete(finished: RunState | None) -> None:
     _state = st
 
 
-def _run_download_env(job: JobName) -> dict[str, str] | None:
+def _run_download_env(job: MonthlyJobName) -> dict[str, str] | None:
     st = _get_state()
     root = Path(st.archive_root).expanduser().resolve()
     try:
@@ -151,29 +237,38 @@ def _enforce_loopback_host() -> None:
     _state = st
 
 
-_scheduler_shutdown: Any = None
+_shutdown_hooks: list[Any] = []
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    global _scheduler_shutdown
+    global _shutdown_hooks
     _enforce_loopback_host()
     RUN_STAMP_DIR.mkdir(parents=True, exist_ok=True)
     PID_FILE.write_text(str(os.getpid()), encoding="utf-8")
-    _scheduler_shutdown = None
+    _shutdown_hooks = []
     st0 = load_state()
     if st0.features.scheduler_enabled:
         from . import console_scheduler
 
-        _scheduler_shutdown = console_scheduler.start_background_scheduler(
-            _get_manager,
-            _on_run_complete,
+        _shutdown_hooks.append(
+            console_scheduler.start_background_scheduler(
+                _get_manager,
+                _on_run_complete,
+            )
         )
+    from . import tray_notify_service
+
+    _shutdown_hooks.append(tray_notify_service.start_tray_notify_scheduler())
+    logger.info(
+        "Browse output folder API accepts field=%s",
+        ", ".join(DOWNLOAD_DIR_BROWSE_FIELDS),
+    )
     try:
         yield
     finally:
-        if _scheduler_shutdown:
-            await _scheduler_shutdown()
+        for hook in reversed(_shutdown_hooks):
+            await hook()
         try:
             PID_FILE.unlink(missing_ok=True)
         except OSError:
@@ -185,8 +280,26 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
 @app.get("/api/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def health() -> dict[str, Any]:
+    """Include browse API fields so operators can verify the running server build."""
+    return {
+        "status": "ok",
+        "download_dir_browse_fields": list(DOWNLOAD_DIR_BROWSE_FIELDS),
+        "gallery_dl_on_path": gallery_dl_executable_ready(),
+    }
+
+
+@app.get("/api/supported-sites")
+async def api_supported_sites(
+    refresh: bool = Query(
+        False,
+        description="Bypass short-TTL cache and re-query yt-dlp / gallery-dl CLIs",
+    ),
+) -> dict[str, Any]:
+    """Extractor/site lists from locally installed yt-dlp and gallery-dl (read-only, cached)."""
+    return await asyncio.to_thread(
+        lambda: build_supported_sites_payload(force_refresh=refresh),
+    )
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -222,6 +335,33 @@ class SettingsPatch(BaseModel):
     pre_run_reminder: PreRunReminderSettings | None = None
     download_dirs: DownloadDirsSettings | None = None
     storage_retention: StorageRetentionConfig | None = None
+    oneoff_report_retention_days: int | None = Field(None, ge=1, le=3650)
+    oneoff_cookie_reminder_last_unix: float | None = None
+    require_cookie_confirm_manual: bool | None = None
+    tray_notify_before_schedule: bool | None = None
+    tray_notify_port: int | None = Field(None, ge=0, le=65535)
+    ffmpeg_exe: str | None = None
+    mediainfo_exe: str | None = None
+    duplicates_quarantine_rel: str | None = None
+    duplicates_prefer_quarantine: bool | None = None
+    exiftool_exe: str | None = None
+    exiftool_timeout_sec: float | None = Field(None, ge=5.0, le=600.0)
+    # DeepL: set non-empty to replace stored key; use deepl_api_key_clear to remove.
+    deepl_api_key: str | None = None
+    deepl_api_key_clear: bool | None = None
+    deepl_endpoint_mode: Literal["auto", "free", "pro"] | None = None
+    deepl_source_lang: str | None = None
+    deepl_target_lang: str | None = None
+
+
+class RenamePreviewBody(BaseModel):
+    rels: list[str]
+    options: RenamePreviewOptions = Field(default_factory=RenamePreviewOptions)
+    max_files: int = Field(50, ge=1, le=200)
+
+
+class RenameApplyBody(BaseModel):
+    preview_id: str = Field(..., min_length=8)
 
 
 class StorageCleanupPreviewBody(BaseModel):
@@ -255,8 +395,8 @@ class SchedulesReplaceBody(BaseModel):
 
 
 class CookieHygieneAckBody(BaseModel):
-    snooze_days: int = Field(0, ge=0, le=30)
-    snooze_minutes: int = Field(0, ge=0, le=1440)
+    snooze_days: int = Field(0, ge=0, le=0)  # removed from UX; kept for API stability
+    snooze_minutes: int = Field(0, ge=0, le=180)
 
 
 class PreRunReminderActionBody(BaseModel):
@@ -265,44 +405,99 @@ class PreRunReminderActionBody(BaseModel):
 
 
 class BrowseDownloadDirBody(BaseModel):
-    field: Literal["watch_later", "channels", "videos"]
+    field: str
+
+    @field_validator("field")
+    @classmethod
+    def _field_allowed(cls, v: str) -> str:
+        v = (v or "").strip()
+        if v not in DOWNLOAD_DIR_BROWSE_FIELDS:
+            raise ValueError(
+                "field must be one of: " + ", ".join(DOWNLOAD_DIR_BROWSE_FIELDS)
+            )
+        return v
+
+
+class DuplicatesScanBody(BaseModel):
+    root_rels: list[str]
+    include_video: bool = True
+    include_images: bool = False
+
+
+class DuplicateApplyItem(BaseModel):
+    keep_rel: str
+    remove_rels: list[str]
+
+
+class DuplicatesApplyBody(BaseModel):
+    dry_run: bool = True
+    mode: Literal["delete", "quarantine"] = "quarantine"
+    items: list[DuplicateApplyItem]
+    confirm: str = ""
+
+
+class ClipStartBody(BaseModel):
+    source_rel: str
+    output_dir_rel: str
+    start_sec: float = Field(0.0, ge=0.0, le=86400.0 * 48)
+    end_sec: float | None = Field(None, ge=0.0)
+    duration_sec: float | None = Field(None, gt=0.0)
+    format: Literal["mp4", "webm", "gif"] = "mp4"
+    basename: str = ""
+
+    @model_validator(mode="after")
+    def _end_or_duration(self) -> ClipStartBody:
+        if self.end_sec is not None and self.duration_sec is not None:
+            raise ValueError("provide end_sec or duration_sec, not both")
+        if self.end_sec is None and self.duration_sec is None:
+            raise ValueError("end_sec or duration_sec required")
+        return self
+
+
+class ShutdownBody(BaseModel):
+    confirm: Literal["SHUTDOWN"]
+
+
+def _shutdown_client_allowed(request: Request) -> bool:
+    c = request.client
+    if not c:
+        return False
+    host = (c.host or "").lower()
+    if host in ("127.0.0.1", "::1"):
+        return True
+    if host == "testclient" and os.environ.get("ARCHIVE_CONSOLE_PYTEST_SHUTDOWN") == "1":
+        return True
+    return False
+
+
+@app.post("/api/shutdown")
+def api_shutdown(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    payload: ShutdownBody,
+) -> dict[str, bool]:
+    """
+    Terminate this server process (frees the listen port). Loopback-only; not on GET.
+    Optional env ARCHIVE_SHUTDOWN_TOKEN: require matching X-Archive-Shutdown-Token header.
+    """
+    if not _shutdown_client_allowed(request):
+        raise HTTPException(
+            status_code=403,
+            detail="Shutdown is only allowed from loopback clients.",
+        )
+    token = (os.environ.get("ARCHIVE_SHUTDOWN_TOKEN") or "").strip()
+    if token:
+        supplied = (request.headers.get("x-archive-shutdown-token") or "").strip()
+        if supplied != token:
+            raise HTTPException(status_code=403, detail="Invalid shutdown token.")
+    from .shutdown import request_shutdown
+
+    background_tasks.add_task(request_shutdown, "api_shutdown")
+    return {"ok": True}
 
 
 def _pre_run_banner(st: ConsoleState) -> dict[str, Any]:
-    from .schedule_times import fire_occurrence_key, next_monthly_fire_local
-
-    pr = st.pre_run_reminder
-    if pr.minutes_before <= 0:
-        return {"show": False, "message": "", "fire_key": ""}
-    now = time.time()
-    if pr.snooze_until_unix and now < pr.snooze_until_unix:
-        return {"show": False, "message": "", "fire_key": ""}
-    best: tuple[ScheduleEntry, Any] | None = None
-    for s in st.schedules:
-        if not s.enabled:
-            continue
-        nf = next_monthly_fire_local(s)
-        if nf is None:
-            continue
-        if best is None or nf < best[1]:
-            best = (s, nf)
-    if best is None:
-        return {"show": False, "message": "", "fire_key": ""}
-    entry, fire_dt = best
-    fire_unix = fire_dt.timestamp()
-    start_win = fire_unix - pr.minutes_before * 60
-    if now < start_win or now >= fire_unix:
-        return {"show": False, "message": "", "fire_key": ""}
-    fk = fire_occurrence_key(entry, fire_dt)
-    if pr.acknowledged_fire_key == fk:
-        return {"show": False, "message": "", "fire_key": ""}
-    msg = (
-        f"Scheduled run “{entry.job}” at {fire_dt.strftime('%Y-%m-%d %H:%M')} "
-        f"(local machine time). {pr.minutes_before} min reminder."
-    ).strip()
-    if not msg:
-        return {"show": False, "message": "", "fire_key": ""}
-    return {"show": True, "message": msg, "fire_key": fk}
+    return pre_run_reminder_banner(st)
 
 
 @app.get("/api/settings/cookie-reminder")
@@ -316,6 +511,7 @@ def api_settings_reminders() -> dict[str, Any]:
     return {
         "cookie_reminder": cookie_reminder_payload(st.cookie_hygiene),
         "pre_run_reminder": _pre_run_banner(st),
+        "require_cookie_confirm_manual": st.features.require_cookie_confirm_manual,
     }
 
 
@@ -357,9 +553,26 @@ def api_settings() -> dict[str, Any]:
         "pre_run_reminder_settings": st.pre_run_reminder.model_dump(),
         "cookie_reminder": cookie_reminder_payload(st.cookie_hygiene),
         "pre_run_reminder": _pre_run_banner(st),
+        "tray_notify_effective_port": effective_tray_notify_port(st),
+        "tray_notify_port": st.tray_notify_port,
+        "tray_notify_last_failure_unix": st.tray_notify_last_failure_unix,
+        "tray_notify_last_failure_message": st.tray_notify_last_failure_message,
         "download_dirs": st.download_dirs.model_dump(),
         "download_dirs_effective": download_dirs_api_payload(root, st.download_dirs),
         "storage_retention": st.storage_retention.model_dump(),
+        "oneoff_report_retention_days": st.oneoff_report_retention_days,
+        "oneoff_cookie_reminder_last_unix": st.oneoff_cookie_reminder_last_unix,
+        "ffmpeg_exe": st.ffmpeg_exe,
+        "mediainfo_exe": st.mediainfo_exe,
+        "exiftool_exe": st.exiftool_exe,
+        "exiftool_timeout_sec": st.exiftool_timeout_sec,
+        "duplicates_quarantine_rel": st.duplicates_quarantine_rel,
+        "duplicates_prefer_quarantine": st.duplicates_prefer_quarantine,
+        "deepl_api_key_configured": bool(effective_deepl_api_key(st.deepl_api_key)),
+        "deepl_endpoint_mode": st.deepl_endpoint_mode,
+        "deepl_source_lang": st.deepl_source_lang,
+        "deepl_target_lang": st.deepl_target_lang,
+        "rename_runs_max": st.rename_runs_max,
     }
 
 
@@ -396,6 +609,69 @@ def api_settings_update(patch: SettingsPatch) -> dict[str, str]:
         updates["download_dirs"] = patch.download_dirs
     if patch.storage_retention is not None:
         updates["storage_retention"] = patch.storage_retention
+    if patch.oneoff_report_retention_days is not None:
+        updates["oneoff_report_retention_days"] = patch.oneoff_report_retention_days
+    if patch.oneoff_cookie_reminder_last_unix is not None:
+        updates["oneoff_cookie_reminder_last_unix"] = patch.oneoff_cookie_reminder_last_unix
+    feat_up: dict[str, Any] = {}
+    if patch.require_cookie_confirm_manual is not None:
+        feat_up["require_cookie_confirm_manual"] = patch.require_cookie_confirm_manual
+    if patch.tray_notify_before_schedule is not None:
+        feat_up["tray_notify_before_schedule"] = patch.tray_notify_before_schedule
+    if feat_up:
+        updates["features"] = st.features.model_copy(update=feat_up)
+    if patch.tray_notify_port is not None:
+        updates["tray_notify_port"] = patch.tray_notify_port
+    if patch.ffmpeg_exe is not None:
+        try:
+            updates["ffmpeg_exe"] = validate_ffmpeg_exe_setting(patch.ffmpeg_exe)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+    if patch.mediainfo_exe is not None:
+        try:
+            updates["mediainfo_exe"] = validate_mediainfo_exe_setting(patch.mediainfo_exe)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+    if patch.exiftool_exe is not None:
+        try:
+            updates["exiftool_exe"] = validate_exiftool_exe_setting(patch.exiftool_exe)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+    if patch.exiftool_timeout_sec is not None:
+        updates["exiftool_timeout_sec"] = patch.exiftool_timeout_sec
+    if patch.duplicates_quarantine_rel is not None:
+        root = Path(st.archive_root).expanduser().resolve()
+        try:
+            rel_n = normalize_rel(patch.duplicates_quarantine_rel.strip())
+        except PathNotAllowedError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        if not rel_n:
+            raise HTTPException(
+                status_code=400,
+                detail="duplicates_quarantine_rel cannot be empty",
+            )
+        try:
+            q_full = assert_allowed_path(root, rel_n, st.allowlisted_rel_prefixes)
+        except PathNotAllowedError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"duplicates quarantine path not allowlisted: {e}",
+            ) from e
+        updates["duplicates_quarantine_rel"] = rel_n
+    if patch.duplicates_prefer_quarantine is not None:
+        updates["duplicates_prefer_quarantine"] = patch.duplicates_prefer_quarantine
+    if patch.deepl_api_key_clear is True:
+        updates["deepl_api_key"] = ""
+    elif patch.deepl_api_key is not None:
+        nk = patch.deepl_api_key.strip()
+        if nk:
+            updates["deepl_api_key"] = nk
+    if patch.deepl_endpoint_mode is not None:
+        updates["deepl_endpoint_mode"] = patch.deepl_endpoint_mode
+    if patch.deepl_source_lang is not None:
+        updates["deepl_source_lang"] = patch.deepl_source_lang.strip()
+    if patch.deepl_target_lang is not None:
+        updates["deepl_target_lang"] = patch.deepl_target_lang.strip()
     st = st.model_copy(update=updates)
     save_state(st)
     global _state
@@ -418,10 +694,12 @@ def api_download_dirs_preview(body: DownloadDirsSettings) -> dict[str, Any]:
 async def api_download_dirs_browse(body: BrowseDownloadDirBody) -> Any:
     st = _get_state()
     root = Path(st.archive_root).expanduser().resolve()
-    labels = {
+    labels: dict[str, str] = {
         "watch_later": "Watch Later / playlists output folder",
         "channels": "Channels batch output folder",
         "videos": "Videos list output folder",
+        "oneoff": "One-off downloads output folder",
+        "galleries": "Galleries (gallery-dl) output folder",
     }
     title = labels.get(body.field, "Choose output folder")
     status, payload = await asyncio.to_thread(pick_directory_host, title)
@@ -448,6 +726,174 @@ async def api_download_dirs_browse(body: BrowseDownloadDirBody) -> Any:
         "rel": rel_s,
         "effective_abs": str(resolved),
     }
+
+
+@app.post("/api/clip/browse-output")
+async def api_clip_browse_output() -> Any:
+    st = _get_state()
+    root = Path(st.archive_root).expanduser().resolve()
+    status, payload = await asyncio.to_thread(
+        pick_directory_host, "Clip export output folder"
+    )
+    if status == "unavailable":
+        logger.warning("clip browse-output: picker unavailable")
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Folder picker is not available on this host (needs GUI/tkinter). "
+                "Type a path relative to the archive root, or run the console on Windows desktop."
+            ),
+        )
+    if status == "cancelled":
+        return Response(status_code=204)
+    try:
+        rel_s, resolved = abs_folder_to_rel(
+            root, Path(payload), st.allowlisted_rel_prefixes
+        )
+    except PathNotAllowedError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    logger.info("clip browse-output picked rel=%s", rel_s)
+    return {"rel": rel_s, "effective_abs": str(resolved)}
+
+
+@app.post("/api/clip/start")
+async def api_clip_start(body: ClipStartBody) -> dict[str, str]:
+    mgr = _get_clip_manager()
+    try:
+        clip_id = await mgr.start(
+            source_rel=body.source_rel,
+            output_dir_rel=body.output_dir_rel,
+            start_sec=body.start_sec,
+            end_sec=body.end_sec,
+            duration_sec=body.duration_sec,
+            fmt=body.format,
+            basename=body.basename,
+        )
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+    except PathNotAllowedError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return {"clip_id": clip_id}
+
+
+@app.get("/api/clip/status")
+def api_clip_status() -> dict[str, Any]:
+    return _get_clip_manager().status()
+
+
+@app.post("/api/duplicates/scan")
+async def api_duplicates_scan(body: DuplicatesScanBody) -> dict[str, str]:
+    mgr = _get_dup_manager()
+    try:
+        scan_id = await mgr.start_scan(
+            root_rels=body.root_rels,
+            include_video=body.include_video,
+            include_images=body.include_images,
+        )
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return {"scan_id": scan_id}
+
+
+@app.get("/api/duplicates/status")
+def api_duplicates_status() -> dict[str, Any]:
+    return _get_dup_manager().status()
+
+
+@app.post("/api/duplicates/apply")
+def api_duplicates_apply(body: DuplicatesApplyBody) -> dict[str, Any]:
+    if not body.items:
+        raise HTTPException(status_code=400, detail="items required")
+    if not body.dry_run:
+        if (body.confirm or "").strip() != "DELETE_DUPLICATES":
+            raise HTTPException(
+                status_code=400,
+                detail='Set confirm to "DELETE_DUPLICATES" to apply removals',
+            )
+    st = _get_state()
+    root = Path(st.archive_root).expanduser().resolve()
+    prefixes = st.allowlisted_rel_prefixes
+    mode = body.mode
+    qrel = (st.duplicates_quarantine_rel or "logs/_duplicates_quarantine").strip()
+    items_dump = [it.model_dump() for it in body.items]
+    try:
+        return apply_duplicate_removals(
+            root,
+            prefixes,
+            items_dump,
+            mode,
+            qrel,
+            dry_run=body.dry_run,
+        )
+    except PathNotAllowedError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.post("/api/rename/preview")
+def api_rename_preview(body: RenamePreviewBody) -> dict[str, Any]:
+    st = _get_state()
+    root = Path(st.archive_root).expanduser().resolve()
+    try:
+        return build_rename_preview(
+            archive_root=root,
+            allowed_prefixes=st.allowlisted_rel_prefixes,
+            rels=body.rels,
+            opt=body.options,
+            stored_api_key=st.deepl_api_key,
+            endpoint_mode=st.deepl_endpoint_mode,
+            source_lang=st.deepl_source_lang,
+            target_lang=st.deepl_target_lang,
+            max_files=body.max_files,
+            exiftool_exe=st.exiftool_exe,
+            exiftool_timeout_sec=st.exiftool_timeout_sec,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except DeepLClientError as e:
+        code = 429 if e.code == "deepl_rate_limit" else 502
+        raise HTTPException(status_code=code, detail=str(e)) from e
+
+
+@app.post("/api/rename/apply")
+def api_rename_apply(body: RenameApplyBody) -> dict[str, Any]:
+    st = _get_state()
+    root = Path(st.archive_root).expanduser().resolve()
+    t0 = time.time()
+    try:
+        summary, pipeline_op = apply_rename_preview(
+            archive_root=root,
+            allowed_prefixes=st.allowlisted_rel_prefixes,
+            preview_id=body.preview_id.strip(),
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    entry: dict[str, Any] = {
+        "run_id": summary["run_id"],
+        "operation": pipeline_op,
+        "started_unix": t0,
+        "ended_unix": time.time(),
+        "ok": summary["ok"],
+        "skip": summary["skip"],
+        "fail": summary["fail"],
+        "items": summary["items"],
+    }
+    st2 = append_rename_run(st, entry)
+    save_state(st2)
+    global _state
+    _state = st2
+    return summary
+
+
+@app.get("/api/rename/history")
+def api_rename_history() -> dict[str, Any]:
+    st = _get_state()
+    return {"items": st.rename_runs, "max": st.rename_runs_max}
 
 
 @app.post("/api/settings/schedules")
@@ -493,10 +939,6 @@ def api_cookie_hygiene_ack(body: CookieHygieneAckBody) -> dict[str, str]:
     if body.snooze_minutes > 0:
         ch = ch.model_copy(
             update={"snooze_until_unix": now + body.snooze_minutes * 60},
-        )
-    elif body.snooze_days > 0:
-        ch = ch.model_copy(
-            update={"snooze_until_unix": now + body.snooze_days * 86400},
         )
     else:
         ch = ch.model_copy(
@@ -569,15 +1011,32 @@ async def api_storage_cleanup_run(body: StorageCleanupRunBody) -> dict[str, Any]
 
 
 class RunStartBody(BaseModel):
-    job: JobName
+    job: MonthlyJobName
     dry_run: bool = False
     skip_ytdlp_update: bool = False
     # Default True: monthly bats historically did not self-upgrade pip; matches double-click runs.
     skip_pip_update: bool = True
+    cookie_confirm: bool = False
 
 
 @app.post("/api/run/start")
-async def run_start(body: RunStartBody) -> dict[str, Any]:
+async def run_start(body: RunStartBody) -> Any:
+    st0 = _get_state()
+    if (
+        st0.features.require_cookie_confirm_manual
+        and not body.dry_run
+        and not body.cookie_confirm
+    ):
+        return JSONResponse(
+            status_code=428,
+            content={
+                "error": "cookie_confirm_required",
+                "message": (
+                    "Confirm you have refreshed cookies.txt (Netscape format for youtube.com) "
+                    "before starting this run."
+                ),
+            },
+        )
     mgr = _get_manager()
     extra = _run_download_env(body.job)
     if extra:
@@ -600,6 +1059,275 @@ async def run_start(body: RunStartBody) -> dict[str, Any]:
         "job": r.job,
         "started_unix": r.started_unix,
     }
+
+
+class OneoffStartBody(BaseModel):
+    url: str = ""
+    output_rel: str = ""
+    dry_run: bool = False
+    skip_ytdlp_update: bool = False
+    skip_pip_update: bool = True
+    cookie_confirm: bool = False
+
+
+@app.post("/api/oneoff/start")
+async def oneoff_start(body: OneoffStartBody) -> Any:
+    st0 = _get_state()
+    try:
+        url_norm = normalize_oneoff_youtube_url(body.url)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    if (
+        st0.features.require_cookie_confirm_manual
+        and not body.dry_run
+        and not body.cookie_confirm
+    ):
+        return JSONResponse(
+            status_code=428,
+            content={
+                "error": "cookie_confirm_required",
+                "message": (
+                    "Confirm you have refreshed cookies.txt (Netscape format for youtube.com) "
+                    "before starting this run."
+                ),
+            },
+        )
+
+    root = Path(st0.archive_root).expanduser().resolve()
+    prefixes = st0.allowlisted_rel_prefixes
+    extra: dict[str, str] = {
+        "ARCHIVE_ONEOFF_URL": url_norm,
+        "ARCHIVE_ONEOFF_RETENTION_DAYS": str(st0.oneoff_report_retention_days),
+    }
+    if body.output_rel.strip():
+        try:
+            rel = normalize_rel(body.output_rel.strip())
+        except PathNotAllowedError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        try:
+            full = resolve_under_root(root, rel)
+        except PathNotAllowedError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        if not is_allowed(root, full, prefixes):
+            raise HTTPException(
+                status_code=400,
+                detail="Output path is not covered by Settings allowlist",
+            )
+        extra["ARCHIVE_OUT_ONEOFF"] = str(full)
+    else:
+        try:
+            validate_download_dirs(root, st0.download_dirs, prefixes)
+            extra.update(extra_env_for_oneoff(root, st0.download_dirs))
+        except PathNotAllowedError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
+    mgr = _get_manager()
+    logger.info("oneoff start url=%s", url_norm[:80])
+    try:
+        r = await mgr.start(
+            "oneoff",
+            dry_run=body.dry_run,
+            skip_ytdlp_update=body.skip_ytdlp_update,
+            skip_pip_update=body.skip_pip_update,
+            on_complete=_on_run_complete,
+            extra_env=extra,
+        )
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+    return {
+        "run_id": r.run_id,
+        "job": r.job,
+        "started_unix": r.started_unix,
+    }
+
+
+class GalleriesPreviewBody(BaseModel):
+    url: str = ""
+    timeout_sec: float = Field(120.0, ge=10.0, le=600.0)
+    gallery_dl_exe: str = ""
+
+
+@app.post("/api/galleries/preview")
+async def galleries_preview(body: GalleriesPreviewBody) -> dict[str, Any]:
+    st0 = _get_state()
+    root = Path(st0.archive_root).expanduser().resolve()
+    try:
+        url_norm = normalize_gallery_url(body.url)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    exe = resolve_gallery_dl_exe(body.gallery_dl_exe.strip() or None)
+    cookies = root / "cookies.txt"
+    conf = root / "gallery-dl.conf"
+    code, stdout, combined = await asyncio.to_thread(
+        run_gallery_dl_json_dump,
+        exe=exe,
+        url=url_norm,
+        cwd=root,
+        cookies_file=cookies if cookies.is_file() else None,
+        conf_file=conf if conf.is_file() else None,
+        timeout_sec=body.timeout_sec,
+    )
+    rows, parse_errs = parse_gallery_dl_json_lines(stdout, max_rows=500)
+    truncated = len(rows) >= 500
+    empty = len(rows) == 0
+    cookie_hint = (empty and cookie_likely_needed(combined)) or (
+        empty and code not in (0, None) and "not recognized" not in combined.lower()
+    )
+    return {
+        "url": url_norm,
+        "exit_code": code,
+        "rows": rows,
+        "parse_warnings": parse_errs[:20],
+        "truncated": truncated,
+        "cookie_required_hint": bool(cookie_hint and empty),
+        "gallery_dl_exe": exe,
+        "drift_note": (
+            "Preview reflects extractors at this moment; counts can change if posts move "
+            "or rate limits differ."
+        ),
+    }
+
+
+class GalleriesStartBody(BaseModel):
+    url: str = ""
+    output_rel: str = ""
+    dry_run: bool = False
+    skip_ytdlp_update: bool = False
+    skip_pip_update: bool = True
+    cookie_confirm: bool = False
+    gallery_dl_exe: str = ""
+    video_fallback: bool = False
+    preview_snapshot: dict[str, Any] | None = None
+
+
+@app.post("/api/galleries/start")
+async def galleries_start(body: GalleriesStartBody) -> Any:
+    st0 = _get_state()
+    try:
+        url_norm = normalize_gallery_url(body.url)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    if (
+        st0.features.require_cookie_confirm_manual
+        and not body.dry_run
+        and not body.cookie_confirm
+    ):
+        return JSONResponse(
+            status_code=428,
+            content={
+                "error": "cookie_confirm_required",
+                "message": (
+                    "Confirm you have refreshed cookies.txt (Netscape format) for YouTube, "
+                    "Reddit, and other sites before starting this run."
+                ),
+            },
+        )
+
+    root = Path(st0.archive_root).expanduser().resolve()
+    prefixes = st0.allowlisted_rel_prefixes
+    extra: dict[str, str] = {
+        "ARCHIVE_GALLERY_URL": url_norm,
+    }
+    gexe = (body.gallery_dl_exe or "").strip()
+    if gexe:
+        extra["ARCHIVE_GALLERY_DL_EXE"] = gexe
+    if body.video_fallback:
+        extra["ARCHIVE_GALLERY_VIDEO_FALLBACK"] = "1"
+
+    if body.output_rel.strip():
+        try:
+            rel = normalize_rel(body.output_rel.strip())
+        except PathNotAllowedError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        try:
+            full = resolve_under_root(root, rel)
+        except PathNotAllowedError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        if not is_allowed(root, full, prefixes):
+            raise HTTPException(
+                status_code=400,
+                detail="Output path is not covered by Settings allowlist",
+            )
+        extra["ARCHIVE_OUT_GALLERIES"] = str(full)
+    else:
+        try:
+            validate_download_dirs(root, st0.download_dirs, prefixes)
+            extra.update(extra_env_for_galleries(root, st0.download_dirs))
+        except PathNotAllowedError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
+    snap = body.preview_snapshot
+    if snap is not None:
+        try:
+            logs_dir = root / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            tmp = logs_dir / f".gallery_preview_{uuid.uuid4().hex}.json"
+            tmp.write_text(json.dumps(snap, ensure_ascii=False), encoding="utf-8")
+            extra["ARCHIVE_GALLERY_PREVIEW_JSON"] = str(tmp)
+        except OSError as e:
+            logger.warning("galleries preview snapshot write failed: %s", e)
+
+    mgr = _get_manager()
+    logger.info("galleries start url=%s", url_norm[:80])
+    try:
+        r = await mgr.start(
+            "galleries",
+            dry_run=body.dry_run,
+            skip_ytdlp_update=body.skip_ytdlp_update,
+            skip_pip_update=body.skip_pip_update,
+            on_complete=_on_run_complete,
+            extra_env=extra,
+        )
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+    return {
+        "run_id": r.run_id,
+        "job": r.job,
+        "started_unix": r.started_unix,
+    }
+
+
+@app.get("/api/galleries/verification")
+def galleries_verification(rel: str = Query(..., description="Run folder rel, e.g. logs/archive_run_*")) -> Any:
+    st = _get_state()
+    root = Path(st.archive_root).expanduser().resolve()
+    try:
+        folder = assert_allowed_path(root, rel, st.allowlisted_rel_prefixes)
+    except PathNotAllowedError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    vf = folder / "verification.json"
+    if not vf.is_file():
+        raise HTTPException(status_code=404, detail="verification.json not found")
+    try:
+        data = json.loads(vf.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        raise HTTPException(status_code=500, detail="invalid verification.json")
+    return data
+
+
+@app.get("/api/oneoff/rolling")
+def api_oneoff_rolling() -> dict[str, Any]:
+    st = _get_state()
+    root = Path(st.archive_root).expanduser().resolve()
+    return oneoff_rolling_payload(root, st.allowlisted_rel_prefixes)
+
+
+@app.post("/api/oneoff/cookie-reminder-ack")
+def api_oneoff_cookie_reminder_ack() -> dict[str, str]:
+    st = _get_state()
+    st2 = st.model_copy(
+        update={"oneoff_cookie_reminder_last_unix": time.time()},
+    )
+    save_state(st2)
+    global _state
+    _state = st2
+    return {"ok": "true"}
 
 
 @app.get("/api/run/status")
@@ -657,11 +1385,7 @@ def reports_latest() -> dict[str, Any]:
     st = _get_state()
     root = Path(st.archive_root).resolve()
     out: dict[str, Any] = {"pointers": {}, "recent_runs": list_recent_archive_runs(root)}
-    for job, rel_file in {
-        "watch_later": "logs/latest_run.txt",
-        "channels": "logs/latest_run_channel.txt",
-        "videos": "logs/latest_run_videos.txt",
-    }.items():
+    for job, rel_file in LATEST_POINTER_REL.items():
         p = root / rel_file
         text = ""
         if p.is_file():
@@ -765,6 +1489,60 @@ def files_metadata(path: str = Query(...)) -> dict[str, Any]:
         "size": st_l.st_size,
         "mtime": st_l.st_mtime,
     }
+
+
+@app.get("/api/files/mediainfo")
+async def files_mediainfo(path: str = Query(...)) -> dict[str, Any]:
+    """Run MediaInfo CLI (JSON) off the event loop; allowlisted files only."""
+    st = _get_state()
+    root = Path(st.archive_root).resolve()
+    try:
+        full = assert_allowed_path(root, path, st.allowlisted_rel_prefixes)
+    except PathNotAllowedError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    if not full.exists():
+        raise HTTPException(status_code=404, detail="not found")
+    exe = resolve_mediainfo_bin(st.mediainfo_exe)
+    return await asyncio.to_thread(mediainfo_for_file, exe, full)
+
+
+@app.get("/api/files/playable-enumerate")
+def files_playable_enumerate(
+    path: str = Query(
+        ...,
+        description="Directory relative to archive_root (allowlisted)",
+    ),
+    recursive: int = Query(
+        0,
+        ge=0,
+        le=1,
+        description="Ignored: only direct children of the folder are listed (non-recursive).",
+    ),
+    max_files: int = Query(1000, ge=1, le=2000),
+) -> dict[str, Any]:
+    """Queue builder: video/audio + slideshow images (jpg/jpeg/png/gif/webp) in one folder (no subfolder walk)."""
+    st = _get_state()
+    root = Path(st.archive_root).resolve()
+    try:
+        rel_n = normalize_rel(path)
+    except PathNotAllowedError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    if not rel_n:
+        raise HTTPException(
+            status_code=400,
+            detail="Choose a folder under Files (not the virtual roots view); path cannot be empty.",
+        )
+    try:
+        rels = collect_playable_rels_under_dir(
+            root,
+            rel_n,
+            st.allowlisted_rel_prefixes,
+            recursive=False,
+            max_files=max_files,
+        )
+    except PathNotAllowedError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    return {"rels": rels, "count": len(rels)}
 
 
 class ExplorerBody(BaseModel):

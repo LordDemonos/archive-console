@@ -12,12 +12,19 @@ from .settings import DownloadDirsSettings
 ENV_PLAYLIST = "ARCHIVE_OUT_PLAYLIST"
 ENV_CHANNEL = "ARCHIVE_OUT_CHANNEL"
 ENV_VIDEOS = "ARCHIVE_OUT_VIDEOS"
+ENV_ONEOFF = "ARCHIVE_OUT_ONEOFF"
+ENV_GALLERIES = "ARCHIVE_OUT_GALLERIES"
+
+ONEOFF_DEFAULT_REL = "oneoff"
+GALLERIES_DEFAULT_REL = "galleries"
 
 # Matches archive_*_run.py defaults when env is unset.
 DEFAULT_REL: dict[JobName, str] = {
     "watch_later": "playlists",
     "channels": "channels",
     "videos": "videos",
+    "oneoff": "oneoff",
+    "galleries": "galleries",
 }
 
 _JOB_ENV: dict[JobName, tuple[str, str]] = {
@@ -48,6 +55,27 @@ def validate_download_dirs(
                 raise PathNotAllowedError(
                     "path not covered by Settings allowlist — add its prefix there first"
                 )
+    orel = (dd.oneoff or "").strip()
+    if orel:
+        ofull = resolve_under_root(archive_root, orel)
+        if not is_allowed(archive_root, ofull, allowed_prefixes):
+            raise PathNotAllowedError(
+                "path not covered by Settings allowlist — add its prefix there first"
+            )
+    grel = (dd.galleries or "").strip()
+    if grel:
+        gfull = resolve_under_root(archive_root, grel)
+        if not is_allowed(archive_root, gfull, allowed_prefixes):
+            raise PathNotAllowedError(
+                "path not covered by Settings allowlist — add its prefix there first"
+            )
+
+
+def effective_oneoff_root(archive_root: Path, dd: DownloadDirsSettings) -> Path:
+    rel = (dd.oneoff or "").strip()
+    if not rel:
+        rel = ONEOFF_DEFAULT_REL
+    return resolve_under_root(archive_root, rel)
 
 
 def abs_folder_to_rel(
@@ -88,6 +116,24 @@ def extra_env_for_job(
     return {env_key: str(p)}
 
 
+def extra_env_for_oneoff(archive_root: Path, dd: DownloadDirsSettings) -> dict[str, str]:
+    """Always set ARCHIVE_OUT_ONEOFF (default subfolder oneoff/ when blank)."""
+    p = effective_oneoff_root(archive_root, dd)
+    return {ENV_ONEOFF: str(p)}
+
+
+def effective_galleries_root(archive_root: Path, dd: DownloadDirsSettings) -> Path:
+    rel = (dd.galleries or "").strip()
+    if not rel:
+        rel = GALLERIES_DEFAULT_REL
+    return resolve_under_root(archive_root, rel)
+
+
+def extra_env_for_galleries(archive_root: Path, dd: DownloadDirsSettings) -> dict[str, str]:
+    p = effective_galleries_root(archive_root, dd)
+    return {ENV_GALLERIES: str(p)}
+
+
 def download_dirs_api_payload(archive_root: Path, dd: DownloadDirsSettings) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for job in _JOB_ENV:
@@ -103,4 +149,26 @@ def download_dirs_api_payload(archive_root: Path, dd: DownloadDirsSettings) -> d
             "effective_rel": DEFAULT_REL[job] if not configured else configured,
             "effective_abs": str(eff) if eff is not None else None,
         }
+    oc = (dd.oneoff or "").strip()
+    try:
+        oeff = effective_oneoff_root(archive_root, dd)
+    except PathNotAllowedError:
+        oeff = None
+    out["oneoff"] = {
+        "configured_rel": oc or None,
+        "default_rel": ONEOFF_DEFAULT_REL,
+        "effective_rel": ONEOFF_DEFAULT_REL if not oc else oc,
+        "effective_abs": str(oeff) if oeff is not None else None,
+    }
+    gc = (dd.galleries or "").strip()
+    try:
+        geff = effective_galleries_root(archive_root, dd)
+    except PathNotAllowedError:
+        geff = None
+    out["galleries"] = {
+        "configured_rel": gc or None,
+        "default_rel": GALLERIES_DEFAULT_REL,
+        "effective_rel": GALLERIES_DEFAULT_REL if not gc else gc,
+        "effective_abs": str(geff) if geff is not None else None,
+    }
     return out

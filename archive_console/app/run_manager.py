@@ -13,10 +13,13 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Literal
 
+from .driver_python import resolve_driver_python_exe
 from .latest_pointer import read_latest_run_folder_rel
 
 
-JobName = Literal["watch_later", "channels", "videos"]
+JobName = Literal["watch_later", "channels", "videos", "oneoff", "galleries"]
+
+MonthlyJobName = Literal["watch_later", "channels", "videos"]
 
 
 class RunPhase(str, Enum):
@@ -42,7 +45,7 @@ class RunState:
     log_folder_rel: str | None = None
 
 
-BATCH_NAMES: dict[JobName, str] = {
+BATCH_NAMES: dict[MonthlyJobName, str] = {
     "watch_later": "monthly_watch_later_archive.bat",
     "channels": "monthly_channels_archive.bat",
     "videos": "monthly_videos_archive.bat",
@@ -130,19 +133,6 @@ class RunManager:
                 skip_ytdlp_update=skip_ytdlp_update,
                 skip_pip_update=skip_pip_update,
             )
-        bat = self.archive_root / BATCH_NAMES[job]
-        if not bat.is_file():
-            async with self._lock:
-                if self.state:
-                    self.state.phase = RunPhase.failed
-                    self.state.exit_code = -1
-                    self.state.ended_unix = time.time()
-            await self.broadcaster.publish(
-                {"type": "line", "text": f"[console] Missing batch: {bat}"}
-            )
-            await self.broadcaster.publish({"type": "end", "exit_code": -1})
-            await on_complete(self.state)
-            raise FileNotFoundError(str(bat))
 
         env = os.environ.copy()
         env["ARCHIVE_CONSOLE_UNATTENDED"] = "1"
@@ -162,6 +152,78 @@ class RunManager:
             env["SKIP_PIP_UPDATE"] = "0"
         if extra_env:
             env.update({k: v for k, v in extra_env.items() if k and v})
+
+        if job == "oneoff":
+            script = self.archive_root / "archive_oneoff_run.py"
+            if not script.is_file():
+                async with self._lock:
+                    if self.state:
+                        self.state.phase = RunPhase.failed
+                        self.state.exit_code = -1
+                        self.state.ended_unix = time.time()
+                await self.broadcaster.publish(
+                    {"type": "line", "text": f"[console] Missing driver: {script}"}
+                )
+                await self.broadcaster.publish({"type": "end", "exit_code": -1})
+                await on_complete(self.state)
+                raise FileNotFoundError(str(script))
+            from datetime import datetime, timezone
+
+            log_stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+            py_exe = resolve_driver_python_exe(self.archive_root)
+            self._task = asyncio.create_task(
+                self._run_python(
+                    run_id,
+                    job,
+                    [str(py_exe), "-u", str(script), log_stamp],
+                    env,
+                    on_complete,
+                )
+            )
+            return self.state  # type: ignore[return-value]
+
+        if job == "galleries":
+            script = self.archive_root / "archive_gallery_run.py"
+            if not script.is_file():
+                async with self._lock:
+                    if self.state:
+                        self.state.phase = RunPhase.failed
+                        self.state.exit_code = -1
+                        self.state.ended_unix = time.time()
+                await self.broadcaster.publish(
+                    {"type": "line", "text": f"[console] Missing driver: {script}"}
+                )
+                await self.broadcaster.publish({"type": "end", "exit_code": -1})
+                await on_complete(self.state)
+                raise FileNotFoundError(str(script))
+            from datetime import datetime, timezone
+
+            log_stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+            py_exe = resolve_driver_python_exe(self.archive_root)
+            self._task = asyncio.create_task(
+                self._run_python(
+                    run_id,
+                    job,
+                    [str(py_exe), "-u", str(script), log_stamp],
+                    env,
+                    on_complete,
+                )
+            )
+            return self.state  # type: ignore[return-value]
+
+        bat = self.archive_root / BATCH_NAMES[job]
+        if not bat.is_file():
+            async with self._lock:
+                if self.state:
+                    self.state.phase = RunPhase.failed
+                    self.state.exit_code = -1
+                    self.state.ended_unix = time.time()
+            await self.broadcaster.publish(
+                {"type": "line", "text": f"[console] Missing batch: {bat}"}
+            )
+            await self.broadcaster.publish({"type": "end", "exit_code": -1})
+            await on_complete(self.state)
+            raise FileNotFoundError(str(bat))
 
         self._task = asyncio.create_task(
             self._run_cmd(run_id, job, bat, env, on_complete)
@@ -207,6 +269,84 @@ class RunManager:
                 await asyncio.wait_for(task, timeout=45.0)
             except asyncio.TimeoutError:
                 pass
+
+    async def _run_python(
+        self,
+        run_id: str,
+        job: JobName,
+        argv: list[str],
+        env: dict[str, str],
+        on_complete,
+    ) -> None:
+        await self.broadcaster.publish(
+            {
+                "type": "start",
+                "run_id": run_id,
+                "job": job,
+                "cmd": " ".join(argv),
+            }
+        )
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *argv,
+                cwd=str(self.archive_root.resolve()),
+                env=env,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.STDOUT,
+            )
+        except OSError as e:
+            await self.broadcaster.publish(
+                {"type": "line", "text": f"[console] Failed to spawn: {e}"}
+            )
+            async with self._lock:
+                if self.state and self.state.run_id == run_id:
+                    self.state.phase = RunPhase.failed
+                    self.state.exit_code = -1
+                    self.state.ended_unix = time.time()
+            await self.broadcaster.publish({"type": "end", "exit_code": -1})
+            st = self.state
+            await on_complete(st)
+            return
+
+        async with self._lock:
+            if self.state and self.state.run_id == run_id:
+                self.state.pid = proc.pid
+
+        assert proc.stdout is not None
+        while True:
+            line_b = await proc.stdout.readline()
+            if not line_b:
+                break
+            text = line_b.decode("utf-8", errors="replace").rstrip("\r\n")
+            await self.broadcaster.publish({"type": "line", "text": text})
+
+        exit_code = await proc.wait()
+        log_rel = read_latest_run_folder_rel(self.archive_root, job)
+
+        async with self._lock:
+            user_canceled = self._canceled_run_id == run_id
+            if user_canceled:
+                self._canceled_run_id = None
+            if self.state and self.state.run_id == run_id:
+                self.state.exit_code = exit_code
+                self.state.ended_unix = time.time()
+                if user_canceled:
+                    self.state.phase = RunPhase.canceled
+                elif exit_code == 0:
+                    self.state.phase = RunPhase.success
+                else:
+                    self.state.phase = RunPhase.failed
+                self.state.log_folder_rel = log_rel
+
+        await self.broadcaster.publish(
+            {
+                "type": "end",
+                "exit_code": exit_code,
+                "canceled": user_canceled,
+            }
+        )
+        st = self.state
+        await on_complete(st)
 
     async def _run_cmd(
         self,

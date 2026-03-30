@@ -1104,11 +1104,13 @@ class RunReporter:
         archive_path: str | None = None,
         summary_heading: str | None = None,
         archive_sync_log_prefix: str = "[archive_playlist_run]",
+        skip_download_archive_sync: bool = False,
     ):
         self.log_dir = log_dir
         self._archive_path = archive_path or playlists_downloaded_path()
         self._summary_heading = summary_heading or "Archive playlist run summary (UTC)"
         self._archive_sync_log_prefix = archive_sync_log_prefix
+        self._skip_download_archive_sync = skip_download_archive_sync
         os.makedirs(log_dir, exist_ok=True)
         self.manifest_path = os.path.join(log_dir, "manifest.csv")
         self.issues_path = os.path.join(log_dir, "issues.csv")
@@ -1235,16 +1237,17 @@ class RunReporter:
 
     def finalize(self) -> None:
         self.verify_manifest_files()
-        sync_playlist_download_archive(self._manifest_rows, self._archive_path)
-        try:
-            with open(self.run_log_path, "a", encoding="utf-8") as af:
-                af.write(
-                    f"{self._archive_sync_log_prefix} download archive synced after verify "
-                    f"({os.path.basename(self._archive_path)}: file_verified_ok=yes; "
-                    "status downloaded or downloaded_merged).\n"
-                )
-        except OSError:
-            pass
+        if not self._skip_download_archive_sync:
+            sync_playlist_download_archive(self._manifest_rows, self._archive_path)
+            try:
+                with open(self.run_log_path, "a", encoding="utf-8") as af:
+                    af.write(
+                        f"{self._archive_sync_log_prefix} download archive synced after verify "
+                        f"({os.path.basename(self._archive_path)}: file_verified_ok=yes; "
+                        "status downloaded or downloaded_merged).\n"
+                    )
+            except OSError:
+                pass
 
         counts = self._compute_counts()
         part = partition_issue_rows(self._issues_rows)

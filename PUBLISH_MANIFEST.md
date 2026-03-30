@@ -27,7 +27,7 @@ This project is **not affiliated with YouTube, Google LLC, or the yt-dlp project
 | `archive_playlists_robust.bat` | placeholder stub | same |
 | `archive_channels.bat` | placeholder stub | same |
 
-- **On-disk `.bat` files scanned (excl. `.venv`):** 13
+- **On-disk `.bat` files scanned (excl. `.venv`):** 14
 
 ## Included (categories)
 
@@ -46,6 +46,7 @@ This project is **not affiliated with YouTube, Google LLC, or the yt-dlp project
 - `channels_input.txt — operator URL lists (ship *.sample.txt)`
 - `cookies.txt — secret / session (ship cookies.txt.example)`
 - `credentials.json — secrets, vendored binary, or local-only input (see manifest)`
+- `oneoff_downloaded.txt — operator download-archive state`
 - `playlists_downloaded.txt — operator download-archive state`
 - `playlists_downloaded_backup.txt — backup of operator state`
 - `playlists_input.txt — operator URL lists (ship *.sample.txt)`
