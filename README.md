@@ -2,6 +2,8 @@
 
 Personal **yt-dlp** workspace for scheduled-style archiving: three **monthly** batch drivers, one **`yt-dlp.conf`**, Netscape **`cookies.txt`**, and per-run logs under **`logs\archive_run_*`**. **Archive Console** is an optional **127.0.0.1** UI on top of the same files—**not affiliated with** YouTube, Google, or [yt-dlp](https://github.com/yt-dlp/yt-dlp); you own installs, config, and compliance.
 
+Public GitHub snapshot: [LordDemonos/archive-console](https://github.com/LordDemonos/archive-console) (rebuilt via **`tools/publish_staging.py`** — see **Publishing** below).
+
 ## Primary entry points
 
 | Job | Batch file | Input | Download archive | Default output | Latest run pointer |
@@ -57,8 +59,12 @@ Follow **`logs\latest_run.txt`**, **`latest_run_channel.txt`**, or **`latest_run
 | **`CLEANUP_PR.md`** | Record of prior cleanups / references. |
 | **`ARCHIVE_PLAYLIST_RUN_LOGS.txt`** | Operator runbook. |
 | **`archive_console/ARCHIVE_CONSOLE.md`** | Archive Console behavior (shutdown, tray, cookies, player, API). |
-| **`yt-dlp.conf`**, **`gallery-dl.conf`** (optional) | Shared CLI config. |
+| **`firefox/archive-cookies-bridge/`** | Optional Firefox extension to export Netscape cookies into the archive tree. |
+| **`archive_cookies.py`** | Shared cookie path helpers used by drivers and Console. |
+| **`yt-dlp.conf`**, **`gallery-dl.conf`**, **`gifsky.conf`** (optional) | Shared CLI / tool config. |
+| **`docs/screenshots/`** | README UI captures (sanitized before publish if needed). |
 | **`tools/publish_staging.py`** | Build anonymized tree for sharing (see **Publishing** below). |
+| **`GITHUB_PUBLISH.md`** | How to refresh the public GitHub repo from staging. |
 
 ## Archive Console
 
@@ -79,7 +85,7 @@ Full behavior, **SHUTDOWN** stop, optional **`ARCHIVE_SHUTDOWN_TOKEN`**, and sec
 
 ### Cookies
 
-You maintain **`cookies.txt`** next to **`yt-dlp.conf`**. The Console does **not** export cookies from a browser. **Manual Run** can require confirming **`cookies.txt`** (**HTTP 428** until you confirm; dry-run skips). **Scheduled** runs use banners / optional **localhost-only** tray notify—see **ARCHIVE_CONSOLE.md**. Reminder snoozes are **short** by design (no “ignore cookies for a week” promise).
+You maintain **`cookies.txt`** next to **`yt-dlp.conf`**. The Console can also write per-site cookie files under **`cookies\`** and accept exports from the in-repo Firefox extension (**`firefox/archive-cookies-bridge/`**). **Manual Run** can require confirming **`cookies.txt`** (**HTTP 428** until you confirm; dry-run skips). **Scheduled** runs use banners / optional **localhost-only** tray notify—see **ARCHIVE_CONSOLE.md**. Reminder snoozes are **short** by design (no “ignore cookies for a week” promise).
 
 ### Optional host tools
 
@@ -126,13 +132,17 @@ Dark UI, **1280×800** captures. Replace for a public fork if paths or editor co
 
 ## Publishing (sanitized copy)
 
-From repo root:
+From your full working tree (repo root):
 
 ```bat
-python tools\publish_staging.py
+python tools\publish_staging.py --dest <STAGING_DEST>
 ```
 
-Redacts typical machine paths, excludes **`cookies.txt`**, **`state.json`**, download trees. Default destination is a sibling folder (see **`--dest`**); **`PUBLISH_MANIFEST.md`** in the output lists what shipped. If **`rmtree`** fails on Windows (e.g. locked **`.git`**), publish to a fresh **`--dest`** and merge per **`STAGING_SYNC_CHECKLIST.md`** if you maintain one.
+Replace `<STAGING_DEST>` with a clean folder outside your private download trees (for example a dedicated staging directory you use only for GitHub).
+
+Redacts typical machine paths; excludes **`cookies.txt`**, credentials, **`state.json`**, download trees (`playlists\`, `channels\`, `videos\`, `galleries\`, `oneoff\`, `cookies\`), logs, and vendored **`yt-dlp.exe`**. The output includes generated **`CONTRIBUTING.md`**, **`PUBLISH_MANIFEST.md`**, sample inputs, and placeholder legacy `.bat` stubs. See **`PUBLISH_MANIFEST.md`** in the staging folder for the full include/exclude list.
+
+Push the staging folder to GitHub per **`GITHUB_PUBLISH.md`**. Default **`--dest`** (if omitted) is a sibling **`<name>__publish_staging`** folder.
 
 ---
 
@@ -142,6 +152,7 @@ Redacts typical machine paths, excludes **`cookies.txt`**, **`state.json`**, dow
 
 ## Public snapshot notes
 
+- **GitHub:** https://github.com/LordDemonos/archive-console — rebuilt from the operator tree with **`tools/publish_staging.py`** (see **`GITHUB_PUBLISH.md`**).
 - Replace machine-specific roots with `<ARCHIVE_ROOT>` in your mind: working directory is the folder that contains `yt-dlp.conf` and the `monthly_*.bat` files.
 - Copy `*.sample.txt` to `channels_input.txt`, `playlists_input.txt`, and `videos_input.txt` before running batch jobs.
 - See **`CONTRIBUTING.md`**, **`PUBLISH_MANIFEST.md`**, and **`cookies.txt.example`**.

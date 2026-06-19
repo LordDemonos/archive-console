@@ -1,7 +1,7 @@
 # Contributing
 
 This snapshot is meant to be forked or copied without the operator’s local paths,
-cookies, or download trees.
+cookies, or download trees. Upstream: https://github.com/LordDemonos/archive-console
 
 ## Setup
 
@@ -11,10 +11,21 @@ cookies, or download trees.
    `*.sample.txt` files (one URL or `youtube id` per line; see comments in samples).
 4. Copy `cookies.txt.example` to `cookies.txt` and add real Netscape-format cookies,
    or adjust `yt-dlp.conf` to use `--cookies-from-browser` (see yt-dlp docs).
+   Optional: load the Firefox extension under `firefox/archive-cookies-bridge/` to export cookies via Archive Console (see that folder’s README).
 5. Install Python 3.10+ on PATH. For **Archive Console**:
    - Run `start_archive_console.bat` once (creates `archive_console\.venv` and installs requirements).
    - Optional: copy `archive_console/state.json.example` to `archive_console/state.json` or let the UI create state on first run.
 6. Set **Archive Console** archive root in the UI if needed (empty string = parent of `archive_console`).
+
+## Optional host tools
+
+Archive Console features may call external programs when configured in **Settings**:
+
+- **ffmpeg**, **mediainfo**, **exiftool** — library, clips, rename
+- **gifski** — Video to GIF (`gifsky.conf`)
+- **czkawka_cli** — duplicate scan tab
+
+Install separately; paths can be set in Console **Settings** if not on PATH.
 
 ## Tests (Archive Console)
 
@@ -25,6 +36,12 @@ python -m pytest
 ```
 
 Or: `archive_console\.venv\Scripts\python.exe -m pytest` from the `archive_console` directory.
+
+Root-level `tests/` covers shared helpers such as `archive_cookies.py`.
+
+## Refreshing this public snapshot
+
+Operators with the full private tree rebuild staging with `tools/publish_staging.py` and push per **`GITHUB_PUBLISH.md`**.
 
 ## Third-party / disclaimer
 

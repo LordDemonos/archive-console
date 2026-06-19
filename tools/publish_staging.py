@@ -269,7 +269,7 @@ Desktop.ini
 CONTRIBUTING = """# Contributing
 
 This snapshot is meant to be forked or copied without the operator’s local paths,
-cookies, or download trees.
+cookies, or download trees. Upstream: https://github.com/LordDemonos/archive-console
 
 ## Setup
 
@@ -279,10 +279,21 @@ cookies, or download trees.
    `*.sample.txt` files (one URL or `youtube id` per line; see comments in samples).
 4. Copy `cookies.txt.example` to `cookies.txt` and add real Netscape-format cookies,
    or adjust `yt-dlp.conf` to use `--cookies-from-browser` (see yt-dlp docs).
+   Optional: load the Firefox extension under `firefox/archive-cookies-bridge/` to export cookies via Archive Console (see that folder’s README).
 5. Install Python 3.10+ on PATH. For **Archive Console**:
    - Run `start_archive_console.bat` once (creates `archive_console\\.venv` and installs requirements).
    - Optional: copy `archive_console/state.json.example` to `archive_console/state.json` or let the UI create state on first run.
 6. Set **Archive Console** archive root in the UI if needed (empty string = parent of `archive_console`).
+
+## Optional host tools
+
+Archive Console features may call external programs when configured in **Settings**:
+
+- **ffmpeg**, **mediainfo**, **exiftool** — library, clips, rename
+- **gifski** — Video to GIF (`gifsky.conf`)
+- **czkawka_cli** — duplicate scan tab
+
+Install separately; paths can be set in Console **Settings** if not on PATH.
 
 ## Tests (Archive Console)
 
@@ -293,6 +304,12 @@ python -m pytest
 ```
 
 Or: `archive_console\\.venv\\Scripts\\python.exe -m pytest` from the `archive_console` directory.
+
+Root-level `tests/` covers shared helpers such as `archive_cookies.py`.
+
+## Refreshing this public snapshot
+
+Operators with the full private tree rebuild staging with `tools/publish_staging.py` and push per **`GITHUB_PUBLISH.md`**.
 
 ## Third-party / disclaimer
 
@@ -337,6 +354,43 @@ echo See BAT_FILES.md and README.md.
 exit /b 2
 """
 
+GITHUB_PUBLISH = """# Publishing to GitHub
+
+Public repo: https://github.com/LordDemonos/archive-console
+
+This tree is an **anonymized snapshot**. Rebuild it from the operator’s full working copy with `tools/publish_staging.py` — do not hand-copy secrets, logs, or download folders.
+
+## Workflow
+
+1. From the private scripts root (the tree with real cookies and downloads):
+
+```bat
+python tools\\publish_staging.py --dest <STAGING_DEST>
+```
+
+Replace `<STAGING_DEST>` with a clean folder outside your private download trees.
+
+2. Open a git clone of **archive-console** (or init one). Replace all files **except** `.git` with the staging folder contents.
+
+3. Review `git status`. Confirm none of these appear as new/changed tracked files:
+
+- `cookies.txt`, `credentials.json`, `*_downloaded.txt`, `logs/`
+- `playlists/`, `channels/`, `videos/`, `galleries/`, `oneoff/`, `cookies/`
+- `yt-dlp.exe`, `archive_console/state.json`, gallery-dl debug captures (`_gdl_*.txt`, `gdl_*.txt`)
+
+4. Commit and push to `main`.
+
+## Generated files
+
+Each staging run overwrites generated docs in the output folder:
+
+- `CONTRIBUTING.md`, `PUBLISH_MANIFEST.md`, `LICENSE`
+- `cookies.txt.example`, `.env.example`, `*.sample.txt`
+- Placeholder legacy `.bat` stubs (`archive_playlists.bat`, etc.)
+
+See **`PUBLISH_MANIFEST.md`** for the authoritative include/exclude list.
+"""
+
 
 def _bat_inventory(source_root: Path) -> list[str]:
     return sorted(
@@ -350,6 +404,7 @@ def _write_extra_staging(dest_root: Path, source_root: Path, buckets: dict[str, 
     (dest_root / "LICENSE").write_text(LICENSE_MIT, encoding="utf-8", newline="\n")
     (dest_root / ".gitignore").write_text(GITIGNORE, encoding="utf-8", newline="\n")
     (dest_root / "CONTRIBUTING.md").write_text(CONTRIBUTING, encoding="utf-8", newline="\n")
+    (dest_root / "GITHUB_PUBLISH.md").write_text(GITHUB_PUBLISH, encoding="utf-8", newline="\n")
     (dest_root / "cookies.txt.example").write_text(COOKIES_EXAMPLE, encoding="utf-8", newline="\n")
     (dest_root / ".env.example").write_text(
         "# No secrets are required for local runs by default.\n"
@@ -427,10 +482,12 @@ def _write_extra_staging(dest_root: Path, source_root: Path, buckets: dict[str, 
         "",
         "## Included (categories)",
         "",
-        "- Root drivers: `archive_*_run.py`, `archive_run_console.py`, `archive_print_role.py`, `regenerate_report.py`, `repair_playlist_download_archive.py`, `yt-dlp.conf`",
+        "- Root drivers: `archive_*_run.py`, `archive_run_console.py`, `archive_print_role.py`, `archive_cookies.py`, `regenerate_report.py`, `repair_playlist_download_archive.py`, `yt-dlp.conf`, `gallery-dl.conf`, `gifsky.conf`",
         "- Batch entrypoints and stubs (see table)",
-        "- Docs: `README.md`, `BAT_FILES.md`, `ARCHIVE_PLAYLIST_RUN_LOGS.txt`, `archive_console/ARCHIVE_CONSOLE.md`",
-        "- Archive Console app: `archive_console/app/`, `templates/`, `static/`, `tests/`, `requirements.txt`, `print_bind.py`, tray sources, `state.example.json` / `state.json.example`, `*.ps1`",
+        "- Docs: `README.md`, `BAT_FILES.md`, `BAT_AUDIT.md`, `CLEANUP_PR.md`, `GITHUB_PUBLISH.md`, `ARCHIVE_PLAYLIST_RUN_LOGS.txt`, `archive_console/ARCHIVE_CONSOLE.md`, `docs/screenshots/`",
+        "- Firefox cookie bridge: `firefox/archive-cookies-bridge/`",
+        "- Archive Console app: `archive_console/app/`, `templates/`, `static/`, `tests/`, `requirements.txt`, `print_bind.py`, tray sources, `state.example.json` / `state.json.example`, `*.example.json`, `*.ps1`",
+        "- Root tests: `tests/`",
         "- Tooling: `tools/publish_staging.py` (regenerate staging from a full tree)",
         "",
         "## Excluded (why)",
@@ -462,10 +519,10 @@ def _write_extra_staging(dest_root: Path, source_root: Path, buckets: dict[str, 
         "",
         "```bat",
         "cd <ARCHIVE_ROOT>",
-        "python tools\\publish_staging.py",
+        "python tools\\publish_staging.py --dest <STAGING_DEST>",
         "```",
         "",
-        "Default destination: sibling `<ARCHIVE_ROOT>__publish_staging`.",
+        "Omit `--dest` for default sibling `<ARCHIVE_ROOT>__publish_staging`. Push to GitHub per **`GITHUB_PUBLISH.md`**.",
     ]
 
     (dest_root / "PUBLISH_MANIFEST.md").write_text("\n".join(manifest_lines) + "\n", encoding="utf-8")
@@ -481,6 +538,7 @@ def _append_readme_public(dest_root: Path) -> None:
 
 ## Public snapshot notes
 
+- **GitHub:** https://github.com/LordDemonos/archive-console — rebuilt from the operator tree with **`tools/publish_staging.py`** (see **`GITHUB_PUBLISH.md`**).
 - Replace machine-specific roots with `<ARCHIVE_ROOT>` in your mind: working directory is the folder that contains `yt-dlp.conf` and the `monthly_*.bat` files.
 - Copy `*.sample.txt` to `channels_input.txt`, `playlists_input.txt`, and `videos_input.txt` before running batch jobs.
 - See **`CONTRIBUTING.md`**, **`PUBLISH_MANIFEST.md`**, and **`cookies.txt.example`**.
@@ -489,7 +547,11 @@ def _append_readme_public(dest_root: Path) -> None:
 
 """
     text = readme.read_text(encoding="utf-8")
-    if "Public snapshot notes" not in text:
+    marker = "## Public snapshot notes"
+    if marker in text:
+        head = text.split(marker, 1)[0].rstrip()
+        readme.write_text(head + block, encoding="utf-8", newline="\n")
+    else:
         readme.write_text(text.rstrip() + block, encoding="utf-8", newline="\n")
 
 

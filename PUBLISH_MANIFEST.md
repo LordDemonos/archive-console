@@ -31,10 +31,12 @@ This project is **not affiliated with YouTube, Google LLC, or the yt-dlp project
 
 ## Included (categories)
 
-- Root drivers: `archive_*_run.py`, `archive_run_console.py`, `archive_print_role.py`, `regenerate_report.py`, `repair_playlist_download_archive.py`, `yt-dlp.conf`
+- Root drivers: `archive_*_run.py`, `archive_run_console.py`, `archive_print_role.py`, `archive_cookies.py`, `regenerate_report.py`, `repair_playlist_download_archive.py`, `yt-dlp.conf`, `gallery-dl.conf`, `gifsky.conf`
 - Batch entrypoints and stubs (see table)
-- Docs: `README.md`, `BAT_FILES.md`, `ARCHIVE_PLAYLIST_RUN_LOGS.txt`, `archive_console/ARCHIVE_CONSOLE.md`
-- Archive Console app: `archive_console/app/`, `templates/`, `static/`, `tests/`, `requirements.txt`, `print_bind.py`, tray sources, `state.example.json` / `state.json.example`, `*.ps1`
+- Docs: `README.md`, `BAT_FILES.md`, `BAT_AUDIT.md`, `CLEANUP_PR.md`, `GITHUB_PUBLISH.md`, `ARCHIVE_PLAYLIST_RUN_LOGS.txt`, `archive_console/ARCHIVE_CONSOLE.md`, `docs/screenshots/`
+- Firefox cookie bridge: `firefox/archive-cookies-bridge/`
+- Archive Console app: `archive_console/app/`, `templates/`, `static/`, `tests/`, `requirements.txt`, `print_bind.py`, tray sources, `state.example.json` / `state.json.example`, `*.example.json`, `*.ps1`
+- Root tests: `tests/`
 - Tooling: `tools/publish_staging.py` (regenerate staging from a full tree)
 
 ## Excluded (why)
@@ -86,7 +88,7 @@ This project is **not affiliated with YouTube, Google LLC, or the yt-dlp project
 
 ```bat
 cd <ARCHIVE_ROOT>
-python tools\publish_staging.py
+python tools\publish_staging.py --dest <STAGING_DEST>
 ```
 
-Default destination: sibling `<ARCHIVE_ROOT>__publish_staging`.
+Omit `--dest` for default sibling `<ARCHIVE_ROOT>__publish_staging`. Push to GitHub per **`GITHUB_PUBLISH.md`**.
