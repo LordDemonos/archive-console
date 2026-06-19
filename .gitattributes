@@ -1,0 +1,2 @@
+# Windows cmd.exe requires CRLF in batch files (LF-only breaks echo/cd parsing).
+*.bat text eol=crlf

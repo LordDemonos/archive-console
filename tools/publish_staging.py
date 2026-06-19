@@ -155,7 +155,8 @@ def _try_read_write_redacted(src: Path, dest: Path, source_root: Path) -> None:
     except UnicodeDecodeError:
         raw = src.read_text(encoding="utf-8", errors="replace")
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(_redact_text(raw, source_root), encoding="utf-8", newline="\n")
+    newline = "\r\n" if src.suffix.lower() in {".bat", ".cmd"} else "\n"
+    dest.write_text(_redact_text(raw, source_root), encoding="utf-8", newline=newline)
 
 
 def _copy_binary(src: Path, dest: Path) -> None:
