@@ -36,6 +36,30 @@ def test_prepare_youtube_suffix() -> None:
     assert suf == "-dQw4w9WgXcQ"
 
 
+def test_prepare_youtube_hyphen_with_numeric_suffix_after_id() -> None:
+    pr, mid, suf, _br = prepare_deepl_input(
+        "한글제목-dQw4w9WgXcQ - 25",
+        whole_basename=False,
+        preserve_youtube_id=True,
+        preserve_brackets=False,
+    )
+    assert pr == ""
+    assert mid == "한글제목"
+    assert suf == "-dQw4w9WgXcQ - 25"
+
+
+def test_prepare_youtube_suffix_stripped_when_not_preserved() -> None:
+    pr, mid, suf, _br = prepare_deepl_input(
+        "한글제목-dQw4w9WgXcQ",
+        whole_basename=False,
+        preserve_youtube_id=False,
+        preserve_brackets=False,
+    )
+    assert pr == ""
+    assert mid == "한글제목"
+    assert suf == ""
+
+
 def test_prepare_date_then_youtube() -> None:
     pr, mid, suf, _br = prepare_deepl_input(
         "20240330_한글-dQw4w9WgXcQ",
@@ -48,6 +72,18 @@ def test_prepare_date_then_youtube() -> None:
     assert suf == "-dQw4w9WgXcQ"
 
 
+def test_prepare_date_then_youtube_stripped_when_not_preserved() -> None:
+    pr, mid, suf, _br = prepare_deepl_input(
+        "20240330_한글-dQw4w9WgXcQ",
+        whole_basename=False,
+        preserve_youtube_id=False,
+        preserve_brackets=False,
+    )
+    assert pr == "20240330"
+    assert mid == "_한글"
+    assert suf == ""
+
+
 def test_prepare_whole_basename_skips_heuristics() -> None:
     pr, mid, suf, _br = prepare_deepl_input(
         "20240330-dQw4w9WgXcQ",
@@ -58,6 +94,43 @@ def test_prepare_whole_basename_skips_heuristics() -> None:
     assert pr == ""
     assert mid == "20240330-dQw4w9WgXcQ"
     assert suf == ""
+
+
+def test_prepare_whole_basename_strips_youtube_when_not_preserved() -> None:
+    pr, mid, suf, _br = prepare_deepl_input(
+        "20240330-dQw4w9WgXcQ",
+        whole_basename=True,
+        preserve_youtube_id=False,
+        preserve_brackets=False,
+    )
+    assert pr == ""
+    assert mid == "20240330"
+    assert suf == ""
+
+
+def test_prepare_space_separated_youtube_id_and_numeric_suffix() -> None:
+    """Titles like '… 코디법 <id> - 22' (space before 11-char id, optional - N)."""
+    pr, mid, suf, _br = prepare_deepl_input(
+        "20210421 Lookbook 코디법 Wab3qz3gwhq - 22",
+        whole_basename=False,
+        preserve_youtube_id=False,
+        preserve_brackets=False,
+    )
+    assert pr == "20210421"
+    assert mid == " Lookbook 코디법"
+    assert suf == ""
+
+
+def test_prepare_space_separated_youtube_preserved_reattaches_tail() -> None:
+    pr, mid, suf, _br = prepare_deepl_input(
+        "20210421 Lookbook 코디법 Wab3qz3gwhq - 22",
+        whole_basename=False,
+        preserve_youtube_id=True,
+        preserve_brackets=False,
+    )
+    assert pr == "20210421"
+    assert mid == " Lookbook 코디법"
+    assert suf == " Wab3qz3gwhq - 22"
 
 
 def test_shield_brackets() -> None:

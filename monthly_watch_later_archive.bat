@@ -24,15 +24,20 @@ if /i not "%ARCHIVE_CONSOLE_UNATTENDED%"=="1" (
 echo.
 echo Starting playlist archive run...
 echo.
-echo Environment toggles ^(optional^):
-echo   SKIP_PIP_UPDATE=1    skip pip self-upgrade ^(default when unset^)
-echo   SKIP_YTDLP_UPDATE=1   skip yt-dlp pip install before run
-echo   ARCHIVE_DRY_RUN=1     pass --simulate to yt-dlp ^(no real downloads; see ARCHIVE_PLAYLIST_RUN_LOGS.txt^)
-echo   ARCHIVE_PAUSE_ON_COOKIE_ERROR=1   pause on likely cookie/auth yt-dlp lines ^(see logs^)
-echo   ARCHIVE_COOKIE_AUTH_POLL_SEC=N      optional mtime poll on cookies.txt every N seconds
-echo   Cookie source: edit yt-dlp.conf ^(--cookies file vs --cookies-from-browser^)
-echo   ARCHIVE_OUT_PLAYLIST=   optional: output root for playlists ^(set by Archive Console^)
-echo   ARCHIVE_PIP_VERBOSE=1        full pip output ^(default: pip -q for less spam^)
+echo Active environment ^(unset = default^):
+if defined ARCHIVE_DRY_RUN (
+    echo   ARCHIVE_DRY_RUN=%ARCHIVE_DRY_RUN%  ^(yt-dlp --simulate; no real downloads^)
+) else (
+    echo   ARCHIVE_DRY_RUN=off  ^(live downloads^)
+)
+if defined SKIP_PIP_UPDATE echo   SKIP_PIP_UPDATE=%SKIP_PIP_UPDATE%
+if defined SKIP_YTDLP_UPDATE echo   SKIP_YTDLP_UPDATE=%SKIP_YTDLP_UPDATE%
+if defined ARCHIVE_PAUSE_ON_COOKIE_ERROR echo   ARCHIVE_PAUSE_ON_COOKIE_ERROR=%ARCHIVE_PAUSE_ON_COOKIE_ERROR%
+if defined ARCHIVE_COOKIE_AUTH_POLL_SEC echo   ARCHIVE_COOKIE_AUTH_POLL_SEC=%ARCHIVE_COOKIE_AUTH_POLL_SEC%
+if defined ARCHIVE_COOKIE_SOURCE_POLL_SEC echo   ARCHIVE_COOKIE_SOURCE_POLL_SEC=%ARCHIVE_COOKIE_SOURCE_POLL_SEC%
+if defined ARCHIVE_OUT_PLAYLIST echo   ARCHIVE_OUT_PLAYLIST=%ARCHIVE_OUT_PLAYLIST%
+if defined ARCHIVE_PIP_VERBOSE echo   ARCHIVE_PIP_VERBOSE=%ARCHIVE_PIP_VERBOSE%
+echo   Cookie source: yt-dlp.conf ^(--cookies file vs --cookies-from-browser^)
 echo.
 
 if /i "%ARCHIVE_PIP_VERBOSE%"=="1" (

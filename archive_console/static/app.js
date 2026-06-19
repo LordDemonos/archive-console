@@ -554,6 +554,12 @@
     optDry: document.getElementById("optDryRun"),
     optSkipPip: document.getElementById("optSkipPip"),
     optSkipYtdlp: document.getElementById("optSkipYtdlp"),
+    optPreflightViaExtension: document.getElementById("optPreflightViaExtension"),
+    optPreflightWaitRow: document.getElementById("optPreflightWaitRow"),
+    optPreflightWaitSec: document.getElementById("optPreflightWaitSec"),
+    optPauseOnCookieError: document.getElementById("optPauseOnCookieError"),
+    optCookieAuthPollRow: document.getElementById("optCookieAuthPollRow"),
+    optCookieAuthPollSec: document.getElementById("optCookieAuthPollSec"),
     runStatusSummary: document.getElementById("runStatusSummary"),
     runDetail: document.getElementById("runDetail"),
     runMetaId: document.getElementById("runMetaId"),
@@ -569,10 +575,23 @@
     historyMoreWrap: document.getElementById("historyMoreWrap"),
     btnHistoryMore: document.getElementById("btnHistoryMore"),
     fileList: document.getElementById("fileList"),
+    filesListFilter: document.getElementById("filesListFilter"),
+    btnLibraryFileListFontMinus: document.getElementById(
+      "btnLibraryFileListFontMinus"
+    ),
+    btnLibraryFileListFontPlus: document.getElementById(
+      "btnLibraryFileListFontPlus"
+    ),
     fileDetail: document.getElementById("fileDetail"),
+    fileDetailMain: document.getElementById("fileDetailMain"),
+    btnFileDetailSendRename: document.getElementById("btnFileDetailSendRename"),
+    btnFileDetailAddPlayerQueue: document.getElementById("btnFileDetailAddPlayerQueue"),
+    fileDetailRenameSendHint: document.getElementById("fileDetailRenameSendHint"),
+    fileDetailPlayerQueueHint: document.getElementById("fileDetailPlayerQueueHint"),
     filesWorkspace: document.getElementById("filesWorkspace"),
     filesWorkspaceShell: document.getElementById("filesWorkspaceShell"),
-    filesWorkspaceResizeY: document.getElementById("filesWorkspaceResizeY"),
+    filesLibraryPlayerBand: document.getElementById("filesLibraryPlayerBand"),
+    filesLibraryExportBand: document.getElementById("filesLibraryExportBand"),
     fileCrumb: document.getElementById("fileBreadcrumb"),
     btnExplorer: document.getElementById("btnExplorer"),
     fileExplorerMsg: document.getElementById("fileExplorerMsg"),
@@ -598,6 +617,7 @@
     filesPlayerOverlayToggle: document.getElementById("filesPlayerOverlayToggle"),
     filesPlayer: document.getElementById("filesPlayer"),
     filesPlayerToast: document.getElementById("filesPlayerToast"),
+    libraryViewToast: document.getElementById("libraryViewToast"),
     filesPlayerShuffle: document.getElementById("filesPlayerShuffle"),
     filesPlayerLoop: document.getElementById("filesPlayerLoop"),
     filesPlayerPlay: document.getElementById("filesPlayerPlay"),
@@ -614,12 +634,21 @@
     filesPlayerMsg: document.getElementById("filesPlayerMsg"),
     filesPlayerError: document.getElementById("filesPlayerError"),
     filesPlayerQueue: document.getElementById("filesPlayerQueue"),
-    btnLibraryQueueRename: document.getElementById("btnLibraryQueueRename"),
     renameQueueBody: document.getElementById("renameQueueBody"),
     renameQueueEmpty: document.getElementById("renameQueueEmpty"),
     renameQueueTable: document.getElementById("renameQueueTable"),
-    btnRenameAddFromLibrary: document.getElementById("btnRenameAddFromLibrary"),
+    btnRenameBrowseFiles: document.getElementById("btnRenameBrowseFiles"),
     btnRenameClearQueue: document.getElementById("btnRenameClearQueue"),
+    inpRenameFolderRel: document.getElementById("inpRenameFolderRel"),
+    btnRenameBrowseFolder: document.getElementById("btnRenameBrowseFolder"),
+    optRenameFolderRecursive: document.getElementById("optRenameFolderRecursive"),
+    optRenameFolderSkipDone: document.getElementById("optRenameFolderSkipDone"),
+    optRenameFolderTouchMtime: document.getElementById("optRenameFolderTouchMtime"),
+    selRenameFolderBatchSize: document.getElementById("selRenameFolderBatchSize"),
+    btnRenameFolderScan: document.getElementById("btnRenameFolderScan"),
+    btnRenameFolderRun: document.getElementById("btnRenameFolderRun"),
+    btnRenameFolderStop: document.getElementById("btnRenameFolderStop"),
+    renameFolderStatus: document.getElementById("renameFolderStatus"),
     optRenameUseDeepl: document.getElementById("optRenameUseDeepl"),
     optRenameUseExif: document.getElementById("optRenameUseExif"),
     selRenamePipelineOrder: document.getElementById("selRenamePipelineOrder"),
@@ -632,6 +661,7 @@
     btnRenameApply: document.getElementById("btnRenameApply"),
     renameMsg: document.getElementById("renameMsg"),
     renameUsageLine: document.getElementById("renameUsageLine"),
+    renameDeeplQuotaLine: document.getElementById("renameDeeplQuotaLine"),
     renamePreviewBody: document.getElementById("renamePreviewBody"),
     renameLogBody: document.getElementById("renameLogBody"),
     renameLogDetail: document.getElementById("renameLogDetail"),
@@ -645,8 +675,10 @@
     reportPointers: document.getElementById("reportPointers"),
     reportRuns: document.getElementById("reportRuns"),
     setPort: document.getElementById("setPort"),
-    setAllow: document.getElementById("setAllow"),
+    setAllowSummary: document.getElementById("setAllowSummary"),
     setFfmpegExe: document.getElementById("setFfmpegExe"),
+    setGifskiExe: document.getElementById("setGifskiExe"),
+    setCzkawkaExe: document.getElementById("setCzkawkaExe"),
     setMediainfoExe: document.getElementById("setMediainfoExe"),
     setExiftoolExe: document.getElementById("setExiftoolExe"),
     setExiftoolTimeoutSec: document.getElementById("setExiftoolTimeoutSec"),
@@ -659,6 +691,7 @@
     dupIncludeVideo: document.getElementById("dupIncludeVideo"),
     dupIncludeImages: document.getElementById("dupIncludeImages"),
     btnDupScan: document.getElementById("btnDupScan"),
+    btnDupReset: document.getElementById("btnDupReset"),
     dupScanProgress: document.getElementById("dupScanProgress"),
     dupResults: document.getElementById("dupResults"),
     dupPreviewOut: document.getElementById("dupPreviewOut"),
@@ -668,7 +701,7 @@
     dupModeDelete: document.getElementById("dupModeDelete"),
     btnSaveSettings: document.getElementById("btnSaveSettings"),
     settingsMsg: document.getElementById("settingsMsg"),
-    settingsArchiveRoot: document.getElementById("settingsArchiveRoot"),
+    setArchiveRoot: document.getElementById("setArchiveRoot"),
     setEditorBackupMax: document.getElementById("setEditorBackupMax"),
     setBackupDest: document.getElementById("setBackupDest"),
     setBackupIncState: document.getElementById("setBackupIncState"),
@@ -696,6 +729,10 @@
     btnSaveSchedules: document.getElementById("btnSaveSchedules"),
     scheduleSaveMsg: document.getElementById("scheduleSaveMsg"),
     schedulerStatusLine: document.getElementById("schedulerStatusLine"),
+    optSchedulerEnabled: document.getElementById("optSchedulerEnabled"),
+    btnSaveSchedulerGlobal: document.getElementById("btnSaveSchedulerGlobal"),
+    schedulerGlobalSaveMsg: document.getElementById("schedulerGlobalSaveMsg"),
+    youtubeSchedulerHint: document.getElementById("youtubeSchedulerHint"),
     setCookieRemindDays: document.getElementById("setCookieRemindDays"),
     btnSaveCookieSettings: document.getElementById("btnSaveCookieSettings"),
     btnCookieAck: document.getElementById("btnCookieAck"),
@@ -707,6 +744,18 @@
     optTrayNotifySchedule: document.getElementById("optTrayNotifySchedule"),
     setTrayNotifyPort: document.getElementById("setTrayNotifyPort"),
     trayNotifyFailureLine: document.getElementById("trayNotifyFailureLine"),
+    optGotifyEnabled: document.getElementById("optGotifyEnabled"),
+    setGotifyBaseUrl: document.getElementById("setGotifyBaseUrl"),
+    setGotifyAppToken: document.getElementById("setGotifyAppToken"),
+    optGotifyNotifyStart: document.getElementById("optGotifyNotifyStart"),
+    optGotifyNotifyComplete: document.getElementById("optGotifyNotifyComplete"),
+    optGotifyNotifyScheduled: document.getElementById("optGotifyNotifyScheduled"),
+    optGotifyNotifyManual: document.getElementById("optGotifyNotifyManual"),
+    setGotifyPriority: document.getElementById("setGotifyPriority"),
+    btnSaveGotifySettings: document.getElementById("btnSaveGotifySettings"),
+    btnGotifyTest: document.getElementById("btnGotifyTest"),
+    gotifySettingsMsg: document.getElementById("gotifySettingsMsg"),
+    gotifyFailureLine: document.getElementById("gotifyFailureLine"),
     cookieGateModal: document.getElementById("cookieGateModal"),
     cookieGateAck: document.getElementById("cookieGateAck"),
     cookieGateContinue: document.getElementById("cookieGateContinue"),
@@ -741,7 +790,14 @@
     optStripBlanks: document.getElementById("optStripBlanks"),
     optConfSmoke: document.getElementById("optConfSmoke"),
     cookiesCallout: document.getElementById("cookiesCallout"),
+    cookiesCalloutText: document.getElementById("cookiesCalloutText"),
     optUnlockCookies: document.getElementById("optUnlockCookies"),
+    siteCookiesList: document.getElementById("siteCookiesList"),
+    siteCookiesEmpty: document.getElementById("siteCookiesEmpty"),
+    siteCookieNewName: document.getElementById("siteCookieNewName"),
+    btnSiteCookieAdd: document.getElementById("btnSiteCookieAdd"),
+    btnSiteCookiesRefresh: document.getElementById("btnSiteCookiesRefresh"),
+    siteCookiesMsg: document.getElementById("siteCookiesMsg"),
     btnSaveEditor: document.getElementById("btnSaveEditor"),
     editorMsg: document.getElementById("editorMsg"),
     editorSaveHint: document.getElementById("editorSaveHint"),
@@ -803,6 +859,28 @@
     btnGalleryPreview: document.getElementById("btnGalleryPreview"),
     btnGalleryStart: document.getElementById("btnGalleryStart"),
     btnGalleryStop: document.getElementById("btnGalleryStop"),
+    btnGalleryRunSelected: document.getElementById("btnGalleryRunSelected"),
+    btnGallerySaveCurrent: document.getElementById("btnGallerySaveCurrent"),
+    btnGallerySourcesSelectAll: document.getElementById("btnGallerySourcesSelectAll"),
+    btnGallerySourcesSelectNone: document.getElementById("btnGallerySourcesSelectNone"),
+    btnGalleryRemoveSelected: document.getElementById("btnGalleryRemoveSelected"),
+    gallerySourcesTbody: document.getElementById("gallerySourcesTbody"),
+    gallerySourcesTableWrap: document.getElementById("gallerySourcesTableWrap"),
+    gallerySourcesScroll: document.getElementById("gallerySourcesScroll"),
+    gallerySourcesCountBadge: document.getElementById("gallerySourcesCountBadge"),
+    gallerySourcesEmpty: document.getElementById("gallerySourcesEmpty"),
+    gallerySourcesMsg: document.getElementById("gallerySourcesMsg"),
+    gallerySourcesScheduleEnabled: document.getElementById("gallerySourcesScheduleEnabled"),
+    gallerySourcesScheduleFreq: document.getElementById("gallerySourcesScheduleFreq"),
+    gallerySourcesScheduleDowWrap: document.getElementById("gallerySourcesScheduleDowWrap"),
+    gallerySourcesScheduleDow: document.getElementById("gallerySourcesScheduleDow"),
+    gallerySourcesScheduleDayWrap: document.getElementById("gallerySourcesScheduleDayWrap"),
+    gallerySourcesScheduleDay: document.getElementById("gallerySourcesScheduleDay"),
+    gallerySourcesScheduleHour: document.getElementById("gallerySourcesScheduleHour"),
+    gallerySourcesScheduleMin: document.getElementById("gallerySourcesScheduleMin"),
+    gallerySourcesScheduleMaxHours: document.getElementById("gallerySourcesScheduleMaxHours"),
+    btnSaveGallerySourcesSchedule: document.getElementById("btnSaveGallerySourcesSchedule"),
+    gallerySourcesScheduleStatus: document.getElementById("gallerySourcesScheduleStatus"),
     btnGallerySaveOutput: document.getElementById("btnGallerySaveOutput"),
     galleryPreviewMsg: document.getElementById("galleryPreviewMsg"),
     galleryDriftNote: document.getElementById("galleryDriftNote"),
@@ -816,8 +894,7 @@
     dlDirGalleriesInputs: document.getElementById("dlDirGalleriesInputs"),
     optGalleryDryRun: document.getElementById("optGalleryDryRun"),
     optGalleryVideoFallback: document.getElementById("optGalleryVideoFallback"),
-    optGallerySkipPip: document.getElementById("optGallerySkipPip"),
-    optGallerySkipYtdlp: document.getElementById("optGallerySkipYtdlp"),
+    optGalleryUpdateGalleryDl: document.getElementById("optGalleryUpdateGalleryDl"),
     galleryLogBody: document.getElementById("galleryLogBody"),
     galleryLogGutter: document.getElementById("galleryLogGutter"),
     galleryLogFrame: document.getElementById("galleryLogFrame"),
@@ -827,9 +904,83 @@
     btnGalleryClearLog: document.getElementById("btnGalleryClearLog"),
     btnGalleryLogFontMinus: document.getElementById("btnGalleryLogFontMinus"),
     btnGalleryLogFontPlus: document.getElementById("btnGalleryLogFontPlus"),
+    gifskyGalleriesRoot: document.getElementById("gifskyGalleriesRoot"),
+    btnGifskyScan: document.getElementById("btnGifskyScan"),
+    btnGifskyStart: document.getElementById("btnGifskyStart"),
+    btnGifskyFoldersSelectAll: document.getElementById("btnGifskyFoldersSelectAll"),
+    btnGifskyFoldersSelectNone: document.getElementById("btnGifskyFoldersSelectNone"),
+    btnGifskyCancel: document.getElementById("btnGifskyCancel"),
+    optGifskyDeleteSource: document.getElementById("optGifskyDeleteSource"),
+    optGifskyDryRun: document.getElementById("optGifskyDryRun"),
+    gifskyScanSummary: document.getElementById("gifskyScanSummary"),
+    gifskyMsg: document.getElementById("gifskyMsg"),
+    gifskyFolderTbody: document.getElementById("gifskyFolderTbody"),
+    gifskyFolderTableWrap: document.getElementById("gifskyFolderTableWrap"),
+    gifskyFolderScroll: document.getElementById("gifskyFolderScroll"),
+    gifskyLogBody: document.getElementById("gifskyLogBody"),
+    gifskyLogFrame: document.getElementById("gifskyLogFrame"),
+    btnGifskyClearLog: document.getElementById("btnGifskyClearLog"),
+    linkGifskyToConf: document.getElementById("linkGifskyToConf"),
+    navGettingStarted: document.getElementById("navGettingStarted"),
+    gsPlatformHint: document.getElementById("gsPlatformHint"),
+    setShowGettingStarted: document.getElementById("setShowGettingStarted"),
+    setDefaultLandingView: document.getElementById("setDefaultLandingView"),
+    btnGsVerifyAll: document.getElementById("btnGsVerifyAll"),
+    gsVerifyAllHint: document.getElementById("gsVerifyAllHint"),
+    btnGsOpenCookies: document.getElementById("btnGsOpenCookies"),
+    btnGsOpenSiteCookies: document.getElementById("btnGsOpenSiteCookies"),
+    btnGsOpenInputs: document.getElementById("btnGsOpenInputs"),
+    btnGsOpenYtdlp: document.getElementById("btnGsOpenYtdlp"),
+    btnGsOpenGallerydl: document.getElementById("btnGsOpenGallerydl"),
+    btnGsOpenGifsky: document.getElementById("btnGsOpenGifsky"),
+    btnGsOpenLibrary: document.getElementById("btnGsOpenLibrary"),
+    btnGsOpenSettings: document.getElementById("btnGsOpenSettings"),
+    homeFlameDatetime: document.getElementById("homeFlameDatetime"),
+    homeFlameGreeting: document.getElementById("homeFlameGreeting"),
+    homeWeatherIcon: document.getElementById("homeWeatherIcon"),
+    homeWeatherLine1: document.getElementById("homeWeatherLine1"),
+    homeWeatherLine2: document.getElementById("homeWeatherLine2"),
+    optHomeClock24: document.getElementById("optHomeClock24"),
+    homeFlameApps: document.getElementById("homeFlameApps"),
+    homeApplicationsToggle: document.getElementById("homeApplicationsToggle"),
+    btnHomeAddBookmark: document.getElementById("btnHomeAddBookmark"),
+    homeBookmarkGrid: document.getElementById("homeBookmarkGrid"),
+    homeBookmarkEmpty: document.getElementById("homeBookmarkEmpty"),
+    homeBookmarkModal: document.getElementById("homeBookmarkModal"),
+    homeBookmarkModalBackdrop: document.getElementById("homeBookmarkModalBackdrop"),
+    inpHomeBookmarkUrl: document.getElementById("inpHomeBookmarkUrl"),
+    homeBookmarkUrlMsg: document.getElementById("homeBookmarkUrlMsg"),
+    btnHomeBookmarkCancel: document.getElementById("btnHomeBookmarkCancel"),
+    btnHomeBookmarkSave: document.getElementById("btnHomeBookmarkSave"),
+    homeBookmarkModalTitle: document.getElementById("homeBookmarkModalTitle"),
+    setWeatherLat: document.getElementById("setWeatherLat"),
+    setWeatherLon: document.getElementById("setWeatherLon"),
+    setOpenweatherApiKey: document.getElementById("setOpenweatherApiKey"),
+    optOpenweatherKeyClear: document.getElementById("optOpenweatherKeyClear"),
+    btnSaveHomeWeather: document.getElementById("btnSaveHomeWeather"),
+    homeWeatherSettingsMsg: document.getElementById("homeWeatherSettingsMsg"),
   };
 
   const STORAGE_LOG_HIGHLIGHT = "archive_console_log_highlight";
+  /** Library file list density (same px range as log A+/A−). */
+  const STORAGE_LIBRARY_FILE_LIST_FONT = "archive_console_library_file_list_font_px";
+  const LS_GS_CHECKLIST = "archive_console.getting_started.checklist.v1";
+  const HOME_LS_BOOKMARKS = "archive_console.home.bookmarks.v1";
+  const HOME_LS_CLOCK24 = "archive_console.home.clock24.v1";
+  const HOME_URL_DEBOUNCE_MS = 300;
+  const HOME_DEFAULT_ICON =
+    "data:image/svg+xml," +
+    encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%238b939e"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>'
+    );
+  const GS_VERIFY_DEBOUNCE_MS = 2000;
+  const GS_INPUT_DEEP_FILES = {
+    "playlists_input.txt": true,
+    "channels_input.txt": true,
+    "videos_input.txt": true,
+    "yt-dlp.conf": true,
+    "cookies.txt": true,
+  };
 
   let logLineCount = 0;
   /** Raw lines for the current stream (rebuild when toggling highlight). */
@@ -842,11 +993,24 @@
   let galleryLogLinesBuffer = [];
   /** @type {{ rows: unknown[], truncated?: boolean, url?: string } | null} */
   let galleryLastPreview = null;
+  let galleryBatchQueue = [];
+  let galleryBatchTotal = 0;
+  let gallerySourcesEntries = [];
   let logFontPx = 13;
+  let libraryFileListFontPx = 13;
   let oneoffCookieCheckTimer = null;
   let lastOneoffCookieReminderUnix = 0;
   /** Sidebar / URL view id (e.g. run, oneoff); used to suppress duplicate cookie UI. */
   let activeViewId = "run";
+  /** Home view: bookmarks `{ id, url, createdAt }` (server-persisted; localStorage cache). */
+  let homeBookmarks = [];
+  let homeClockTimer = null;
+  let homeBookmarkModalEditId = null;
+  /** When true, Home Bookmarks section shows Add and per-row edit/delete. */
+  let homeApplicationsEdit = false;
+  let homeUrlDebounceTimer = null;
+  var lastShowGettingStarted = true;
+  var lastGsToolsVerifyAt = 0;
   let lastRemindersCookieShowEligible = false;
   let lastRemindersCookieMessage = "";
   let lastRemindersRequireCookieConfirmManual = false;
@@ -855,20 +1019,62 @@
   let selectedRel = "";
   /** Abort in-flight MediaInfo fetch when selection changes. */
   let filesMediainfoController = null;
-  /** Duplicate finder: last scan groups + allowlist cache. */
+  /** Duplicate finder: last scan groups + download output roots cache. */
   var dupLastGroups = [];
-  var dupPollTimer = null;
-  var dupAllowlistPrefixes = [];
+  var dupScanBusy = false;
+  var dupDownloadOutputRoots = [];
   var dupManualRoots = [];
+  var DUP_OUTPUT_JOB_ORDER = [
+    "watch_later",
+    "channels",
+    "videos",
+    "oneoff",
+    "galleries",
+  ];
+  var DUP_OUTPUT_JOB_LABELS = {
+    watch_later: "Watch Later",
+    channels: "Channels",
+    videos: "Videos",
+    oneoff: "Single download",
+    galleries: "Galleries",
+  };
+
+  function dupOutputRootsFromSettings(j) {
+    var eff = (j && j.download_dirs_effective) || {};
+    var seen = {};
+    var out = [];
+    DUP_OUTPUT_JOB_ORDER.forEach(function (key) {
+      var o = eff[key];
+      if (!o || !o.effective_rel) {
+        return;
+      }
+      var rel = String(o.effective_rel).trim();
+      if (!rel || seen[rel]) {
+        return;
+      }
+      seen[rel] = true;
+      out.push({
+        key: key,
+        label: DUP_OUTPUT_JOB_LABELS[key] || key,
+        rel: rel,
+      });
+    });
+    return out;
+  }
   /** Files list: Windows-style multi-select (Ctrl/Meta toggle, Shift range). */
   var filesListSelectedSet = new Set();
   var filesListAnchorIndex = -1;
   /** Rename view: queued relative paths (allowlisted). */
   var renameQueueRels = [];
+  var RENAME_PREVIEW_MAX_FILES = 200;
+  var renameFolderBatchAbort = false;
+  var renameFolderBatchState = null;
   var renamePreviewId = null;
   var renameLastPreviewRows = [];
   var renameHistoryItems = [];
-  /** Snapshot of current directory rows in list order (for range + folder enqueue). */
+  /** Full current-directory rows from the last list API response. */
+  var filesListAllRowModels = [];
+  /** Visible rows after folder search filter (for range + folder enqueue). */
   var filesListRowModels = [];
 
   function filesListApplySelectionVisual() {
@@ -881,6 +1087,7 @@
       b.classList.toggle("is-selected", on);
       b.setAttribute("aria-selected", on ? "true" : "false");
     });
+    libraryUpdateSendRenameButton();
   }
 
   function filesListPlayableSelectedInOrder() {
@@ -902,9 +1109,9 @@
     if (!rel) {
       return null;
     }
-    for (var i = 0; i < filesListRowModels.length; i++) {
-      if (filesListRowModels[i].rel === rel) {
-        var z = filesListRowModels[i].ent.size;
+    for (var i = 0; i < filesListAllRowModels.length; i++) {
+      if (filesListAllRowModels[i].rel === rel) {
+        var z = filesListAllRowModels[i].ent.size;
         return z != null ? z : null;
       }
     }
@@ -974,12 +1181,25 @@
     shown: HISTORY_PAGE,
     historyLoadFailed: false,
     reportsLoadFailed: false,
+    globalErrors: [],
   };
 
   const COOKIES_FILE = "cookies.txt";
   const YTDLP_CONF = "yt-dlp.conf";
   const GALLERY_DL_CONF = "gallery-dl.conf";
-  let gallerydlBaseline = "";
+  const SITE_COOKIES_REL_RE = /^cookies\/[a-z0-9][a-z0-9_-]{0,62}\.txt$/i;
+
+  function isSiteCookiesRel(rel) {
+    return SITE_COOKIES_REL_RE.test(rel || "");
+  }
+
+  function isSensitiveCookieRel(rel) {
+    return rel === COOKIES_FILE || isSiteCookiesRel(rel);
+  }
+
+  function isInputsDeepLinkFile(f) {
+    return !!GS_INPUT_DEEP_FILES[f] || isSiteCookiesRel(f);
+  }
   let lastSupportedsitesPayload = null;
 
   function formatFileSize(bytes) {
@@ -1027,10 +1247,10 @@
     els.btnExplorer.disabled = !can;
     if (selectedRel) {
       var primDir = false;
-      for (var ei = 0; ei < filesListRowModels.length; ei++) {
+      for (var ei = 0; ei < filesListAllRowModels.length; ei++) {
         if (
-          filesListRowModels[ei].rel === selectedRel &&
-          filesListRowModels[ei].is_dir
+          filesListAllRowModels[ei].rel === selectedRel &&
+          filesListAllRowModels[ei].is_dir
         ) {
           primDir = true;
           break;
@@ -1209,6 +1429,24 @@
   }
 
   var fpToastTimer = null;
+  var libraryViewToastTimer = null;
+
+  function libraryViewToast(msg, isError) {
+    if (!msg) {
+      return;
+    }
+    if (els.libraryViewToast) {
+      els.libraryViewToast.textContent = msg;
+      els.libraryViewToast.hidden = false;
+      els.libraryViewToast.classList.toggle("is-error", msg && !!isError);
+      window.clearTimeout(libraryViewToastTimer);
+      libraryViewToastTimer = window.setTimeout(function () {
+        if (els.libraryViewToast) {
+          els.libraryViewToast.hidden = true;
+        }
+      }, isError ? 9000 : 5500);
+    }
+  }
 
   function fpToast(msg, isError) {
     if (!msg) {
@@ -1388,6 +1626,57 @@
     }
   }
 
+  function fpMediaDisplayMode() {
+    var cur = fpCurrentRel();
+    if (cur && filesPlayerIsVideoAudioRel(cur)) {
+      return "video";
+    }
+    if (cur && filesPlayerIsImageRel(cur)) {
+      return "image";
+    }
+    return "idle";
+  }
+
+  function fpSyncMediaBandMode() {
+    var mode = fpMediaDisplayMode();
+    if (els.filesLibraryPlayerBand) {
+      els.filesLibraryPlayerBand.hidden = mode === "idle";
+    }
+    if (els.filesLibraryExportBand) {
+      els.filesLibraryExportBand.hidden = mode !== "video";
+    }
+    if (els.filesPlayer) {
+      els.filesPlayer.classList.remove(
+        "is-video-mode",
+        "is-image-mode",
+        "is-idle-mode"
+      );
+      els.filesPlayer.classList.add(
+        mode === "video"
+          ? "is-video-mode"
+          : mode === "image"
+            ? "is-image-mode"
+            : "is-idle-mode"
+      );
+    }
+    if (els.filesVideo) {
+      if (mode === "video") {
+        els.filesVideo.hidden = false;
+        els.filesVideo.controls = true;
+      } else if (mode === "image") {
+        els.filesVideo.pause();
+        els.filesVideo.controls = false;
+        els.filesVideo.hidden = true;
+      }
+    }
+  }
+
+  function fpReadSlideshowTimedFromUi() {
+    if (els.filesPlayerSlideshowTimed) {
+      fpSlideshowTimed = !!els.filesPlayerSlideshowTimed.checked;
+    }
+  }
+
   function fpSyncPlayPauseButton() {
     var btn = els.filesPlayerPlay;
     if (!btn || !els.filesVideo) {
@@ -1398,6 +1687,7 @@
     if (filesPlayerIsVideoAudioRel(cur) && !els.filesVideo.hidden) {
       playing = !els.filesVideo.paused;
     } else if (filesPlayerIsImageRel(cur)) {
+      fpReadSlideshowTimedFromUi();
       playing = fpSlideshowTimed && !fpSlideshowPaused;
     }
     var playIc = btn.querySelector(".files-player-ic--play");
@@ -1408,6 +1698,11 @@
     if (pauseIc) {
       pauseIc.hidden = !playing;
     }
+    btn.setAttribute("aria-pressed", playing ? "true" : "false");
+    btn.classList.toggle("is-playing", playing);
+    if (filesPlayerIsImageRel(cur)) {
+      fpReadSlideshowTimedFromUi();
+    }
     if (filesPlayerIsImageRel(cur) && !fpSlideshowTimed) {
       if (playIc) {
         playIc.hidden = false;
@@ -1415,6 +1710,8 @@
       if (pauseIc) {
         pauseIc.hidden = true;
       }
+      btn.setAttribute("aria-pressed", "false");
+      btn.classList.remove("is-playing");
       btn.setAttribute("aria-label", "Play selected or resume");
       btn.title =
         "Play selected / resume (timed slideshow off — use Next for images)";
@@ -1507,96 +1804,29 @@
   var filesPlayerVideoMetaW = 0;
   var filesPlayerVideoMetaH = 0;
   var filesPlayerPaneWidthPx = 0;
-  /** #filesPlayer content box height (ResizeObserver) — caps video frame so queue stays reachable. */
-  var filesPlayerSectionHeightPx = 0;
   var fpVideoLayoutRaf = 0;
 
   function fpClampLayout(n, lo, hi) {
     return Math.max(lo, Math.min(hi, n));
   }
 
-  /** Sum layout height of #filesPlayer children except the video frame and playlist (measured). */
-  function fpMeasureFilesPlayerChromeExcludingFrameAndQueuePx() {
-    var player = els.filesPlayer;
-    var frame = els.filesVideoFrame;
-    var queue = els.filesPlayerQueue;
-    if (!player || !frame || !queue) {
-      return 200;
-    }
-    var sum = 0;
-    var kids = player.children;
-    for (var i = 0; i < kids.length; i++) {
-      var el = kids[i];
-      if (el === frame || el === queue) {
-        continue;
-      }
-      if (el.hidden) {
-        continue;
-      }
-      var r = el.getBoundingClientRect();
-      sum += r.height;
-    }
-    /* Flex gap is not in child rects; padding already inside player box. */
-    return Math.max(120, Math.ceil(sum));
-  }
-
+  /** Library R2: #filesVideoFrame size is CSS (16:9 stage in .files-library-player-band). Clear legacy inline styles; keep width for observers/logging. */
   function fpUpdateVideoFrameLayout() {
     var frame = els.filesVideoFrame;
     if (!frame) {
       return;
     }
-    var paneW = filesPlayerPaneWidthPx;
+    frame.style.height = "";
+    frame.style.maxHeight = "";
+    frame.style.aspectRatio = "";
     var rw = frame.getBoundingClientRect().width;
-    if (!paneW || paneW < 32) {
-      paneW = rw;
+    if (rw > 0) {
+      filesPlayerPaneWidthPx = rw;
     }
-    if (!paneW || paneW < 32) {
-      return;
-    }
-    var ph = filesPlayerSectionHeightPx;
-    if ((!ph || ph < 80) && els.filesPlayer) {
-      ph = els.filesPlayer.getBoundingClientRect().height;
-    }
-    var vw = filesPlayerVideoMetaW;
-    var vh = filesPlayerVideoMetaH;
-    var ar = vw > 0 && vh > 0 ? vw / vh : 16 / 9;
-    if (vw > 0 && vh > 0) {
-      frame.style.aspectRatio = vw + " / " + vh;
-    } else {
-      frame.style.aspectRatio = "16 / 9";
-    }
-    /* Height scales with pane width (naturalH = width ÷ aspect ratio). */
-    var naturalH = paneW / ar;
-    /* Floor grows with width so wide panes are not stuck with a short strip. */
-    var minH = fpClampLayout(paneW * 0.34, 128, 300);
-    var chrome = fpMeasureFilesPlayerChromeExcludingFrameAndQueuePx();
-    var queueMin = 0;
-    if (els.filesPlayerQueue) {
-      var qcs = window.getComputedStyle(els.filesPlayerQueue);
-      var qm = parseFloat(qcs.minHeight);
-      queueMin = isFinite(qm) && qm > 0 ? qm : 160;
-    }
-    var room =
-      ph > 120 ? ph - chrome - queueMin : Math.min(naturalH, window.innerHeight * 0.5);
-    var globalCap = Math.min(window.innerHeight * 0.82, 720);
-    var maxH = Math.max(96, Math.min(room, globalCap));
-    var lo = Math.min(minH, maxH);
-    var hi = Math.max(minH, maxH);
-    var targetH = fpClampLayout(naturalH, lo, hi);
-    frame.style.height = targetH + "px";
-    frame.style.maxHeight = maxH + "px";
     if (isFilesPlayerDevLog()) {
       console.debug("[files-player] fpUpdateVideoFrameLayout", {
-        paneW: paneW,
-        ar: ar,
-        minH: minH,
-        maxH: maxH,
-        finalH: targetH,
-        chromePx: chrome,
-        queueMinPx: queueMin,
-        ph: ph,
+        frameWidthPx: rw,
         targetId: "filesVideoFrame",
-        videoObjectFitEl: "filesVideo",
       });
     }
   }
@@ -1645,6 +1875,7 @@
 
   function fpRestartSlideshowTimer() {
     fpStopSlideshowTimer();
+    fpReadSlideshowTimedFromUi();
     if (!fpSlideshowTimed || fpSlideshowPaused) {
       return;
     }
@@ -1659,6 +1890,25 @@
       }
       fpNext(true);
     }, fpSlideshowIntervalSeconds() * 1000);
+  }
+
+  /** Pause/resume timed slideshow for the current image track (not list selection). */
+  function fpToggleTimedSlideshowPause() {
+    var cur = fpCurrentRel();
+    fpReadSlideshowTimedFromUi();
+    if (!fpSlideshowTimed || !cur || !filesPlayerIsImageRel(cur)) {
+      return false;
+    }
+    fpSlideshowPaused = !fpSlideshowPaused;
+    if (fpSlideshowPaused) {
+      fpStopSlideshowTimer();
+    } else {
+      fpRestartSlideshowTimer();
+    }
+    fpSyncPlayPauseButton();
+    fpSyncFsHudPauseLabel();
+    fpSave();
+    return true;
   }
 
   function fpClearImageLayers() {
@@ -1909,6 +2159,7 @@
     fpSyncPlayPauseButton();
     fpSyncFsHudPauseLabel();
     fpStopSlideshowTimer();
+    fpSyncMediaBandMode();
   }
 
   function fpLoadCurrentMedia(rel, andPlay) {
@@ -1924,6 +2175,9 @@
     fpStopSlideshowTimer();
     fpLastLoadedRel = rel;
     fpUpdateMediaSession(rel);
+    if (andPlay) {
+      fpSlideshowPaused = false;
+    }
     if (filesPlayerIsVideoAudioRel(rel)) {
       fpLoadVideoSource(rel, !!andPlay);
       return;
@@ -1933,11 +2187,55 @@
         els.filesVideo.pause();
         els.filesVideo.removeAttribute("src");
         els.filesVideo.load();
+        els.filesVideo.controls = false;
         els.filesVideo.hidden = true;
       }
       fpResetVideoFrameMeta();
       fpApplyImageToStage(rel);
+      fpSyncMediaBandMode();
+      fpSyncPlayPauseButton();
+      fpSyncFsHudPauseLabel();
     }
+  }
+
+  function fpHandlePlayPauseAction() {
+    var cur = fpCurrentRel();
+    var v = els.filesVideo;
+
+    if (cur && filesPlayerIsImageRel(cur)) {
+      fpReadSlideshowTimedFromUi();
+      if (fpSlideshowTimed) {
+        fpToggleTimedSlideshowPause();
+        return;
+      }
+      fpMsg("Enable Timed to auto-advance images, or use Next / Previous.");
+      return;
+    }
+
+    if (
+      cur &&
+      filesPlayerIsVideoAudioRel(cur) &&
+      v &&
+      !v.hidden &&
+      (v.currentSrc || v.src || v.getAttribute("src"))
+    ) {
+      if (v.paused) {
+        fpPolicyPlayPromise(v.play());
+      } else {
+        v.pause();
+      }
+      fpSyncPlayPauseButton();
+      return;
+    }
+
+    var target = fpResolvePlayTargetRel();
+    if (!target) {
+      fpMsg(
+        "Select a queueable file in the list or add tracks to the queue."
+      );
+      return;
+    }
+    fpPlayTargetRelNow(target);
   }
 
   function fpRefreshPlayerStats() {
@@ -2341,6 +2639,7 @@
     fpRenderNowNext();
     fpUpdatePlayerActionButtons();
     fpSyncPlayPauseButton();
+    fpSyncMediaBandMode();
   }
 
   function fpResolvePlayTargetRel() {
@@ -2355,6 +2654,19 @@
       fpPlayIndex = 0;
     }
     return fpCurrentRel();
+  }
+
+  function fpAddPlayablesToQueue(playables) {
+    if (!playables || !playables.length) {
+      return 0;
+    }
+    var added = 0;
+    playables.forEach(function (rel) {
+      if (fpQueueAppendPlayable(rel, true)) {
+        added++;
+      }
+    });
+    return added;
   }
 
   function fpQueueAppendPlayable(rel, quietDup) {
@@ -2587,7 +2899,7 @@
     });
     els.filesVideo.addEventListener("error", function () {
       fpSetPlayerError(
-        "Could not load media—check allowlist, format, codec, or network."
+        "Could not load media—check download folder access, format, codec, or network."
       );
       if (isFilesPlayerDevLog()) {
         try {
@@ -2625,51 +2937,7 @@
       }
     });
     if (els.filesPlayerPlay) {
-      els.filesPlayerPlay.addEventListener("click", function () {
-        var v = els.filesVideo;
-        var cur = fpCurrentRel();
-        var target = fpResolvePlayTargetRel();
-        if (
-          cur &&
-          target === cur &&
-          filesPlayerIsImageRel(cur) &&
-          fpSlideshowTimed
-        ) {
-          fpSlideshowPaused = !fpSlideshowPaused;
-          if (fpSlideshowPaused) {
-            fpStopSlideshowTimer();
-          } else {
-            fpRestartSlideshowTimer();
-          }
-          fpSyncPlayPauseButton();
-          fpSyncFsHudPauseLabel();
-          fpSave();
-          return;
-        }
-        if (
-          v &&
-          cur &&
-          target === cur &&
-          filesPlayerIsVideoAudioRel(cur) &&
-          !v.hidden &&
-          (v.currentSrc || v.src || v.getAttribute("src"))
-        ) {
-          if (v.paused) {
-            fpPolicyPlayPromise(v.play());
-          } else {
-            v.pause();
-          }
-          fpSyncPlayPauseButton();
-          return;
-        }
-        if (!target) {
-          fpMsg(
-            "Select a queueable file in the list or add tracks to the queue."
-          );
-          return;
-        }
-        fpPlayTargetRelNow(target);
-      });
+      els.filesPlayerPlay.addEventListener("click", fpHandlePlayPauseAction);
     }
     if (els.filesPlayerPrev) {
       els.filesPlayerPrev.addEventListener("click", function () {
@@ -2688,12 +2956,7 @@
           fpMsg("Select one or more playable files in the list.");
           return;
         }
-        var added = 0;
-        playables.forEach(function (rel) {
-          if (fpQueueAppendPlayable(rel, true)) {
-            added++;
-          }
-        });
+        var added = fpAddPlayablesToQueue(playables);
         if (added === 0) {
           fpToast("Selected files were already in the queue.", false);
         } else {
@@ -2837,6 +3100,7 @@
         if (!fpSlideshowTimed) {
           fpStopSlideshowTimer();
         } else {
+          fpSlideshowPaused = false;
           fpRestartSlideshowTimer();
         }
         fpSyncPlayPauseButton();
@@ -2875,18 +3139,7 @@
     }
     if (els.filesPlayerFsPause) {
       els.filesPlayerFsPause.addEventListener("click", function () {
-        if (!filesPlayerIsImageRel(fpCurrentRel()) || !fpSlideshowTimed) {
-          return;
-        }
-        fpSlideshowPaused = !fpSlideshowPaused;
-        if (fpSlideshowPaused) {
-          fpStopSlideshowTimer();
-        } else {
-          fpRestartSlideshowTimer();
-        }
-        fpSyncPlayPauseButton();
-        fpSyncFsHudPauseLabel();
-        fpSave();
+        fpToggleTimedSlideshowPause();
       });
     }
     if (els.filesPlayerFsOverlay) {
@@ -2910,7 +3163,7 @@
     document.addEventListener("webkitfullscreenchange", fpOnFullscreenChange);
 
     window.addEventListener("keydown", function (ev) {
-      if (activeViewId !== "files") {
+      if (activeViewId !== "library") {
         return;
       }
       var tag = ev.target && ev.target.tagName;
@@ -2930,26 +3183,7 @@
         fpNext(true);
       } else if (ev.key === " " || ev.code === "Space") {
         ev.preventDefault();
-        var cur = fpCurrentRel();
-        var v = els.filesVideo;
-        if (filesPlayerIsVideoAudioRel(cur) && v && !v.hidden && v.src) {
-          if (v.paused) {
-            fpPolicyPlayPromise(v.play());
-          } else {
-            v.pause();
-          }
-          fpSyncPlayPauseButton();
-        } else if (filesPlayerIsImageRel(cur) && fpSlideshowTimed) {
-          fpSlideshowPaused = !fpSlideshowPaused;
-          if (fpSlideshowPaused) {
-            fpStopSlideshowTimer();
-          } else {
-            fpRestartSlideshowTimer();
-          }
-          fpSyncPlayPauseButton();
-          fpSyncFsHudPauseLabel();
-          fpSave();
-        }
+        fpHandlePlayPauseAction();
       } else if (ev.key === "i" || ev.key === "I") {
         fpToggleOverlayVisible();
       }
@@ -2967,19 +3201,6 @@
         fpScheduleVideoFrameLayout();
       });
       fpPaneRo.observe(els.filesVideoFrame);
-    }
-    if (typeof ResizeObserver !== "undefined" && els.filesPlayer) {
-      var fpPlayerRo = new ResizeObserver(function (entries) {
-        if (!entries.length) {
-          return;
-        }
-        var ch = entries[0].contentRect.height;
-        if (ch > 0) {
-          filesPlayerSectionHeightPx = ch;
-        }
-        fpScheduleVideoFrameLayout();
-      });
-      fpPlayerRo.observe(els.filesPlayer);
     }
     window.addEventListener("resize", fpScheduleVideoFrameLayout);
     fpScheduleVideoFrameLayout();
@@ -3020,11 +3241,12 @@
       }
       var n = parseFloat(s);
       if (!isFinite(n) || n < 28 || n > 75) {
-        return 42;
+        return 36;
       }
       return n;
     }
 
+    /* Library R1: first column = file list %; second region = .files-library-r1-right (metadata | dup). */
     function applyPct(pct) {
       if (!isWideLayout()) {
         split.style.gridTemplateColumns = "";
@@ -3084,190 +3306,7 @@
     });
   }
 
-  /** Library workspace: one pixel height for both columns (localStorage + vertical drag). */
-  var FILES_WORKSPACE_HEIGHT_STORAGE = "library.workspace.height";
-  var LEGACY_FILES_WORKSPACE_HEIGHT_STORAGE = "files.workspace.height";
-  var FILES_WORKSPACE_MIN_PX = 520;
-  var filesWorkspaceResizeDrag = null;
-  var filesWorkspaceResizeWinTimer = 0;
-
-  function filesWorkspaceMaxHeightPx() {
-    var shell = els.filesWorkspaceShell;
-    if (!shell || activeViewId !== "library") {
-      return 960;
-    }
-    var top = shell.getBoundingClientRect().top;
-    var bottomReserve = 8;
-    return Math.max(
-      FILES_WORKSPACE_MIN_PX,
-      Math.floor(window.innerHeight - top - bottomReserve)
-    );
-  }
-
-  function filesWorkspaceDefaultHeightPx() {
-    var shell = els.filesWorkspaceShell;
-    var maxH = filesWorkspaceMaxHeightPx();
-    if (!shell) {
-      return fpClampLayout(820, FILES_WORKSPACE_MIN_PX, maxH);
-    }
-    /* Default fills space to the bottom of the viewport (maxH). Older builds used ~92vh
-       caps and ~520px floors, which felt too small now that Library has details, duplicates,
-       and player. Operators can still drag the resize strip or shrink with arrow keys. */
-    return fpClampLayout(maxH, FILES_WORKSPACE_MIN_PX, maxH);
-  }
-
-  function applyFilesWorkspaceHeightPx(h, persist) {
-    if (!els.filesWorkspaceShell) {
-      return;
-    }
-    var maxH = filesWorkspaceMaxHeightPx();
-    var minH = FILES_WORKSPACE_MIN_PX;
-    h = Math.round(fpClampLayout(h, minH, maxH));
-    var shell = els.filesWorkspaceShell;
-    shell.style.setProperty("--files-workspace-height", h + "px");
-    shell.style.height = h + "px";
-    shell.style.minHeight = h + "px";
-    shell.style.maxHeight = h + "px";
-    if (persist) {
-      try {
-        localStorage.setItem(FILES_WORKSPACE_HEIGHT_STORAGE, String(h));
-      } catch (_e) {
-        void _e;
-      }
-    }
-    fpScheduleVideoFrameLayout();
-  }
-
-  function syncFilesWorkspaceHeightFromStorage() {
-    if (!els.filesWorkspaceShell || activeViewId !== "library") {
-      return;
-    }
-    var maxH = filesWorkspaceMaxHeightPx();
-    var minH = FILES_WORKSPACE_MIN_PX;
-    var raw = null;
-    try {
-      raw = localStorage.getItem(FILES_WORKSPACE_HEIGHT_STORAGE);
-      if (raw == null || raw === "") {
-        var leg = localStorage.getItem(LEGACY_FILES_WORKSPACE_HEIGHT_STORAGE);
-        if (leg != null && leg !== "") {
-          raw = leg;
-          try {
-            localStorage.setItem(FILES_WORKSPACE_HEIGHT_STORAGE, leg);
-          } catch (_mig2) {
-            void _mig2;
-          }
-        }
-      }
-    } catch (_e) {
-      raw = null;
-    }
-    var px = raw != null ? parseFloat(raw) : NaN;
-    var h;
-    if (!isFinite(px)) {
-      h = filesWorkspaceDefaultHeightPx();
-      applyFilesWorkspaceHeightPx(h, true);
-      return;
-    }
-    h = fpClampLayout(px, minH, maxH);
-    if (h !== px) {
-      try {
-        localStorage.setItem(FILES_WORKSPACE_HEIGHT_STORAGE, String(h));
-      } catch (_e2) {
-        void _e2;
-      }
-    }
-    applyFilesWorkspaceHeightPx(h, false);
-  }
-
-  function initFilesWorkspaceShellResize() {
-    var shell = els.filesWorkspaceShell;
-    var handle = els.filesWorkspaceResizeY;
-    if (!shell || !handle) {
-      return;
-    }
-
-    function onWindowResize() {
-      if (filesWorkspaceResizeWinTimer) {
-        clearTimeout(filesWorkspaceResizeWinTimer);
-      }
-      filesWorkspaceResizeWinTimer = setTimeout(function () {
-        filesWorkspaceResizeWinTimer = 0;
-        if (activeViewId === "library") {
-          syncFilesWorkspaceHeightFromStorage();
-        }
-      }, 100);
-    }
-    window.addEventListener("resize", onWindowResize);
-
-    function moveFromClientY(clientY) {
-      if (!filesWorkspaceResizeDrag) {
-        return;
-      }
-      var delta = clientY - filesWorkspaceResizeDrag.startY;
-      var h = filesWorkspaceResizeDrag.startH + delta;
-      applyFilesWorkspaceHeightPx(h, false);
-    }
-
-    function endDrag() {
-      if (!filesWorkspaceResizeDrag) {
-        return;
-      }
-      filesWorkspaceResizeDrag = null;
-      document.body.style.userSelect = "";
-      if (els.filesWorkspaceShell) {
-        var h = Math.round(els.filesWorkspaceShell.getBoundingClientRect().height);
-        applyFilesWorkspaceHeightPx(h, true);
-      }
-    }
-
-    handle.addEventListener("mousedown", function (ev) {
-      if (ev.button !== 0) {
-        return;
-      }
-      ev.preventDefault();
-      var rect = shell.getBoundingClientRect();
-      filesWorkspaceResizeDrag = { startY: ev.clientY, startH: rect.height };
-      document.body.style.userSelect = "none";
-    });
-
-    handle.addEventListener("touchstart", function (ev) {
-      if (!ev.touches || !ev.touches.length) {
-        return;
-      }
-      ev.preventDefault();
-      var rect = shell.getBoundingClientRect();
-      filesWorkspaceResizeDrag = {
-        startY: ev.touches[0].clientY,
-        startH: rect.height,
-      };
-    }, { passive: false });
-
-    window.addEventListener("mousemove", function (ev) {
-      moveFromClientY(ev.clientY);
-    });
-    window.addEventListener("mouseup", endDrag);
-
-    window.addEventListener("touchmove", function (ev) {
-      if (!filesWorkspaceResizeDrag || !ev.touches.length) {
-        return;
-      }
-      ev.preventDefault();
-      moveFromClientY(ev.touches[0].clientY);
-    }, { passive: false });
-    window.addEventListener("touchend", endDrag);
-    window.addEventListener("touchcancel", endDrag);
-
-    handle.addEventListener("keydown", function (ev) {
-      if (ev.key === "ArrowUp" || ev.key === "ArrowDown") {
-        ev.preventDefault();
-        var cur = shell.getBoundingClientRect().height;
-        var step = ev.shiftKey ? 48 : 16;
-        var next =
-          ev.key === "ArrowUp" ? cur - step : cur + step;
-        applyFilesWorkspaceHeightPx(next, true);
-      }
-    });
-  }
+  /* Library R1/R2/R3 sizing is CSS (min-height, 16:9 stage); vertical band resize removed. */
 
   function editorMarkClean() {
     editorBaseline = els.editorTextarea.value;
@@ -3282,7 +3321,7 @@
   function setEditorRunning(running) {
     editorJobRunning = !!running;
     var cookiesBlocked =
-      editorFile === COOKIES_FILE && !els.optUnlockCookies.checked;
+      isSensitiveCookieRel(editorFile) && !els.optUnlockCookies.checked;
     els.btnSaveEditor.disabled = editorJobRunning || cookiesBlocked;
     if (editorJobRunning) {
       els.editorSaveHint.textContent =
@@ -3316,8 +3355,16 @@
       editorFile === "videos_input.txt";
     els.editorOptionsStrip.hidden = !isInputList;
     els.editorOptionsConf.hidden = editorFile !== YTDLP_CONF;
-    const isCookies = editorFile === COOKIES_FILE;
+    const isCookies = isSensitiveCookieRel(editorFile);
     els.cookiesCallout.hidden = !isCookies;
+    if (els.cookiesCalloutText && isCookies) {
+      var cookieLabel =
+        editorFile === COOKIES_FILE ? "cookies.txt" : editorFile;
+      els.cookiesCalloutText.innerHTML =
+        "<strong>" +
+        esc(cookieLabel) +
+        "</strong> is sensitive. Content is hidden until you unlock. Avoid leaving this open where screen captures or shared logs could leak tokens.";
+    }
     if (!isCookies) {
       els.optUnlockCookies.checked = false;
     }
@@ -3338,9 +3385,8 @@
     els.editorRelLabel.textContent = editorFile;
     editorTabOptionsVisible();
     var unlock =
-      editorFile === COOKIES_FILE && els.optUnlockCookies.checked;
-    var q =
-      editorFile === COOKIES_FILE
+      isSensitiveCookieRel(editorFile) && els.optUnlockCookies.checked;
+    var q = isSensitiveCookieRel(editorFile)
         ? "?unlock_cookies=" + (unlock ? "1" : "0")
         : "";
     var r = await fetch(
@@ -3380,10 +3426,10 @@
       return;
     }
     if (
-      editorFile === COOKIES_FILE &&
+      isSensitiveCookieRel(editorFile) &&
       !els.optUnlockCookies.checked
     ) {
-      els.editorMsg.textContent = "Enable unlock to save cookies.txt.";
+      els.editorMsg.textContent = "Enable unlock to save this cookie file.";
       return;
     }
     var body = {
@@ -3391,7 +3437,7 @@
       strip_blank_lines: els.optStripBlanks.checked,
       conf_smoke: els.optConfSmoke.checked,
       unlock_cookies:
-        editorFile === COOKIES_FILE && els.optUnlockCookies.checked,
+        isSensitiveCookieRel(editorFile) && els.optUnlockCookies.checked,
     };
     var r = await fetch(
       "/api/files/" + encodeURIComponent(editorFile),
@@ -3433,165 +3479,16 @@
     editorMarkClean();
   }
 
-  function gallerydlMarkClean() {
-    if (!els.gallerydlTextarea) {
+  function loadGallerydlFile() {
+    if (typeof window.gallerydlSetupLoad === "function") {
+      window.gallerydlSetupLoad();
       return;
     }
-    gallerydlBaseline = els.gallerydlTextarea.value;
-    if (els.gallerydlDirtyPill) {
-      els.gallerydlDirtyPill.hidden = true;
+    var gWarn = document.getElementById("gallerydlMsg");
+    if (gWarn) {
+      gWarn.textContent =
+        "gallery-dl.conf editor script did not load. Hard-refresh (Ctrl+F5) or check /static/gallerydl_setup.js.";
     }
-  }
-
-  function gallerydlUpdateDirty() {
-    if (!els.gallerydlTextarea || !els.gallerydlDirtyPill) {
-      return;
-    }
-    var dirty = els.gallerydlTextarea.value !== gallerydlBaseline;
-    els.gallerydlDirtyPill.hidden = !dirty;
-  }
-
-  async function loadGallerydlFile() {
-    if (!els.gallerydlTextarea) {
-      return;
-    }
-    if (els.gallerydlMsg) {
-      els.gallerydlMsg.textContent = "Loading from disk…";
-    }
-    try {
-      var rs = await fetch("/api/settings");
-      if (rs.ok) {
-        var st = await rs.json();
-        if (els.gallerydlEmptyPath && st.archive_root) {
-          var root = String(st.archive_root).replace(/[/\\]+$/, "");
-          var join = root.indexOf("\\") >= 0 ? "\\" : "/";
-          els.gallerydlEmptyPath.textContent = root + join + GALLERY_DL_CONF;
-        }
-      }
-    } catch (_e0) {
-      /* ignore */
-    }
-    var r;
-    try {
-      r = await fetch("/api/files/" + encodeURIComponent(GALLERY_DL_CONF));
-    } catch (_e1) {
-      if (els.gallerydlMsg) {
-        els.gallerydlMsg.textContent =
-          "Load failed (network error). Check connection and the Archive Console server.";
-      }
-      return;
-    }
-    if (!r.ok) {
-      if (els.gallerydlMsg) {
-        els.gallerydlMsg.textContent = "Load failed (" + r.status + ").";
-      }
-      return;
-    }
-    var j = await r.json();
-    if (els.gallerydlMsg) {
-      els.gallerydlMsg.textContent = "";
-    }
-    var existsOnDisk = j.mtime != null;
-    if (els.gallerydlEmptyState) {
-      els.gallerydlEmptyState.hidden = existsOnDisk;
-    }
-    if (els.gallerydlMtime) {
-      if (j.mtime != null) {
-        els.gallerydlMtime.textContent =
-          "mtime: " + new Date(j.mtime * 1000).toLocaleString();
-      } else {
-        els.gallerydlMtime.textContent = "new / missing on disk";
-      }
-    }
-    if (els.gallerydlRelLabel) {
-      els.gallerydlRelLabel.textContent = GALLERY_DL_CONF;
-    }
-    els.gallerydlTextarea.value = j.content != null ? j.content : "";
-    gallerydlMarkClean();
-    setEditorRunning(editorJobRunning);
-  }
-
-  async function gallerydlReloadFromDisk() {
-    if (!els.gallerydlTextarea) {
-      return;
-    }
-    if (els.gallerydlTextarea.value !== gallerydlBaseline) {
-      if (
-        !window.confirm(
-          "Discard unsaved edits in " + GALLERY_DL_CONF + "?"
-        )
-      ) {
-        return;
-      }
-    }
-    await loadGallerydlFile();
-  }
-
-  async function saveGallerydlFile() {
-    if (!els.gallerydlTextarea) {
-      return;
-    }
-    var r0 = await fetch("/api/run/status");
-    var s0 = await r0.json();
-    if (s0.phase === "running") {
-      if (els.gallerydlMsg) {
-        els.gallerydlMsg.textContent =
-          "Save blocked: a job is running. Wait for it to finish.";
-      }
-      return;
-    }
-    var body = {
-      content: els.gallerydlTextarea.value,
-      strip_blank_lines: false,
-      conf_smoke: false,
-      unlock_cookies: false,
-    };
-    var r = await fetch(
-      "/api/files/" + encodeURIComponent(GALLERY_DL_CONF),
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      }
-    );
-    if (r.status === 409) {
-      try {
-        var ej = await r.json();
-        if (els.gallerydlMsg) {
-          els.gallerydlMsg.textContent =
-            typeof ej.detail === "string"
-              ? ej.detail
-              : JSON.stringify(ej.detail);
-        }
-      } catch (_e2) {
-        if (els.gallerydlMsg) {
-          els.gallerydlMsg.textContent = await r.text();
-        }
-      }
-      return;
-    }
-    if (!r.ok) {
-      if (els.gallerydlMsg) {
-        els.gallerydlMsg.textContent = "Save failed: " + r.status;
-      }
-      return;
-    }
-    var sj = await r.json();
-    var parts = ["Saved."];
-    if (sj.backup) {
-      parts.push("Backup: " + sj.backup);
-    }
-    if (els.gallerydlMsg) {
-      els.gallerydlMsg.textContent = parts.join(" ");
-    }
-    if (sj.mtime != null && els.gallerydlMtime) {
-      els.gallerydlMtime.textContent =
-        "mtime: " + new Date(sj.mtime * 1000).toLocaleString();
-    }
-    if (els.gallerydlEmptyState) {
-      els.gallerydlEmptyState.hidden = true;
-    }
-    gallerydlMarkClean();
   }
 
   function supportedsitesSafeHttpHref(u) {
@@ -3616,6 +3513,9 @@
     var hay = (row.label || "") + " " + (row.id || "");
     if (row.example_url) {
       hay += " " + row.example_url;
+    }
+    if (row.cookie_file) {
+      hay += " " + row.cookie_file;
     }
     return hay.toLowerCase().indexOf(s) >= 0;
   }
@@ -3660,6 +3560,37 @@
         note.className = "muted small";
         note.textContent = tool.doc_note;
         card.appendChild(note);
+      }
+
+      if (tool.cookie_note) {
+        var cnote = document.createElement("p");
+        cnote.className = "muted small supportedsites-cookie-note";
+        cnote.textContent = tool.cookie_note;
+        card.appendChild(cnote);
+      }
+
+      if (tool.cookie_convention) {
+        var gnote = document.createElement("p");
+        gnote.className = "muted small supportedsites-cookie-note";
+        gnote.textContent = tool.cookie_convention;
+        card.appendChild(gnote);
+      }
+
+      if (
+        tool.id === "gallery-dl" &&
+        tool.site_cookies_on_disk &&
+        tool.site_cookies_on_disk.length
+      ) {
+        var onDisk = document.createElement("p");
+        onDisk.className = "muted small";
+        onDisk.textContent =
+          "On disk: " +
+          tool.site_cookies_on_disk
+            .map(function (x) {
+              return x.rel;
+            })
+            .join(", ");
+        card.appendChild(onDisk);
       }
 
       if (tool.error) {
@@ -3724,7 +3655,11 @@
         table.className = "table supportedsites-table";
         var thead = document.createElement("thead");
         var hr = document.createElement("tr");
-        ["Name / id", "Documentation", "Example"].forEach(function (lab) {
+        var headers = ["Name / id", "Documentation", "Example"];
+        if (tool.id === "gallery-dl") {
+          headers.push("Site cookie (gallery-dl)");
+        }
+        headers.forEach(function (lab) {
           var th = document.createElement("th");
           th.textContent = lab;
           hr.appendChild(th);
@@ -3776,6 +3711,34 @@
             td2.textContent = "—";
           }
           tr.appendChild(td2);
+          if (tool.id === "gallery-dl") {
+            var td3 = document.createElement("td");
+            if (row.cookie_file) {
+              var cf = document.createElement("code");
+              cf.textContent = row.cookie_file;
+              td3.appendChild(cf);
+              if (row.cookie_present) {
+                td3.appendChild(document.createElement("br"));
+                var editBtn = document.createElement("button");
+                editBtn.type = "button";
+                editBtn.className = "btn ghost small supportedsites-cookie-edit";
+                editBtn.textContent = "on disk — edit";
+                editBtn.addEventListener("click", function () {
+                  goToSiteCookieFile(row.cookie_file);
+                });
+                td3.appendChild(editBtn);
+              } else {
+                td3.appendChild(document.createElement("br"));
+                var hint = document.createElement("span");
+                hint.className = "muted small";
+                hint.textContent = "if needed";
+                td3.appendChild(hint);
+              }
+            } else {
+              td3.textContent = "—";
+            }
+            tr.appendChild(td3);
+          }
           tbody.appendChild(tr);
         });
         table.appendChild(tbody);
@@ -3834,6 +3797,116 @@
     }
   }
 
+  async function refreshSiteCookiesPanel() {
+    if (!els.siteCookiesList) {
+      return;
+    }
+    try {
+      var r = await fetch("/api/cookies/site-files");
+      if (!r.ok) {
+        if (els.siteCookiesMsg) {
+          els.siteCookiesMsg.textContent = "Could not load site cookies list.";
+        }
+        return;
+      }
+      var j = await r.json();
+      var files = j.files || [];
+      els.siteCookiesList.innerHTML = "";
+      files.forEach(function (row) {
+        var li = document.createElement("li");
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "site-cookie-row";
+        if (row.rel === editorFile) {
+          btn.classList.add("is-selected");
+        }
+        var size =
+          row.size != null ? formatFileSize(Number(row.size)) : "—";
+        btn.textContent = row.rel + " (" + size + ")";
+        btn.title = "Edit " + row.rel;
+        btn.addEventListener("click", function () {
+          goToSiteCookieFile(row.rel);
+        });
+        li.appendChild(btn);
+        els.siteCookiesList.appendChild(li);
+      });
+      if (els.siteCookiesEmpty) {
+        els.siteCookiesEmpty.hidden = files.length > 0;
+      }
+      if (els.siteCookiesMsg) {
+        var parts = [];
+        if (j.cookies_txt_present) {
+          parts.push("cookies.txt present (yt-dlp)");
+        } else {
+          parts.push("no cookies.txt yet (yt-dlp / optional gallery fallback)");
+        }
+        if (files.length) {
+          parts.push(
+            files.length +
+              " site file(s) auto-wired at Galleries run (see Supported sites)"
+          );
+        }
+        if (!j.allowlist_has_cookies_dir) {
+          parts.push(
+            "cookies/ should be included automatically — refresh Settings if Library cannot browse this folder"
+          );
+        }
+        els.siteCookiesMsg.textContent = parts.join(" · ");
+      }
+    } catch (_e) {
+      if (els.siteCookiesMsg) {
+        els.siteCookiesMsg.textContent = "Site cookies list unavailable.";
+      }
+    }
+  }
+
+  function goToSiteCookieFile(rel) {
+    if (!rel || !isSiteCookiesRel(rel)) {
+      return;
+    }
+    activateView("inputs");
+    replaceStateView("inputs", rel);
+    loadDownloadDirsForm();
+    editorTrySwitchTab(rel);
+    void refreshSiteCookiesPanel();
+  }
+
+  async function addSiteCookieFile() {
+    if (!els.siteCookieNewName) {
+      return;
+    }
+    var name = (els.siteCookieNewName.value || "").trim();
+    if (!name) {
+      if (els.siteCookiesMsg) {
+        els.siteCookiesMsg.textContent = "Enter a site name (e.g. instagram).";
+      }
+      return;
+    }
+    var r = await fetch("/api/cookies/site-files", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name }),
+    });
+    var j = {};
+    try {
+      j = await r.json();
+    } catch (_e) {
+      void _e;
+    }
+    if (!r.ok) {
+      if (els.siteCookiesMsg) {
+        els.siteCookiesMsg.textContent =
+          (j && j.detail) || "Could not create site cookie file.";
+      }
+      return;
+    }
+    els.siteCookieNewName.value = "";
+    await refreshSiteCookiesPanel();
+    if (j.rel) {
+      goToSiteCookieFile(j.rel);
+    }
+  }
+
   function editorTrySwitchTab(nextFile) {
     if (els.editorTextarea.value !== editorBaseline) {
       if (
@@ -3847,7 +3920,7 @@
     editorFile = nextFile;
     els.editorTabs.forEach(function (t) {
       var f = t.getAttribute("data-file");
-      var on = f === editorFile;
+      var on = f === editorFile && !isSiteCookiesRel(editorFile);
       t.classList.toggle("is-active", on);
       t.setAttribute("aria-selected", on ? "true" : "false");
     });
@@ -3865,6 +3938,89 @@
       canceled: "canceled",
     };
     els.globalPill.textContent = labels[phase] || phase;
+    if (phase !== "running") {
+      stopRunStatusPoll();
+    }
+  }
+
+  var runStatusPollTimer = null;
+
+  function stopRunStatusPoll() {
+    if (runStatusPollTimer) {
+      clearInterval(runStatusPollTimer);
+      runStatusPollTimer = null;
+    }
+  }
+
+  function startRunStatusPoll() {
+    if (runStatusPollTimer) {
+      return;
+    }
+    runStatusPollTimer = setInterval(function () {
+      fetch("/api/run/status")
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (j) {
+          if (j && j.phase && j.phase !== "running") {
+            applyRunStatusFromServer(j);
+          }
+        })
+        .catch(function () {});
+    }, 5000);
+  }
+
+  function applyRunStatusFromServer(j) {
+    if (j && j.phase) {
+      setPhase(j.phase);
+    }
+    renderRunPanel(j);
+    var running = j && j.phase === "running";
+    if (running && j.run && j.run.job) {
+      activeStreamJob = j.run.job;
+      disableRunButtons(true);
+      editorJobRunning = true;
+      setEditorRunning(true);
+      startRunStatusPoll();
+    } else {
+      activeStreamJob = null;
+      disableRunButtons(false);
+      editorJobRunning = false;
+      setEditorRunning(false);
+      stopRunStatusPoll();
+    }
+  }
+
+  async function postRunStop() {
+    if (
+      !window.confirm(
+        "Stop this run? The job may leave partial files on disk. You can re-run or clean up manually."
+      )
+    ) {
+      return;
+    }
+    var r = await fetch("/api/run/stop", { method: "POST" });
+    if (r.status === 409) {
+      appendStreamLine("[console] Stop: " + (await r.text()));
+      return;
+    }
+    if (!r.ok) {
+      appendStreamLine(
+        "[console] Stop failed (" + r.status + ") — trying force-reset…"
+      );
+      await fetch("/api/run/force-reset", { method: "POST" });
+    }
+    try {
+      var st = await fetch("/api/run/status");
+      if (st.ok) {
+        applyRunStatusFromServer(await st.json());
+      }
+    } catch (_e) {
+      void _e;
+    }
+    appendStreamLine(
+      "[console] Stop finished — Run galleries is enabled again if no job is running."
+    );
   }
 
   function formatDur(seconds) {
@@ -3890,8 +4046,8 @@
       watch_later: "Watch Later / playlists",
       channels: "Channels",
       videos: "Video list",
-      oneoff: "One-off",
-      galleries: "Galleries",
+      oneoff: "Single download",
+      galleries: "Gallery batch",
       clip_export: "Clip export",
     };
     return map[job] || job || "job";
@@ -3928,7 +4084,523 @@
     b.hidden = !wantShow || suppressOnOneoffWithGate;
   }
 
+  function homeValidateUrl(raw) {
+    var s = (raw || "").trim();
+    if (!s) {
+      return null;
+    }
+    try {
+      var u = new URL(s);
+      if (u.protocol !== "http:" && u.protocol !== "https:") {
+        return null;
+      }
+      if (!u.hostname) {
+        return null;
+      }
+      u.hash = "";
+      return u.href;
+    } catch (_e) {
+      return null;
+    }
+  }
+
+  function homeNormalizeBookmarks(arr) {
+    var out = [];
+    if (!Array.isArray(arr)) {
+      return out;
+    }
+    arr.forEach(function (row) {
+      var vu =
+        row && typeof row.url === "string" ? homeValidateUrl(row.url) : null;
+      if (row && typeof row.id === "string" && vu) {
+        out.push({
+          id: row.id,
+          url: vu,
+          createdAt:
+            typeof row.createdAt === "number" ? row.createdAt : Date.now(),
+        });
+      }
+    });
+    return out;
+  }
+
+  function homeReadBookmarksFromLs() {
+    try {
+      return homeNormalizeBookmarks(JSON.parse(localStorage.getItem(HOME_LS_BOOKMARKS)));
+    } catch (_err) {
+      void _err;
+      return [];
+    }
+  }
+
+  /** Load bookmarks from the server (port-independent); migrate legacy localStorage once. */
+  async function homeLoadBookmarks() {
+    homeBookmarks = [];
+    try {
+      var resp = await fetch("/api/bookmarks", {
+        headers: { Accept: "application/json" },
+      });
+      if (resp.ok) {
+        var data = await resp.json();
+        homeBookmarks = homeNormalizeBookmarks(data && data.bookmarks);
+        if (homeBookmarks.length === 0) {
+          var legacy = homeReadBookmarksFromLs();
+          if (legacy.length > 0) {
+            homeBookmarks = legacy;
+            await homeSaveBookmarks();
+          }
+        }
+        return;
+      }
+    } catch (_e) {
+      void _e;
+    }
+    homeBookmarks = homeReadBookmarksFromLs();
+  }
+
+  /** Persist to the server (source of truth); keep a localStorage cache for offline use. */
+  async function homeSaveBookmarks() {
+    try {
+      localStorage.setItem(HOME_LS_BOOKMARKS, JSON.stringify(homeBookmarks));
+    } catch (_e) {
+      void _e;
+    }
+    try {
+      await fetch("/api/bookmarks", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookmarks: homeBookmarks }),
+      });
+    } catch (_e2) {
+      void _e2;
+    }
+  }
+
+  function homeApplyClock24FromLs() {
+    if (!els.optHomeClock24) {
+      return;
+    }
+    try {
+      var v = localStorage.getItem(HOME_LS_CLOCK24);
+      els.optHomeClock24.checked = v === "1";
+    } catch (_x) {
+      void _x;
+    }
+  }
+
+  function homeWeatherIconSvg(condition, hour) {
+    var c = (condition || "").toLowerCase();
+    if (
+      c.indexOf("cloud") >= 0 ||
+      c.indexOf("overcast") >= 0 ||
+      c.indexOf("fog") >= 0 ||
+      c.indexOf("rain") >= 0 ||
+      c.indexOf("snow") >= 0 ||
+      c.indexOf("drizzle") >= 0 ||
+      c.indexOf("storm") >= 0
+    ) {
+      return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+        '<path d="M6.5 19a4.5 4.5 0 01-.37-8.98 6.002 6.002 0 0111.16-3.48A4.502 4.502 0 0117.5 19h-11z"/>' +
+        "</svg>"
+      );
+    }
+    if (hour < 6 || hour >= 20) {
+      return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+        '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>' +
+        "</svg>"
+      );
+    }
+    return (
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="5"/>' +
+      "</svg>"
+    );
+  }
+
+  function tickHomeClock() {
+    if (activeViewId !== "home" || !els.homeFlameDatetime) {
+      return;
+    }
+    var now = new Date();
+    var use24 = !!(els.optHomeClock24 && els.optHomeClock24.checked);
+    var datePart = "";
+    try {
+      datePart = new Intl.DateTimeFormat("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }).format(now);
+    } catch (_e) {
+      datePart = now.toLocaleDateString();
+    }
+    var timePart = "";
+    try {
+      timePart = new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: !use24,
+      }).format(now);
+    } catch (_e2) {
+      timePart = now.toLocaleTimeString();
+    }
+    els.homeFlameDatetime.textContent = (datePart + " — " + timePart).toUpperCase();
+
+    var h = now.getHours();
+    var greet = "Good evening!";
+    if (h < 5 || h >= 22) {
+      greet = "Good night!";
+    } else if (h < 12) {
+      greet = "Good morning!";
+    } else if (h < 17) {
+      greet = "Good afternoon!";
+    }
+    if (els.homeFlameGreeting) {
+      els.homeFlameGreeting.textContent = greet;
+    }
+  }
+
+  function homeSetApplicationsEdit(on) {
+    homeApplicationsEdit = !!on;
+    var wrap = els.homeFlameApps;
+    if (wrap) {
+      wrap.classList.toggle("is-edit", homeApplicationsEdit);
+    }
+    if (els.homeApplicationsToggle) {
+      els.homeApplicationsToggle.setAttribute(
+        "aria-expanded",
+        homeApplicationsEdit ? "true" : "false"
+      );
+    }
+    if (els.btnHomeAddBookmark) {
+      els.btnHomeAddBookmark.hidden = !homeApplicationsEdit;
+    }
+  }
+
+  async function homeFetchLabels(urls) {
+    try {
+      var r = await fetch("/api/bookmarks/labels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ urls: urls }),
+      });
+      if (!r.ok) {
+        return null;
+      }
+      return await r.json();
+    } catch (_e) {
+      return null;
+    }
+  }
+
+  function homeFallbackLabels(urls) {
+    return urls.map(function (u) {
+      try {
+        var x = new URL(u);
+        return x.hostname.replace(/^\[|\]$/g, "") || u;
+      } catch (_e) {
+        return u;
+      }
+    });
+  }
+
+  async function homeRenderBookmarks() {
+    if (!els.homeBookmarkGrid) {
+      return;
+    }
+    els.homeBookmarkGrid.textContent = "";
+    var urls = homeBookmarks.map(function (b) {
+      return b.url;
+    });
+    var labels = homeFallbackLabels(urls);
+    var titles = urls.slice();
+    var payload = await homeFetchLabels(urls);
+    if (
+      payload &&
+      Array.isArray(payload.labels) &&
+      payload.labels.length === urls.length
+    ) {
+      labels = payload.labels;
+      titles = Array.isArray(payload.titles) ? payload.titles : titles;
+    }
+    if (els.homeBookmarkEmpty) {
+      els.homeBookmarkEmpty.hidden = urls.length > 0;
+    }
+    homeBookmarks.forEach(function (b, i) {
+      var card = document.createElement("article");
+      card.className = "home-bookmark-row";
+      var labelText = labels[i] || b.url;
+      var titleText = titles[i] || b.url;
+      var titleUpper = String(labelText || "").toUpperCase();
+      var rawTitle = String(titles[i] || "").trim();
+      var descUpper = "";
+      if (rawTitle && rawTitle !== labelText) {
+        var shortT =
+          rawTitle.length > 52 ? rawTitle.slice(0, 49).trim() + "…" : rawTitle;
+        descUpper = shortT.toUpperCase();
+      } else {
+        try {
+          var uh = new URL(b.url);
+          descUpper = (
+            uh.hostname.replace(/^www\./i, "") || titleUpper
+          ).toUpperCase();
+        } catch (_eu) {
+          descUpper = titleUpper;
+        }
+      }
+      var main = document.createElement("div");
+      main.className = "home-bookmark-row__main";
+      var link = document.createElement("a");
+      link.className = "home-bookmark-row__link";
+      link.href = b.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.title = titleText;
+      var img = document.createElement("img");
+      img.className = "home-bookmark-row__icon";
+      img.alt = "";
+      img.loading = "lazy";
+      img.src = "/api/bookmark-icon?url=" + encodeURIComponent(b.url);
+      img.onerror = function () {
+        img.onerror = null;
+        img.src = HOME_DEFAULT_ICON;
+      };
+      var meta = document.createElement("div");
+      meta.className = "home-bookmark-row__meta";
+      var spanTitle = document.createElement("span");
+      spanTitle.className = "home-bookmark-row__title";
+      spanTitle.textContent = titleUpper;
+      var spanDesc = document.createElement("span");
+      spanDesc.className = "home-bookmark-row__desc";
+      spanDesc.textContent = descUpper;
+      meta.appendChild(spanTitle);
+      meta.appendChild(spanDesc);
+      link.appendChild(img);
+      link.appendChild(meta);
+      var actions = document.createElement("div");
+      actions.className = "home-bookmark-row__actions";
+      var btnEdit = document.createElement("button");
+      btnEdit.type = "button";
+      btnEdit.className = "btn ghost small";
+      btnEdit.textContent = "Edit";
+      btnEdit.setAttribute("aria-label", "Edit bookmark");
+      btnEdit.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        openHomeBookmarkModal(b.id);
+      });
+      var btnDel = document.createElement("button");
+      btnDel.type = "button";
+      btnDel.className = "btn ghost small";
+      btnDel.textContent = "Delete";
+      btnDel.setAttribute("aria-label", "Delete bookmark");
+      btnDel.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        homeBookmarks = homeBookmarks.filter(function (x) {
+          return x.id !== b.id;
+        });
+        void homeSaveBookmarks();
+        void homeRenderBookmarks();
+      });
+      actions.appendChild(btnEdit);
+      actions.appendChild(btnDel);
+      main.appendChild(link);
+      card.appendChild(main);
+      card.appendChild(actions);
+      els.homeBookmarkGrid.appendChild(card);
+    });
+  }
+
+  async function refreshHomeWeather() {
+    if (!els.homeWeatherLine1) {
+      return;
+    }
+    els.homeWeatherLine1.classList.remove("is-weather-primary");
+    els.homeWeatherLine1.textContent = "LOADING…";
+    if (els.homeWeatherLine2) {
+      els.homeWeatherLine2.textContent = "";
+    }
+    if (els.homeWeatherIcon) {
+      els.homeWeatherIcon.innerHTML = "";
+    }
+    try {
+      var r = await fetch("/api/weather");
+      var j = await r.json();
+      var nowH = new Date().getHours();
+      if (!j || j.ok === false) {
+        var msg =
+          (j && j.message) ||
+          (j && j.error === "not_configured"
+            ? "SET COORDINATES IN SETTINGS"
+            : "WEATHER UNAVAILABLE");
+        els.homeWeatherLine1.textContent = String(msg).toUpperCase();
+        if (els.homeWeatherLine2) {
+          els.homeWeatherLine2.textContent = "";
+        }
+        if (els.homeWeatherIcon) {
+          els.homeWeatherIcon.innerHTML = homeWeatherIconSvg("", nowH);
+        }
+        return;
+      }
+      if (j.temp_c != null) {
+        var tempF = Math.round(Number(j.temp_c) * (9 / 5) + 32);
+        els.homeWeatherLine1.textContent = tempF + "°F";
+        els.homeWeatherLine1.classList.add("is-weather-primary");
+      } else {
+        els.homeWeatherLine1.textContent = "—";
+      }
+      if (els.homeWeatherLine2) {
+        if (j.humidity_pct != null) {
+          els.homeWeatherLine2.textContent = String(j.humidity_pct) + "%";
+        } else {
+          els.homeWeatherLine2.textContent = "";
+        }
+      }
+      if (els.homeWeatherIcon) {
+        els.homeWeatherIcon.innerHTML = homeWeatherIconSvg(
+          j.condition || "",
+          nowH
+        );
+      }
+    } catch (_e) {
+      els.homeWeatherLine1.classList.remove("is-weather-primary");
+      els.homeWeatherLine1.textContent = "WEATHER UNREACHABLE";
+      if (els.homeWeatherLine2) {
+        els.homeWeatherLine2.textContent = "";
+      }
+      if (els.homeWeatherIcon) {
+        els.homeWeatherIcon.innerHTML = homeWeatherIconSvg(
+          "",
+          new Date().getHours()
+        );
+      }
+    }
+  }
+
+  function homeCloseBookmarkModal() {
+    var m = els.homeBookmarkModal;
+    if (!m) {
+      return;
+    }
+    m.hidden = true;
+    m.setAttribute("aria-hidden", "true");
+    homeBookmarkModalEditId = null;
+    if (els.inpHomeBookmarkUrl) {
+      els.inpHomeBookmarkUrl.value = "";
+    }
+    if (els.homeBookmarkUrlMsg) {
+      els.homeBookmarkUrlMsg.textContent = "";
+    }
+    if (els.btnHomeBookmarkSave) {
+      els.btnHomeBookmarkSave.disabled = true;
+    }
+    document.removeEventListener("keydown", homeOnModalKeydown, true);
+  }
+
+  function homeOnModalKeydown(ev) {
+    if (ev.key === "Escape") {
+      homeCloseBookmarkModal();
+      ev.preventDefault();
+    }
+  }
+
+  function openHomeBookmarkModal(editId) {
+    var m = els.homeBookmarkModal;
+    if (!m || !els.inpHomeBookmarkUrl) {
+      return;
+    }
+    homeBookmarkModalEditId = editId || null;
+    if (els.homeBookmarkModalTitle) {
+      els.homeBookmarkModalTitle.textContent = editId
+        ? "Edit bookmark"
+        : "Add bookmark";
+    }
+    var preset = "";
+    if (editId) {
+      var found = homeBookmarks.filter(function (x) {
+        return x.id === editId;
+      });
+      preset = found[0] ? found[0].url : "";
+    }
+    els.inpHomeBookmarkUrl.value = preset;
+    if (els.homeBookmarkUrlMsg) {
+      els.homeBookmarkUrlMsg.textContent = "";
+    }
+    m.hidden = false;
+    m.setAttribute("aria-hidden", "false");
+    document.addEventListener("keydown", homeOnModalKeydown, true);
+    window.setTimeout(function () {
+      els.inpHomeBookmarkUrl.focus();
+      els.inpHomeBookmarkUrl.select();
+    }, 0);
+    homeSyncBookmarkSaveEnabled();
+  }
+
+  function homeSyncBookmarkSaveEnabled() {
+    if (!els.btnHomeBookmarkSave || !els.inpHomeBookmarkUrl) {
+      return;
+    }
+    els.btnHomeBookmarkSave.disabled = !homeValidateUrl(
+      els.inpHomeBookmarkUrl.value.trim()
+    );
+  }
+
+  function homeCommitBookmarkFromModal() {
+    var u = homeValidateUrl(
+      (els.inpHomeBookmarkUrl && els.inpHomeBookmarkUrl.value) || ""
+    );
+    if (!u) {
+      return;
+    }
+    if (homeBookmarkModalEditId) {
+      homeBookmarks = homeBookmarks.map(function (x) {
+        return x.id === homeBookmarkModalEditId
+          ? { id: x.id, url: u, createdAt: x.createdAt }
+          : x;
+      });
+    } else {
+      var nid =
+        window.crypto && typeof window.crypto.randomUUID === "function"
+          ? window.crypto.randomUUID()
+          : String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8);
+      homeBookmarks.push({ id: nid, url: u, createdAt: Date.now() });
+    }
+    void homeSaveBookmarks();
+    homeCloseBookmarkModal();
+    void homeRenderBookmarks();
+  }
+
+  function initHomeView() {
+    homeSetApplicationsEdit(false);
+    homeApplyClock24FromLs();
+    void refreshHomeWeather();
+    tickHomeClock();
+    void homeLoadBookmarks().then(function () {
+      void homeRenderBookmarks();
+    });
+  }
+
+  function markGettingStartedSeenOnServer() {
+    void fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ getting_started_seen: true }),
+    });
+  }
+
   function activateView(viewId) {
+    if (homeClockTimer != null) {
+      window.clearInterval(homeClockTimer);
+      homeClockTimer = null;
+    }
+    var prevViewId = activeViewId;
+    if (prevViewId === "getting-started" && viewId !== "getting-started") {
+      markGettingStartedSeenOnServer();
+    }
     activeViewId = viewId;
     els.nav.forEach(function (b) {
       var on = b.getAttribute("data-view") === viewId;
@@ -3940,15 +4612,56 @@
     applyTopCookieBannerVisibility();
     if (viewId === "library") {
       requestAnimationFrame(function () {
-        requestAnimationFrame(syncFilesWorkspaceHeightFromStorage);
+        requestAnimationFrame(function () {
+          fpScheduleVideoFrameLayout();
+        });
       });
       syncDupRootCheckboxesFromApi();
     }
+    if (viewId === "home") {
+      homeClockTimer = window.setInterval(tickHomeClock, 1000);
+      tickHomeClock();
+    }
+    if (viewId === "czkawka" && typeof window.czkawkaOnViewEnter === "function") {
+      window.czkawkaOnViewEnter();
+    }
+    if (typeof window.czkawkaSyncScanState === "function") {
+      void window.czkawkaSyncScanState();
+    }
+    if (viewId === "run") {
+      void loadYoutubeScheduleForm();
+    }
+    if (viewId === "rename") {
+      void refreshRenameDeepLUsage();
+    }
   }
 
-  function getInitialViewFromUrl() {
-    var q = new URLSearchParams(window.location.search);
-    var v = q.get("view");
+  var DEFAULT_LANDING_VIEW_IDS = {
+    "getting-started": true,
+    home: true,
+    run: true,
+    oneoff: true,
+    galleries: true,
+    history: true,
+    library: true,
+    czkawka: true,
+    rename: true,
+    inputs: true,
+    ytdlp: true,
+    gallerydl: true,
+    gifsky: true,
+    gifskyconf: true,
+    supportedsites: true,
+    settings: true,
+  };
+
+  function normalizeDefaultLandingView(v) {
+    var s = String(v || "").trim();
+    return DEFAULT_LANDING_VIEW_IDS[s] ? s : "run";
+  }
+
+  function mapViewQueryToViewId(raw) {
+    var v = (raw || "").trim();
     if (v === "history" || v === "logs" || v === "reports") {
       return "history";
     }
@@ -3957,23 +4670,309 @@
     }
     if (
       v === "library" ||
+      v === "czkawka" ||
       v === "rename" ||
       v === "inputs" ||
       v === "settings" ||
       v === "ytdlp" ||
       v === "gallerydl" ||
+      v === "gifsky" ||
+      v === "gifskyconf" ||
       v === "supportedsites" ||
       v === "run" ||
       v === "oneoff" ||
-      v === "galleries"
+      v === "galleries" ||
+      v === "getting-started" ||
+      v === "home"
     ) {
       return v;
     }
     return "run";
   }
 
+  /** @returns {string | null} view id if ?view= is present, else null */
+  function getExplicitViewFromUrl() {
+    var q = new URLSearchParams(window.location.search);
+    if (!q.has("view")) {
+      return null;
+    }
+    return mapViewQueryToViewId(q.get("view"));
+  }
+
+  function resolveInitialViewFromSettings(settingsPayload) {
+    var explicit = getExplicitViewFromUrl();
+    if (explicit !== null) {
+      return explicit;
+    }
+    if (settingsPayload && settingsPayload.getting_started_seen === false) {
+      return "getting-started";
+    }
+    return normalizeDefaultLandingView(
+      settingsPayload && settingsPayload.default_landing_view
+    );
+  }
+
+  function runInitialViewBootstrap(viewId) {
+    if (viewId === "inputs") {
+      var gsInputsFile = getInitialInputsFileFromUrl(viewId);
+      if (gsInputsFile) {
+        editorFile = gsInputsFile;
+        els.editorTabs.forEach(function (t) {
+          var f = t.getAttribute("data-file");
+          var on = f === editorFile && !isSiteCookiesRel(editorFile);
+          t.classList.toggle("is-active", on);
+          t.setAttribute("aria-selected", on ? "true" : "false");
+        });
+      }
+      loadDownloadDirsForm();
+      void refreshSiteCookiesPanel();
+      loadEditorFile(editorFile);
+    }
+    if (viewId === "inputs") {
+      loadDownloadDirsForm();
+      void refreshSiteCookiesPanel();
+    }
+    if (viewId === "run") {
+      void loadYoutubeScheduleForm();
+    }
+    if (viewId === "settings") {
+      loadSettingsForm();
+    }
+    if (viewId === "oneoff") {
+      loadDownloadDirsForm();
+      loadOneoffRolling();
+      refreshOneoffOutputEffective();
+      void refreshReminders().then(function () {
+        scheduleOneoffCookieChecks();
+      });
+    } else if (viewId === "galleries") {
+      loadDownloadDirsForm();
+      refreshGalleryOutputEffective();
+      void loadGallerySources();
+      void refreshReminders();
+    } else if (viewId === "gifsky") {
+      loadDownloadDirsForm();
+      void loadGifskyScan();
+      void refreshReminders();
+    } else {
+      void refreshReminders();
+    }
+    if (viewId === "library") {
+      void openFilesViewWithOptionalWatch();
+    }
+    if (viewId === "rename") {
+      renderRenameQueue();
+    }
+    if (viewId === "gallerydl") {
+      loadGallerydlFile();
+    }
+    if (viewId === "gifskyconf" && window.gifskyconfSetupLoad) {
+      window.gifskyconfSetupLoad();
+    }
+    if (viewId === "supportedsites") {
+      void loadSupportedsites(false);
+    }
+    if (viewId === "getting-started") {
+      initGettingStartedView();
+    }
+    if (viewId === "home") {
+      initHomeView();
+    }
+  }
+
+  function getInitialInputsFileFromUrl(viewId) {
+    if (viewId !== "inputs") {
+      return null;
+    }
+    var q = new URLSearchParams(window.location.search);
+    var f = (q.get("file") || "").trim();
+    if (!f || !isInputsDeepLinkFile(f)) {
+      return null;
+    }
+    return f;
+  }
+
+  function replaceStateView(viewId, fileOpt) {
+    try {
+      var u = new URL(window.location.href);
+      u.searchParams.set("view", viewId);
+      if (fileOpt) {
+        u.searchParams.set("file", fileOpt);
+      } else {
+        u.searchParams.delete("file");
+      }
+      history.replaceState(null, "", u.pathname + u.search + u.hash);
+    } catch (_e) {
+      void _e;
+    }
+  }
+
+  function syncGettingStartedSidebar(show) {
+    if (!els.navGettingStarted) {
+      return;
+    }
+    var on = show !== false;
+    els.navGettingStarted.hidden = !on;
+    els.navGettingStarted.setAttribute("aria-hidden", on ? "false" : "true");
+  }
+
+  function applyShowGettingStartedFromSettingsPayload(j) {
+    lastShowGettingStarted = j.show_getting_started !== false;
+    syncGettingStartedSidebar(lastShowGettingStarted);
+  }
+
+  function goToInputsFile(nextFile) {
+    if (!nextFile || !isInputsDeepLinkFile(nextFile)) {
+      return;
+    }
+    activateView("inputs");
+    replaceStateView("inputs", nextFile);
+    loadDownloadDirsForm();
+    editorTrySwitchTab(nextFile);
+  }
+
+  function initGettingStartedView() {
+    if (els.gsPlatformHint) {
+      var ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+      if (/windows/i.test(ua)) {
+        els.gsPlatformHint.hidden = false;
+        els.gsPlatformHint.textContent =
+          "Windows: prefer the console venv under archive_console/.venv (Scripts) for drivers; add tools to PATH or set explicit paths in Settings.";
+      } else {
+        els.gsPlatformHint.hidden = true;
+        els.gsPlatformHint.textContent = "";
+      }
+    }
+    try {
+      var raw = window.localStorage.getItem(LS_GS_CHECKLIST) || "{}";
+      var data = JSON.parse(raw);
+      if (data.gifski) {
+        data.gifsky = true;
+        delete data.gifski;
+      }
+      document.querySelectorAll("[data-gs-check]").forEach(function (inp) {
+        if (!(inp instanceof HTMLInputElement) || inp.type !== "checkbox") {
+          return;
+        }
+        var id = inp.getAttribute("data-gs-check") || "";
+        if (data[id]) {
+          inp.checked = true;
+        }
+      });
+    } catch (_e) {
+      void _e;
+    }
+  }
+
+  function persistGettingStartedChecklist() {
+    var data = {};
+    document.querySelectorAll("[data-gs-check]").forEach(function (inp) {
+      if (!(inp instanceof HTMLInputElement) || inp.type !== "checkbox") {
+        return;
+      }
+      var id = inp.getAttribute("data-gs-check") || "";
+      if (id && inp.checked) {
+        data[id] = true;
+      }
+    });
+    try {
+      window.localStorage.setItem(LS_GS_CHECKLIST, JSON.stringify(data));
+    } catch (_e) {
+      void _e;
+    }
+  }
+
+  function applyToolRowStatus(toolId, row) {
+    var sel = '[data-gs-tool-status="' + toolId + '"]';
+    var el = document.querySelector(sel);
+    if (!el) {
+      return;
+    }
+    if (row.ok && row.version) {
+      el.textContent = "OK — " + row.version;
+    } else if (row.error === "not found") {
+      el.textContent = "Missing (not on PATH or not configured).";
+    } else {
+      el.textContent =
+        "Problem: " + (row.error || "unknown") + (row.version ? " — " + row.version : "");
+    }
+  }
+
+  /**
+   * @param {boolean} busy
+   * @param {HTMLElement | null | undefined} activeButton — per-tool button when verifying one tool; null/undefined = "Verify all" (all tool rows busy)
+   */
+  function setGsVerifyBusy(busy, activeButton) {
+    var allMode = busy && (activeButton == null);
+    document.querySelectorAll("[data-gs-verify-tool]").forEach(function (btn) {
+      if (!busy) {
+        btn.disabled = false;
+        btn.setAttribute("aria-busy", "false");
+      } else if (allMode) {
+        btn.disabled = true;
+        btn.setAttribute("aria-busy", "true");
+      } else {
+        var isThis = btn === activeButton;
+        btn.disabled = isThis;
+        btn.setAttribute("aria-busy", isThis ? "true" : "false");
+      }
+    });
+    if (els.btnGsVerifyAll) {
+      if (!busy) {
+        els.btnGsVerifyAll.disabled = false;
+        els.btnGsVerifyAll.setAttribute("aria-busy", "false");
+      } else if (allMode) {
+        els.btnGsVerifyAll.disabled = true;
+        els.btnGsVerifyAll.setAttribute("aria-busy", "true");
+      } else {
+        els.btnGsVerifyAll.disabled = true;
+        els.btnGsVerifyAll.setAttribute("aria-busy", "false");
+      }
+    }
+  }
+
+  async function fetchAndApplyToolVersions(singleTool, clickedButton) {
+    var now = Date.now();
+    if (now - lastGsToolsVerifyAt < GS_VERIFY_DEBOUNCE_MS) {
+      if (els.gsVerifyAllHint) {
+        els.gsVerifyAllHint.textContent = "Wait a moment before verifying again.";
+      }
+      return;
+    }
+    lastGsToolsVerifyAt = now;
+    if (els.gsVerifyAllHint) {
+      els.gsVerifyAllHint.textContent = "";
+    }
+    setGsVerifyBusy(
+      true,
+      singleTool == null ? null : clickedButton instanceof HTMLElement ? clickedButton : null
+    );
+    try {
+      var r = await fetch("/api/tools/versions", { credentials: "same-origin" });
+      if (!r.ok) {
+        if (els.gsVerifyAllHint) {
+          els.gsVerifyAllHint.textContent = "Verify failed (" + r.status + ").";
+        }
+        return;
+      }
+      var j = await r.json();
+      var rows = (j && j.tools) || [];
+      rows.forEach(function (row) {
+        if (!row || !row.tool) {
+          return;
+        }
+        if (singleTool && row.tool !== singleTool) {
+          return;
+        }
+        applyToolRowStatus(row.tool, row);
+      });
+    } finally {
+      setGsVerifyBusy(false, null);
+    }
+  }
+
   function scrollHistorySectionFromUrl() {
-    if (getInitialViewFromUrl() !== "history") {
+    if (activeViewId !== "history") {
       return;
     }
     var q = new URLSearchParams(window.location.search);
@@ -4101,7 +5100,7 @@
     try {
       const r = await fetch("/api/run/status");
       const j = await r.json();
-      renderRunPanel(j);
+      applyRunStatusFromServer(j);
     } catch {
       /* ignore */
     }
@@ -4129,6 +5128,16 @@
       els.galleryLogBody.style.fontSize = logFontPx + "px";
       els.galleryLogGutter.style.fontSize = g + "px";
     }
+  }
+
+  function applyLibraryFileListFont() {
+    if (!els.fileList) {
+      return;
+    }
+    els.fileList.style.setProperty(
+      "--library-file-list-font",
+      libraryFileListFontPx + "px"
+    );
   }
 
   function appendLogLine(text) {
@@ -4211,6 +5220,7 @@
         disableRunButtons(true);
         editorJobRunning = true;
         setEditorRunning(true);
+        startRunStatusPoll();
         refreshRunPanel();
         return;
       }
@@ -4235,6 +5245,7 @@
         disableRunButtons(false);
         editorJobRunning = false;
         setEditorRunning(false);
+        stopRunStatusPoll();
         refreshRunPanel();
         loadRunOverview();
         if (endedOneoff) {
@@ -4242,6 +5253,15 @@
         }
         if (endedGalleries) {
           loadRunOverview();
+          if (galleryBatchQueue.length) {
+            continueGalleryBatchIfAny();
+          } else {
+            if (galleryBatchTotal > 0 && els.gallerySourcesMsg) {
+              els.gallerySourcesMsg.textContent = "Batch finished.";
+            }
+            galleryBatchTotal = 0;
+            void loadGallerySources();
+          }
         }
         return;
       }
@@ -4264,8 +5284,54 @@
     if (els.btnGalleryPreview) {
       els.btnGalleryPreview.disabled = disabled;
     }
+    if (els.btnGalleryRunSelected) {
+      els.btnGalleryRunSelected.disabled = disabled;
+    }
   }
 
+
+  function renderGlobalConsoleErrors() {
+    var wrap = document.getElementById("globalConsoleErrorsWrap");
+    var body = document.getElementById("globalConsoleErrorsBody");
+    if (!wrap || !body) {
+      return;
+    }
+    var errs = historyRenderState.globalErrors || [];
+    if (!errs.length) {
+      wrap.hidden = true;
+      body.innerHTML = "";
+      return;
+    }
+    wrap.hidden = false;
+    var table = document.createElement("table");
+    table.className = "table";
+    table.innerHTML =
+      "<thead><tr><th>Time (UTC)</th><th>Stage</th><th>Severity</th><th>Operation</th><th>Message</th></tr></thead>";
+    var tbody = document.createElement("tbody");
+    errs.slice(0, 80).forEach(function (er) {
+      var tr = document.createElement("tr");
+      function td(t, cls) {
+        var x = document.createElement("td");
+        if (cls) {
+          x.className = cls;
+        }
+        x.textContent = t != null ? String(t) : "";
+        return x;
+      }
+      tr.appendChild(td(er.ts_utc || "—"));
+      tr.appendChild(td(er.stage || "—"));
+      var sev = (er.severity || "error").toLowerCase();
+      tr.appendChild(
+        td(sev, sev === "warning" ? "exit-stopped" : "exit-fail"),
+      );
+      tr.appendChild(td(er.operation || "—"));
+      tr.appendChild(td(er.message || "—"));
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    body.innerHTML = "";
+    body.appendChild(table);
+  }
 
   function renderHistoryRows() {
     var tb = els.historyTable;
@@ -4273,7 +5339,7 @@
     if (historyRenderState.historyLoadFailed) {
       var trErr = document.createElement("tr");
       trErr.innerHTML =
-        '<td colspan="8" class="muted">Could not load run history (request failed). Refresh the page.</td>';
+        '<td colspan="9" class="muted">Could not load run history (request failed). Refresh the page.</td>';
       tb.appendChild(trErr);
       if (els.historyMoreWrap) {
         els.historyMoreWrap.hidden = true;
@@ -4286,7 +5352,7 @@
     if (!items.length) {
       var tr0 = document.createElement("tr");
       tr0.innerHTML =
-        '<td colspan="8" class="muted">No recorded runs yet. Start a job from <strong>Run</strong>; finished jobs appear here with exit code, item stats, and folder.</td>';
+        '<td colspan="9" class="muted">No recorded runs yet. Start a job from <strong>Run</strong>; finished jobs appear here with exit code, item stats, and folder.</td>';
       tb.appendChild(tr0);
       if (els.historyMoreWrap) {
         els.historyMoreWrap.hidden = true;
@@ -4362,6 +5428,18 @@
       var okCell = hasStats ? esc(String(rs.ok)) : "—";
       var failCell = hasStats ? esc(String(rs.fail)) : "—";
       var savedCell = hasStats ? esc(String(rs.saved)) : "—";
+      var errList = Array.isArray(row.errors) ? row.errors : [];
+      var nErr = errList.length;
+      var errCell =
+        nErr === 0
+          ? "—"
+          : folder && !clipOut
+            ? '<a class="link" target="_blank" rel="noopener" href="' +
+              esc(reportsViewHref(folder + "/report.html")) +
+              '#archive-console-errors">' +
+              esc(String(nErr)) +
+              "</a>"
+            : esc(String(nErr));
       tr.innerHTML =
         "<td>" +
         esc(jobLabel(row.job)) +
@@ -4380,6 +5458,8 @@
         failCell +
         '</td><td class="hist-stat hist-stat-wide">' +
         savedCell +
+        '</td><td class="hist-stat hist-stat-wide">' +
+        errCell +
         '</td><td class="history-folder-cell">' +
         (clipOut
           ? '<a class="link" target="_blank" rel="noopener" href="' +
@@ -4731,6 +5811,108 @@
     }, 60 * 1000);
   }
 
+  function formatRenameDeepLUsage(j) {
+    if (!j) {
+      return "";
+    }
+    if (!j.configured) {
+      return j.message || "DeepL API key not configured (Settings → DeepL).";
+    }
+    if (j.error_code && j.message) {
+      return j.message;
+    }
+    var parts = [];
+    if (j.character_limit > 0) {
+      var rem =
+        j.character_remaining != null
+          ? j.character_remaining
+          : Math.max(0, j.character_limit - j.character_count);
+      parts.push(
+        "DeepL: " +
+          Number(j.character_count).toLocaleString() +
+          " / " +
+          Number(j.character_limit).toLocaleString() +
+          " characters this period (" +
+          Number(rem).toLocaleString() +
+          " remaining)."
+      );
+    } else if (j.character_count != null) {
+      parts.push(
+        "DeepL: " + Number(j.character_count).toLocaleString() + " characters used this period."
+      );
+    }
+    var q = renameQueueRels.length;
+    if (q > 0) {
+      parts.push(
+        "Queue: " +
+          q +
+          " file(s); preview processes up to " +
+          RENAME_PREVIEW_MAX_FILES +
+          " per batch."
+      );
+      if (j.estimated_api_batches > 0) {
+        parts.push(
+          "~" +
+            j.estimated_api_batches +
+            " DeepL API call(s) if every stem needs translation."
+        );
+      }
+    }
+    if (j.limits_note) {
+      parts.push(j.limits_note);
+    }
+    return parts.join(" ");
+  }
+
+  function formatRenamePreviewUsage(u) {
+    if (!u || !Object.keys(u).length) {
+      return "";
+    }
+    var parts = [];
+    if (u.character_count != null) {
+      parts.push(
+        "This preview billed ~" + Number(u.character_count).toLocaleString() + " characters."
+      );
+    }
+    if (u.character_count_before != null && u.character_limit > 0) {
+      var after =
+        Number(u.character_count_before) + Number(u.character_count || 0);
+      parts.push(
+        "Period total after preview: ~" +
+          after.toLocaleString() +
+          " / " +
+          Number(u.character_limit).toLocaleString() +
+          "."
+      );
+    }
+    if (u.batches > 1) {
+      parts.push("Sent in " + u.batches + " batched API requests.");
+    }
+    return parts.join(" ");
+  }
+
+  async function refreshRenameDeepLUsage() {
+    if (!els.renameDeeplQuotaLine) {
+      return;
+    }
+    var q = renameQueueRels.length;
+    try {
+      var r = await fetch(
+        "/api/rename/deepl-usage?queue_size=" + encodeURIComponent(String(q))
+      );
+      var j = await r.json().catch(function () {
+        return {};
+      });
+      if (!r.ok) {
+        els.renameDeeplQuotaLine.textContent = "Could not load DeepL usage.";
+        return;
+      }
+      els.renameDeeplQuotaLine.textContent = formatRenameDeepLUsage(j);
+    } catch (_e) {
+      els.renameDeeplQuotaLine.textContent = "Could not load DeepL usage (network).";
+    }
+  }
+
   function renameQueueAddRels(rels) {
     var added = 0;
     (rels || []).forEach(function (rel) {
@@ -4742,6 +5924,135 @@
       added += 1;
     });
     return added;
+  }
+
+  var LIBRARY_LAST_FOLDER_LS = "archive_console_library_last_folder_v1";
+
+  function libraryReadLastFolderPayload() {
+    try {
+      var raw = localStorage.getItem(LIBRARY_LAST_FOLDER_LS);
+      if (!raw) {
+        return null;
+      }
+      return JSON.parse(raw);
+    } catch (_e) {
+      return null;
+    }
+  }
+
+  function libraryPersistCurrentFolder(pathAfterList) {
+    try {
+      var pathStr = pathAfterList != null ? String(pathAfterList) : "";
+      void fetch("/api/settings", { credentials: "same-origin" })
+        .then(function (r) {
+          return r.ok ? r.json() : null;
+        })
+        .then(function (sj) {
+          if (!sj || !sj.archive_root) {
+            return;
+          }
+          localStorage.setItem(
+            LIBRARY_LAST_FOLDER_LS,
+            JSON.stringify({
+              archive_root: String(sj.archive_root),
+              folder_rel: pathStr,
+            })
+          );
+        });
+    } catch (_e) {
+      void _e;
+    }
+  }
+
+  /** Non-directory rels for Rename: selected files if any selection; else all files in current listing. */
+  function libraryCollectRelsForRenameSend() {
+    var out = [];
+    var hasSel = filesListSelectedSet.size > 0;
+    var i;
+    if (hasSel) {
+      for (i = 0; i < filesListRowModels.length; i++) {
+        var row = filesListRowModels[i];
+        if (!filesListSelectedSet.has(row.rel) || row.is_dir) {
+          continue;
+        }
+        out.push(row.rel);
+      }
+      return out;
+    }
+    for (i = 0; i < filesListRowModels.length; i++) {
+      var row2 = filesListRowModels[i];
+      if (!row2.is_dir) {
+        out.push(row2.rel);
+      }
+    }
+    return out;
+  }
+
+  /** Queueable media for player: selected files if any selection; else all queueable in listing. */
+  function libraryCollectPlayablesForPlayerSend() {
+    var out = [];
+    var hasSel = filesListSelectedSet.size > 0;
+    var i;
+    for (i = 0; i < filesListRowModels.length; i++) {
+      var row = filesListRowModels[i];
+      if (row.is_dir) {
+        continue;
+      }
+      if (hasSel && !filesListSelectedSet.has(row.rel)) {
+        continue;
+      }
+      if (filesPlayerIsQueueableRel(row.rel)) {
+        out.push(row.rel);
+      }
+    }
+    return out;
+  }
+
+  function libraryUpdateSelectionActionButtons() {
+    if (els.btnFileDetailSendRename) {
+      var renameRels = libraryCollectRelsForRenameSend();
+      var renameN = renameRels.length;
+      els.btnFileDetailSendRename.disabled = renameN === 0;
+      if (els.fileDetailRenameSendHint) {
+        if (filesListSelectedSet.size > 0) {
+          els.fileDetailRenameSendHint.textContent = renameN
+            ? "Selection active: " +
+              renameN +
+              " file(s) will be added (folders skipped). Clear selection to use every file in this folder list."
+            : "Selection is only folders or empty — select files, or clear selection to use all files in this folder.";
+        } else {
+          els.fileDetailRenameSendHint.textContent = renameN
+            ? "No selection — all " +
+              renameN +
+              " file(s) in this folder listing will be added (folders skipped)."
+            : "No files in this folder listing to add.";
+        }
+      }
+    }
+    if (els.btnFileDetailAddPlayerQueue) {
+      var playables = libraryCollectPlayablesForPlayerSend();
+      var playN = playables.length;
+      els.btnFileDetailAddPlayerQueue.disabled = playN === 0;
+      if (els.fileDetailPlayerQueueHint) {
+        if (filesListSelectedSet.size > 0) {
+          els.fileDetailPlayerQueueHint.textContent = playN
+            ? "Selection active: " +
+              playN +
+              " queueable file(s) will be added in list order (folders and unsupported types skipped)."
+            : "Selection has no queueable files — use video, audio, or jpg/png/gif/webp, or clear selection to add every queueable file in this folder.";
+        } else {
+          els.fileDetailPlayerQueueHint.textContent = playN
+            ? "No selection — all " +
+              playN +
+              " queueable file(s) in this folder listing will be added."
+            : "No queueable files in this folder listing (video, audio, or jpg/png/gif/webp).";
+        }
+      }
+    }
+  }
+
+  function libraryUpdateSendRenameButton() {
+    libraryUpdateSelectionActionButtons();
   }
 
   function renderRenameQueue() {
@@ -4776,6 +6087,7 @@
     if (els.renameQueueTable) {
       els.renameQueueTable.hidden = renameQueueRels.length === 0;
     }
+    void refreshRenameDeepLUsage();
   }
 
   function renderRenamePreviewRows(rows) {
@@ -4808,6 +6120,22 @@
     });
   }
 
+  async function refreshRenameHistoryOnly() {
+    if (!els.renameLogBody) {
+      return;
+    }
+    try {
+      var r = await fetch("/api/rename/history");
+      if (r.ok) {
+        var j = await r.json();
+        renameHistoryItems = j.items || [];
+        renderRenameLog();
+      }
+    } catch {
+      void 0;
+    }
+  }
+
   function renderRenameLog() {
     if (!els.renameLogBody) {
       return;
@@ -4828,16 +6156,69 @@
         x.textContent = t;
         return x;
       }
+      var isFail =
+        run.status === "fail" ||
+        (run.ledger_kind &&
+          String(run.ledger_kind).indexOf("_failed") >= 0);
+      var resultLabel = isFail ? "Failed" : "OK";
       tr.appendChild(td(dt));
       tr.appendChild(td(String(run.operation || "")));
-      tr.appendChild(td(String(run.ok != null ? run.ok : "0")));
-      tr.appendChild(td(String(run.skip != null ? run.skip : "0")));
-      tr.appendChild(td(String(run.fail != null ? run.fail : "0")));
+      tr.appendChild(td(resultLabel));
+      tr.appendChild(
+        td(isFail ? "—" : String(run.ok != null ? run.ok : "0")),
+      );
+      tr.appendChild(
+        td(isFail ? "—" : String(run.skip != null ? run.skip : "0")),
+      );
+      tr.appendChild(
+        td(isFail ? "—" : String(run.fail != null ? run.fail : "0")),
+      );
       tr.appendChild(td(String(run.run_id || "").slice(0, 8) + "…"));
       tr.style.cursor = "pointer";
-      tr.title = "Click for per-file detail";
+      tr.title = isFail
+        ? "Click for error summary (sanitized)"
+        : "Click for per-file detail";
+      tr.className = isFail ? "rename-log-row-fail" : "";
       tr.addEventListener("click", function () {
         if (!els.renameLogDetail) {
+          return;
+        }
+        if (isFail) {
+          var bits = [];
+          if (run.error_code) {
+            bits.push("Code: " + String(run.error_code));
+          }
+          if (run.message) {
+            bits.push("Message: " + String(run.message));
+          }
+          if (run.diagnostic_ref) {
+            bits.push(
+              "Diagnostic ref (correlate with server log): " +
+                String(run.diagnostic_ref),
+            );
+          }
+          if (run.rel_count != null && run.rel_count !== "") {
+            bits.push("Files in request: " + String(run.rel_count));
+          }
+          if (run.preview_id) {
+            bits.push("Preview id: " + String(run.preview_id).slice(0, 16) + "…");
+          }
+          if (run.errors && run.errors.length) {
+            bits.push("Structured errors:");
+            run.errors.forEach(function (er) {
+              bits.push(
+                (er.ts_utc || "—") +
+                  " [" +
+                  (er.stage || "") +
+                  "] " +
+                  (er.message || ""),
+              );
+            });
+          }
+          els.renameLogDetail.textContent = bits.length
+            ? bits.join("\n")
+            : "(no detail)";
+          els.renameLogDetail.hidden = false;
           return;
         }
         var lines = (run.items || []).map(function (it) {
@@ -4851,11 +6232,307 @@
             (it.reason || "")
           );
         });
+        if (run.errors && run.errors.length) {
+          lines.push("— Structured warnings (partial failures) —");
+          run.errors.forEach(function (er) {
+            lines.push(
+              (er.ts_utc || "—") +
+                " [" +
+                (er.stage || "") +
+                "] " +
+                (er.message || ""),
+            );
+          });
+        }
         els.renameLogDetail.textContent = lines.join("\n") || "(no items)";
         els.renameLogDetail.hidden = false;
       });
       els.renameLogBody.appendChild(tr);
     });
+  }
+
+  function renameBuildPipelineOptions() {
+    var useDeepl = !els.optRenameUseDeepl || els.optRenameUseDeepl.checked;
+    var useExif = !!(els.optRenameUseExif && els.optRenameUseExif.checked);
+    return {
+      useDeepl: useDeepl,
+      useExif: useExif,
+      options: {
+        whole_basename: !!(els.optRenameWholeBasename && els.optRenameWholeBasename.checked),
+        preserve_youtube_id: els.optRenamePreserveYt
+          ? els.optRenamePreserveYt.checked
+          : true,
+        preserve_brackets:
+          !els.optRenamePreserveBrackets || els.optRenamePreserveBrackets.checked,
+        use_deepl: useDeepl,
+        use_exif: useExif,
+        pipeline_order:
+          els.selRenamePipelineOrder && els.selRenamePipelineOrder.value
+            ? els.selRenamePipelineOrder.value
+            : "exif_then_deepl",
+        exif_template:
+          els.inpRenameExifTemplate && els.inpRenameExifTemplate.value
+            ? els.inpRenameExifTemplate.value.trim()
+            : "",
+        exif_missing_policy:
+          els.selRenameExifMissing && els.selRenameExifMissing.value === "skip"
+            ? "skip"
+            : "keep_basename",
+      },
+    };
+  }
+
+  function renameValidatePipeline(pipe) {
+    if (!pipe.useDeepl && !pipe.useExif) {
+      return "Enable at least one of DeepL or Exif template in Pipeline.";
+    }
+    if (pipe.useExif && !pipe.options.exif_template) {
+      return "Enter an Exif template or turn off Exif template.";
+    }
+    return "";
+  }
+
+  function renameFolderSetStatus(text) {
+    if (els.renameFolderStatus) {
+      els.renameFolderStatus.textContent = text || "";
+    }
+  }
+
+  async function renameFolderScan() {
+    renameFolderSetStatus("");
+    renameFolderBatchState = null;
+    if (els.btnRenameFolderRun) {
+      els.btnRenameFolderRun.disabled = true;
+    }
+    var folderRel =
+      els.inpRenameFolderRel && els.inpRenameFolderRel.value
+        ? els.inpRenameFolderRel.value.trim().replace(/\\/g, "/")
+        : "";
+    if (!folderRel) {
+      renameFolderSetStatus("Enter a folder path or use Browse folder…");
+      return;
+    }
+    var pipe = renameBuildPipelineOptions();
+    var pipeErr = renameValidatePipeline(pipe);
+    if (pipeErr) {
+      renameFolderSetStatus(pipeErr);
+      return;
+    }
+    try {
+      var r = await fetch("/api/rename/folder-candidates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          folder_rel: folderRel,
+          recursive: !!(els.optRenameFolderRecursive && els.optRenameFolderRecursive.checked),
+          skip_done: !!(els.optRenameFolderSkipDone && els.optRenameFolderSkipDone.checked),
+          options: pipe.options,
+        }),
+      });
+      var j = await r.json().catch(function () {
+        return {};
+      });
+      if (!r.ok) {
+        var det = j.detail != null ? j.detail : r.statusText;
+        renameFolderSetStatus(typeof det === "string" ? det : JSON.stringify(det));
+        return;
+      }
+      renameFolderBatchState = j;
+      var msg =
+        "Found " +
+        (j.total_in_folder != null ? j.total_in_folder : 0) +
+        " file(s) in folder";
+      if (j.skipped_done) {
+        msg += "; " + j.skipped_done + " already renamed (skipped)";
+      }
+      msg += "; " + (j.pending_count != null ? j.pending_count : 0) + " pending";
+      if (j.done_log_entries) {
+        msg += " (" + j.done_log_entries + " in done log for this pipeline)";
+      }
+      renameFolderSetStatus(msg);
+      if (els.btnRenameFolderRun) {
+        els.btnRenameFolderRun.disabled = !(j.pending_count > 0);
+      }
+    } catch (_e) {
+      renameFolderSetStatus("Scan failed (network).");
+    }
+  }
+
+  async function renameFolderBatchRun() {
+    if (!renameFolderBatchState || !renameFolderBatchState.pending_rels) {
+      await renameFolderScan();
+      if (!renameFolderBatchState || !renameFolderBatchState.pending_count) {
+        return;
+      }
+    }
+    var pipe = renameBuildPipelineOptions();
+    var pipeErr = renameValidatePipeline(pipe);
+    if (pipeErr) {
+      renameFolderSetStatus(pipeErr);
+      return;
+    }
+    var pending = renameFolderBatchState.pending_rels.slice();
+    var batchSize = 200;
+    if (els.selRenameFolderBatchSize && els.selRenameFolderBatchSize.value) {
+      batchSize = Math.min(200, Math.max(1, parseInt(els.selRenameFolderBatchSize.value, 10) || 50));
+    }
+    var totalBatches = Math.ceil(pending.length / batchSize) || 0;
+    if (
+      !window.confirm(
+        "Rename up to " +
+          pending.length +
+          " file(s) in " +
+          totalBatches +
+          " batch(es)? Already-renamed files are skipped. This cannot be undone from Archive Console."
+      )
+    ) {
+      return;
+    }
+    renameFolderBatchAbort = false;
+    if (els.btnRenameFolderRun) {
+      els.btnRenameFolderRun.disabled = true;
+    }
+    if (els.btnRenameFolderScan) {
+      els.btnRenameFolderScan.disabled = true;
+    }
+    if (els.btnRenameFolderStop) {
+      els.btnRenameFolderStop.hidden = false;
+    }
+    var folderRel = renameFolderBatchState.folder_rel;
+    var pipelineFp = renameFolderBatchState.pipeline_fp;
+    var touchMtime = !!(els.optRenameFolderTouchMtime && els.optRenameFolderTouchMtime.checked);
+    var processed = 0;
+    var totalOk = 0;
+    var totalSkip = 0;
+    var totalFail = 0;
+    for (var offset = 0; offset < pending.length; offset += batchSize) {
+      if (renameFolderBatchAbort) {
+        break;
+      }
+      var chunk = pending.slice(offset, offset + batchSize);
+      var batchNum = Math.floor(offset / batchSize) + 1;
+      renameFolderSetStatus(
+        "Batch " +
+          batchNum +
+          "/" +
+          totalBatches +
+          " — previewing " +
+          chunk.length +
+          " file(s)… (" +
+          processed +
+          "/" +
+          pending.length +
+          " done so far)"
+      );
+      try {
+        var pr = await fetch("/api/rename/preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            rels: chunk,
+            max_files: chunk.length,
+            options: pipe.options,
+          }),
+        });
+        var pj = await pr.json().catch(function () {
+          return {};
+        });
+        if (!pr.ok) {
+          var pdet = pj.detail != null ? pj.detail : pr.statusText;
+          renameFolderSetStatus(
+            "Batch " +
+              batchNum +
+              " preview failed: " +
+              (typeof pdet === "string" ? pdet : JSON.stringify(pdet))
+          );
+          break;
+        }
+        renameFolderSetStatus(
+          "Batch " + batchNum + "/" + totalBatches + " — applying renames…"
+        );
+        var ar = await fetch("/api/rename/apply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            preview_id: pj.preview_id,
+            folder_batch: {
+              folder_rel: folderRel,
+              pipeline_fp: pipelineFp,
+              touch_mtime: touchMtime,
+            },
+          }),
+        });
+        var aj = await ar.json().catch(function () {
+          return {};
+        });
+        if (!ar.ok) {
+          var adet = aj.detail != null ? aj.detail : ar.statusText;
+          renameFolderSetStatus(
+            "Batch " +
+              batchNum +
+              " apply failed: " +
+              (typeof adet === "string" ? adet : JSON.stringify(adet))
+          );
+          break;
+        }
+        processed += chunk.length;
+        totalOk += aj.ok != null ? aj.ok : 0;
+        totalSkip += aj.skip != null ? aj.skip : 0;
+        totalFail += aj.fail != null ? aj.fail : 0;
+        renameFolderSetStatus(
+          "Batch " +
+            batchNum +
+            "/" +
+            totalBatches +
+            " complete — OK " +
+            (aj.ok != null ? aj.ok : 0) +
+            ", skip " +
+            (aj.skip != null ? aj.skip : 0) +
+            ", fail " +
+            (aj.fail != null ? aj.fail : 0) +
+            " (" +
+            processed +
+            "/" +
+            pending.length +
+            " processed; running totals OK " +
+            totalOk +
+            ", fail " +
+            totalFail +
+            ")"
+        );
+      } catch (_e2) {
+        renameFolderSetStatus("Batch " + batchNum + " failed (network).");
+        break;
+      }
+    }
+    if (renameFolderBatchAbort) {
+      renameFolderSetStatus(
+        "Stopped. Totals — OK " + totalOk + ", skip " + totalSkip + ", fail " + totalFail + "."
+      );
+    } else if (processed >= pending.length) {
+      renameFolderSetStatus(
+        "Folder batch finished — OK " +
+          totalOk +
+          ", skip " +
+          totalSkip +
+          ", fail " +
+          totalFail +
+          ". Re-scan to confirm nothing pending."
+      );
+    }
+    renameFolderBatchAbort = false;
+    renameFolderBatchState = null;
+    if (els.btnRenameFolderRun) {
+      els.btnRenameFolderRun.disabled = true;
+    }
+    if (els.btnRenameFolderScan) {
+      els.btnRenameFolderScan.disabled = false;
+    }
+    if (els.btnRenameFolderStop) {
+      els.btnRenameFolderStop.hidden = true;
+    }
+    void loadRunOverview();
+    void refreshRenameHistoryOnly();
   }
 
   async function renameRunPreview() {
@@ -4877,40 +6554,25 @@
       els.renameMsg.textContent = "Add at least one file to the queue.";
       return;
     }
-    var useDeepl = !els.optRenameUseDeepl || els.optRenameUseDeepl.checked;
-    var useExif = !!(els.optRenameUseExif && els.optRenameUseExif.checked);
-    if (!useDeepl && !useExif) {
-      els.renameMsg.textContent =
-        "Enable at least one of DeepL or Exif template in Pipeline.";
+    var pipe = renameBuildPipelineOptions();
+    var pipeErr = renameValidatePipeline(pipe);
+    if (pipeErr) {
+      els.renameMsg.textContent = pipeErr;
       return;
     }
-    if (useExif && els.inpRenameExifTemplate && !els.inpRenameExifTemplate.value.trim()) {
-      els.renameMsg.textContent = "Enter an Exif template or turn off Exif template.";
+    if (renameQueueRels.length > RENAME_PREVIEW_MAX_FILES) {
+      els.renameMsg.textContent =
+        "Queue has " +
+        renameQueueRels.length +
+        " files (max " +
+        RENAME_PREVIEW_MAX_FILES +
+        " per manual preview). Use Folder batch or remove files from the queue.";
       return;
     }
     var body = {
       rels: renameQueueRels.slice(),
-      max_files: 50,
-      options: {
-        whole_basename: !!(els.optRenameWholeBasename && els.optRenameWholeBasename.checked),
-        preserve_youtube_id: !els.optRenamePreserveYt || els.optRenamePreserveYt.checked,
-        preserve_brackets:
-          !els.optRenamePreserveBrackets || els.optRenamePreserveBrackets.checked,
-        use_deepl: useDeepl,
-        use_exif: useExif,
-        pipeline_order:
-          els.selRenamePipelineOrder && els.selRenamePipelineOrder.value
-            ? els.selRenamePipelineOrder.value
-            : "exif_then_deepl",
-        exif_template:
-          els.inpRenameExifTemplate && els.inpRenameExifTemplate.value
-            ? els.inpRenameExifTemplate.value.trim()
-            : "",
-        exif_missing_policy:
-          els.selRenameExifMissing && els.selRenameExifMissing.value
-            ? els.selRenameExifMissing.value
-            : "keep_basename",
-      },
+      max_files: Math.min(renameQueueRels.length, RENAME_PREVIEW_MAX_FILES),
+      options: pipe.options,
     };
     try {
       var r = await fetch("/api/rename/preview", {
@@ -4923,8 +6585,18 @@
       });
       if (!r.ok) {
         var det = j.detail != null ? j.detail : r.statusText;
-        els.renameMsg.textContent =
-          typeof det === "string" ? det : JSON.stringify(det);
+        if (det != null && typeof det === "object" && !Array.isArray(det)) {
+          var dm = det.message != null ? String(det.message) : "";
+          els.renameMsg.textContent =
+            dm ||
+            (det.error_code
+              ? String(det.error_code) + " — see server log."
+              : JSON.stringify(det));
+        } else {
+          els.renameMsg.textContent =
+            typeof det === "string" ? det : JSON.stringify(det);
+        }
+        void refreshRenameHistoryOnly();
         return;
       }
       renamePreviewId = j.preview_id || null;
@@ -4944,17 +6616,20 @@
         els.btnRenameApply.disabled = !renamePreviewId || !okApply;
       }
       els.renameMsg.textContent = "Preview ready. Review warnings, then apply if correct.";
-      var u = j.usage || {};
-      var ukeys = Object.keys(u);
-      if (els.renameUsageLine && ukeys.length) {
-        els.renameUsageLine.textContent =
-          "DeepL usage fields: " + JSON.stringify(u);
-        els.renameUsageLine.hidden = false;
-      } else if (els.renameUsageLine) {
-        els.renameUsageLine.textContent =
-          "Character counts may appear here when the API returns them; otherwise see your DeepL dashboard.";
-        els.renameUsageLine.hidden = false;
+      var usageText = formatRenamePreviewUsage(j.usage || {});
+      if (els.renameUsageLine) {
+        if (usageText) {
+          els.renameUsageLine.textContent = usageText;
+          els.renameUsageLine.hidden = false;
+        } else if (pipe.useDeepl) {
+          els.renameUsageLine.textContent =
+            "DeepL did not return character counts for this preview; see your DeepL dashboard.";
+          els.renameUsageLine.hidden = false;
+        } else {
+          els.renameUsageLine.hidden = true;
+        }
       }
+      void refreshRenameDeepLUsage();
     } catch {
       els.renameMsg.textContent = "Preview failed (network).";
     }
@@ -4994,6 +6669,7 @@
         var det = j.detail != null ? j.detail : r.statusText;
         els.renameMsg.textContent =
           typeof det === "string" ? det : JSON.stringify(det);
+        void refreshRenameHistoryOnly();
         return;
       }
       els.renameMsg.textContent =
@@ -5038,9 +6714,11 @@
       var rh = responses[2];
       if (!hr.ok) {
         historyRenderState.historyLoadFailed = true;
+        historyRenderState.globalErrors = [];
       } else {
         var hj = await hr.json();
         histItems = hj.items || [];
+        historyRenderState.globalErrors = hj.global_errors || [];
       }
       if (!rr.ok) {
         historyRenderState.reportsLoadFailed = true;
@@ -5060,6 +6738,7 @@
     } catch {
       historyRenderState.historyLoadFailed = true;
       historyRenderState.reportsLoadFailed = true;
+      historyRenderState.globalErrors = [];
       renameHistoryItems = [];
     }
     historyRenderState.items = histItems;
@@ -5069,6 +6748,7 @@
       historyRenderState.pointers
     );
     renderHistoryRows();
+    renderGlobalConsoleErrors();
     renderReportCards();
     renderRecentRuns();
     renderRenameLog();
@@ -5082,7 +6762,7 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.textContent = label;
-      btn.title = rel ? rel : "Allowlisted roots";
+      btn.title = rel ? rel : "Download output folders";
       btn.addEventListener("click", function () {
         browseTo(rel);
       });
@@ -5108,42 +6788,84 @@
     }
   }
 
-  async function browseTo(rel, options) {
-    options = options || {};
-    var selectRelAfter = options.selectRelAfter;
-    selectedRel = "";
-    filesListSelectedSet.clear();
+  function filesListFilterQuery() {
+    return (els.filesListFilter && els.filesListFilter.value.trim().toLowerCase()) || "";
+  }
+
+  function filesListEnsureAllRowModels() {
+    if (filesListAllRowModels.length > 0) {
+      return;
+    }
+    if (filesListRowModels.length > 0) {
+      filesListAllRowModels = filesListRowModels.slice();
+      return;
+    }
+    if (!els.fileList) {
+      return;
+    }
+    var rebuilt = [];
+    els.fileList.querySelectorAll("li button[data-file-rel]").forEach(function (btn) {
+      var rel = btn.dataset.fileRel || "";
+      if (!rel) {
+        return;
+      }
+      var title = btn.getAttribute("title") || rel;
+      var text = btn.textContent || "";
+      var isDir = text.indexOf("📁") === 0;
+      var slash = title.lastIndexOf("/");
+      var name = slash >= 0 ? title.slice(slash + 1) : title;
+      if (!name) {
+        name = text.replace(/^📁\s|^📄\s/, "");
+      }
+      rebuilt.push({
+        rel: rel,
+        is_dir: isDir,
+        name: name,
+        ent: { rel: rel, is_dir: isDir, name: name, mtime: 0, size: null },
+      });
+    });
+    if (rebuilt.length) {
+      filesListAllRowModels = rebuilt;
+    }
+  }
+
+  function filesListFilteredRowModels() {
+    filesListEnsureAllRowModels();
+    var q = filesListFilterQuery();
+    if (!q) {
+      return filesListAllRowModels.slice();
+    }
+    return filesListAllRowModels.filter(function (row) {
+      var name = String(row.name || "").toLowerCase();
+      var rel = String(row.rel || "").toLowerCase();
+      return name.indexOf(q) >= 0 || rel.indexOf(q) >= 0;
+    });
+  }
+
+  function filesListOnFilterInput() {
     filesListAnchorIndex = -1;
-    filesExplorerSetMessage("");
-    var reqPath = rel || "";
-    var q = reqPath ? "?path=" + encodeURIComponent(reqPath) : "";
-    var r = await fetch("/api/files/list" + q);
-    if (!r.ok) {
-      els.fileList.innerHTML =
-        "<li><em class=\"muted\">" + esc(r.status + " " + r.statusText) + "</em></li>";
+    renderFilesList();
+  }
+
+  function renderFilesList() {
+    if (!els.fileList) {
+      return;
+    }
+    filesListRowModels = filesListFilteredRowModels();
+    els.fileList.innerHTML = "";
+    if (!filesListRowModels.length) {
+      var emptyLi = document.createElement("li");
+      var emptyEm = document.createElement("em");
+      emptyEm.className = "muted";
+      emptyEm.textContent = filesListFilterQuery()
+        ? "No matching files in this folder."
+        : "This folder is empty.";
+      emptyLi.appendChild(emptyEm);
+      els.fileList.appendChild(emptyLi);
       updateExplorerButton();
       fpUpdatePlayerActionButtons();
       return;
     }
-    var j = await r.json();
-    if (j.type === "file") {
-      var full = j.path || reqPath;
-      var slash = full.lastIndexOf("/");
-      var parentDir = slash >= 0 ? full.slice(0, slash) : "";
-      await browseTo(parentDir, { selectRelAfter: full });
-      return;
-    }
-    filePath = j.virtual_root ? "" : j.path && j.path !== "." ? j.path : "";
-    renderBreadcrumb(filePath);
-    els.fileList.innerHTML = "";
-    filesListRowModels = (j.entries || []).map(function (ent) {
-      return {
-        rel: ent.rel,
-        is_dir: !!ent.is_dir,
-        name: ent.name,
-        ent: ent,
-      };
-    });
     filesListRowModels.forEach(function (row, idx) {
       var ent = row.ent;
       const li = document.createElement("li");
@@ -5209,8 +6931,52 @@
       li.appendChild(btn);
       els.fileList.appendChild(li);
     });
+    filesListApplySelectionVisual();
     updateExplorerButton();
     fpUpdatePlayerActionButtons();
+  }
+
+  async function browseTo(rel, options) {
+    options = options || {};
+    var selectRelAfter = options.selectRelAfter;
+    selectedRel = "";
+    filesListSelectedSet.clear();
+    filesListAnchorIndex = -1;
+    filesExplorerSetMessage("");
+    var reqPath = rel || "";
+    var q = reqPath ? "?path=" + encodeURIComponent(reqPath) : "";
+    var r = await fetch("/api/files/list" + q);
+    if (!r.ok) {
+      filesListAllRowModels = [];
+      filesListRowModels = [];
+      els.fileList.innerHTML =
+        "<li><em class=\"muted\">" + esc(r.status + " " + r.statusText) + "</em></li>";
+      updateExplorerButton();
+      fpUpdatePlayerActionButtons();
+      return;
+    }
+    var j = await r.json();
+    if (j.type === "file") {
+      var full = j.path || reqPath;
+      var slash = full.lastIndexOf("/");
+      var parentDir = slash >= 0 ? full.slice(0, slash) : "";
+      await browseTo(parentDir, { selectRelAfter: full });
+      return;
+    }
+    filePath = j.virtual_root ? "" : j.path && j.path !== "." ? j.path : "";
+    renderBreadcrumb(filePath);
+    if (els.filesListFilter) {
+      els.filesListFilter.value = "";
+    }
+    filesListAllRowModels = (j.entries || []).map(function (ent) {
+      return {
+        rel: ent.rel,
+        is_dir: !!ent.is_dir,
+        name: ent.name,
+        ent: ent,
+      };
+    });
+    renderFilesList();
     fpRefreshPlayerStats();
     if (selectRelAfter) {
       var hitIdx = -1;
@@ -5253,6 +7019,8 @@
         }
       }
     }
+    libraryPersistCurrentFolder(filePath);
+    libraryUpdateSendRenameButton();
   }
 
   function consumeWatchIntentFromUrl() {
@@ -5294,10 +7062,43 @@
 
   async function openFilesViewWithOptionalWatch() {
     var intent = consumeWatchIntentFromUrl();
-    await browseTo("");
     if (intent) {
+      await browseTo("");
       await applyFilesWatchIntent(intent);
+      libraryUpdateSendRenameButton();
+      return;
     }
+    var curRoot = "";
+    try {
+      var sr = await fetch("/api/settings", { credentials: "same-origin" });
+      if (sr.ok) {
+        var sj = await sr.json();
+        curRoot = String(sj.archive_root || "");
+      }
+    } catch (_e) {
+      void _e;
+    }
+    var saved = libraryReadLastFolderPayload();
+    if (
+      curRoot &&
+      saved &&
+      String(saved.archive_root || "") === curRoot &&
+      typeof saved.folder_rel === "string"
+    ) {
+      var pathTry = saved.folder_rel;
+      var lr = await fetch(
+        "/api/files/list?path=" + encodeURIComponent(pathTry),
+        { credentials: "same-origin" }
+      );
+      if (lr.ok) {
+        var lj = await lr.json();
+        if (lj.type !== "file") {
+          await browseTo(pathTry);
+          return;
+        }
+      }
+    }
+    await browseTo("");
   }
 
   function renderMediainfoDetailsHtml(details) {
@@ -5412,25 +7213,28 @@
     var miInner = isDir
       ? "<p class=\"muted small\">Media details (MediaInfo) apply to files only.</p>"
       : "<p class=\"muted small\">Loading media details…</p>";
-    els.fileDetail.innerHTML =
-      "<p><strong title=\"" +
-      esc(rel) +
-      "\">" +
-      esc(rel) +
-      "</strong></p>" +
-      '<p title="' +
-      esc(sizeTitle) +
-      '">Size: ' +
-      esc(formatFileSize(rawSize)) +
-      "</p>" +
-      "<p>Modified: " +
-      esc(mt.toLocaleString()) +
-      "</p>" +
-      links +
-      '<div class="file-detail-mediainfo" id="fileDetailMediainfo">' +
-      "<h3 class=\"file-detail-mi-heading\">Media details</h3>" +
-      miInner +
-      "</div>";
+    var fdTarget = els.fileDetailMain || els.fileDetail;
+    if (fdTarget) {
+      fdTarget.innerHTML =
+        "<p><strong title=\"" +
+        esc(rel) +
+        "\">" +
+        esc(rel) +
+        "</strong></p>" +
+        '<p title="' +
+        esc(sizeTitle) +
+        '">Size: ' +
+        esc(formatFileSize(rawSize)) +
+        "</p>" +
+        "<p>Modified: " +
+        esc(mt.toLocaleString()) +
+        "</p>" +
+        links +
+        '<div class="file-detail-mediainfo" id="fileDetailMediainfo">' +
+        "<h3 class=\"file-detail-mi-heading\">Media details</h3>" +
+        miInner +
+        "</div>";
+    }
     updateExplorerButton();
     fpUpdatePlayerActionButtons();
     if (rel && rel === fpCurrentRel()) {
@@ -5463,6 +7267,13 @@
           "<p class=\"file-detail-mi-error\" role=\"alert\">" +
           esc(mi.error || "MediaInfo failed") +
           "</p>";
+        if (mi.help_url) {
+          inner +=
+            "<p class=\"muted small file-detail-mi-help\"><a class=\"link\" href=\"" +
+            esc(String(mi.help_url)) +
+            "\" target=\"_blank\" rel=\"noopener noreferrer\">MediaInfo CLI — official download</a>" +
+            " · or set the executable path under <strong>Settings</strong>.</p>";
+        }
       }
       wrap.innerHTML = inner;
     } catch (err) {
@@ -5497,8 +7308,9 @@
         return;
       }
       var j = await r.json();
-      dupAllowlistPrefixes = j.allowlisted_rel_prefixes || [];
+      dupDownloadOutputRoots = dupOutputRootsFromSettings(j);
       renderDupRootCheckboxes();
+      restoreDupResultsIfReady();
     } catch (_e) {
       void _e;
     }
@@ -5509,20 +7321,18 @@
       return;
     }
     var parts = [];
-    (dupAllowlistPrefixes || []).forEach(function (pref, i) {
-      var p = (pref || "").trim();
-      if (!p) {
-        return;
-      }
-      var id = "dupRootPref_" + i;
+    (dupDownloadOutputRoots || []).forEach(function (item, i) {
+      var id = "dupRootOut_" + i;
       parts.push(
         '<label class="chk dup-root-label"><input type="checkbox" id="' +
           esc(id) +
           '" data-dup-root="' +
-          esc(p) +
+          esc(item.rel) +
           '" /> <span>' +
-          esc(p) +
-          "</span></label>"
+          esc(item.label) +
+          ' <span class="muted">(' +
+          esc(item.rel) +
+          ")</span></span></label>"
       );
     });
     dupManualRoots.forEach(function (mr, mi) {
@@ -5568,46 +7378,84 @@
     return out;
   }
 
-  function stopDupPoll() {
-    if (dupPollTimer) {
-      clearInterval(dupPollTimer);
-      dupPollTimer = null;
+  function setDupScanUiBusy(busy) {
+    dupScanBusy = !!busy;
+    if (els.btnDupScan) {
+      els.btnDupScan.disabled = dupScanBusy;
+    }
+    if (els.btnDupReset) {
+      els.btnDupReset.hidden = !dupScanBusy;
     }
   }
 
-  function pollDupStatusLoop() {
-    stopDupPoll();
-    dupPollTimer = window.setInterval(function () {
-      fetch("/api/duplicates/status", { credentials: "same-origin" })
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (j) {
-          var ph = j.phase || "idle";
-          var prog = j.progress || {};
-          if (els.dupScanProgress) {
-            els.dupScanProgress.textContent =
-              ph === "running"
-                ? "Scanning… files listed " +
-                  (prog.files_scanned || 0) +
-                  ", hashed " +
-                  (prog.files_hashed || 0) +
-                  ", groups " +
-                  (prog.groups_found || 0)
-                : ph === "success"
-                  ? "Done."
-                  : ph === "failed"
-                    ? "Failed."
-                    : "";
-          }
-          if (ph !== "running") {
-            stopDupPoll();
-          }
-        })
-        .catch(function () {
-          stopDupPoll();
-        });
-    }, 450);
+  function updateDupScanProgressFromStatus(j) {
+    if (!els.dupScanProgress) {
+      return;
+    }
+    var ph = (j && j.phase) || "idle";
+    var prog = (j && j.progress) || {};
+    els.dupScanProgress.textContent =
+      ph === "running"
+        ? "Scanning… files listed " +
+          (prog.files_scanned || 0) +
+          ", hashed " +
+          (prog.files_hashed || 0) +
+          ", groups " +
+          (prog.groups_found || 0)
+        : ph === "success"
+          ? "Done."
+          : ph === "failed"
+            ? "Failed."
+            : "";
+  }
+
+  async function fetchDupStatusLite() {
+    var rs = await fetch("/api/duplicates/status", { credentials: "same-origin" });
+    return rs.json();
+  }
+
+  async function fetchDupResults() {
+    var rs = await fetch("/api/duplicates/results", { credentials: "same-origin" });
+    if (!rs.ok) {
+      return { groups: [] };
+    }
+    return rs.json();
+  }
+
+  async function waitForDupScanComplete() {
+    for (;;) {
+      await new Promise(function (res) {
+        setTimeout(res, 450);
+      });
+      var st = await fetchDupStatusLite();
+      updateDupScanProgressFromStatus(st);
+      if ((st.phase || "") !== "running") {
+        return st;
+      }
+    }
+  }
+
+  async function restoreDupResultsIfReady() {
+    if (dupScanBusy || dupLastGroups.length) {
+      return;
+    }
+    try {
+      var st = await fetchDupStatusLite();
+      if ((st.phase || "") === "running") {
+        setDupScanUiBusy(true);
+        updateDupScanProgressFromStatus(st);
+        st = await waitForDupScanComplete();
+        setDupScanUiBusy(false);
+      }
+      if ((st.phase || "") !== "success") {
+        return;
+      }
+      var res = await fetchDupResults();
+      dupLastGroups = res.groups || [];
+      renderDupResults();
+    } catch (_e) {
+      void _e;
+    }
   }
 
   function renderDupResults() {
@@ -5739,6 +7587,416 @@
       "Last backup (" + ok + ") " + tStr + " — " + (info.summary || "—");
   }
 
+  var SCHEDULE_WEEKDAYS = [
+    ["0", "Monday"],
+    ["1", "Tuesday"],
+    ["2", "Wednesday"],
+    ["3", "Thursday"],
+    ["4", "Friday"],
+    ["5", "Saturday"],
+    ["6", "Sunday"],
+  ];
+  var YOUTUBE_SCHEDULE_JOBS = ["watch_later", "channels", "videos"];
+  var GALLERY_SCHEDULE_JOB = "gallery_sources";
+
+  function syncScheduleRowFields(row) {
+    if (!row) {
+      return;
+    }
+    var freqEl = row.querySelector(".sch-freq");
+    var dayWrap = row.querySelector(".sch-day-wrap");
+    var dowWrap = row.querySelector(".sch-dow-wrap");
+    if (!freqEl) {
+      return;
+    }
+    var f = freqEl.value || "monthly";
+    if (dayWrap) {
+      dayWrap.hidden = f !== "monthly";
+    }
+    if (dowWrap) {
+      dowWrap.hidden = f !== "weekly";
+    }
+  }
+
+  function scheduleJobLabel(job) {
+    if (job === "gallery_sources") {
+      return "Gallery saved sources (all)";
+    }
+    return job;
+  }
+
+  function syncGallerySourcesScheduleFields() {
+    if (!els.gallerySourcesScheduleFreq) {
+      return;
+    }
+    var f = els.gallerySourcesScheduleFreq.value || "daily";
+    if (els.gallerySourcesScheduleDayWrap) {
+      els.gallerySourcesScheduleDayWrap.hidden = f !== "monthly";
+    }
+    if (els.gallerySourcesScheduleDowWrap) {
+      els.gallerySourcesScheduleDowWrap.hidden = f !== "weekly";
+    }
+  }
+
+  function galleryScheduleMaxHoursFromSec(sec) {
+    var n = typeof sec === "number" ? sec : parseInt(sec, 10);
+    if (!n || n <= 0) {
+      return 0;
+    }
+    return Math.min(24, Math.max(1, Math.round(n / 3600)));
+  }
+
+  function renderGallerySourcesSchedule(payload) {
+    var sch = payload && payload.schedule;
+    var enabled = !!(sch && sch.enabled);
+    if (els.gallerySourcesScheduleEnabled) {
+      els.gallerySourcesScheduleEnabled.checked = enabled;
+    }
+    if (sch) {
+      if (els.gallerySourcesScheduleFreq) {
+        els.gallerySourcesScheduleFreq.value = sch.frequency || "daily";
+      }
+      if (els.gallerySourcesScheduleDow) {
+        els.gallerySourcesScheduleDow.value = String(
+          typeof sch.day_of_week === "number" ? sch.day_of_week : 0
+        );
+      }
+      if (els.gallerySourcesScheduleDay) {
+        els.gallerySourcesScheduleDay.value = String(sch.day_of_month || 1);
+      }
+      if (els.gallerySourcesScheduleHour) {
+        els.gallerySourcesScheduleHour.value = String(sch.hour != null ? sch.hour : 2);
+      }
+      if (els.gallerySourcesScheduleMin) {
+        els.gallerySourcesScheduleMin.value = String(sch.minute != null ? sch.minute : 0);
+      }
+    }
+    if (els.gallerySourcesScheduleMaxHours) {
+      var maxSec =
+        payload && typeof payload.scheduled_max_run_sec === "number"
+          ? payload.scheduled_max_run_sec
+          : 7200;
+      els.gallerySourcesScheduleMaxHours.value = String(galleryScheduleMaxHoursFromSec(maxSec));
+    }
+    syncGallerySourcesScheduleFields();
+    if (els.gallerySourcesScheduleStatus) {
+      var parts = [];
+      if (payload && payload.next_run && enabled) {
+        parts.push("Next run (local): " + payload.next_run);
+      } else if (enabled) {
+        parts.push("Next run: —");
+      }
+      var capH =
+        payload && typeof payload.scheduled_max_run_sec === "number"
+          ? galleryScheduleMaxHoursFromSec(payload.scheduled_max_run_sec)
+          : 2;
+      parts.push(capH > 0 ? "Per-source limit: " + capH + "h" : "Per-source limit: none");
+      if (payload && payload.scheduler_enabled === false) {
+        parts.push(
+          "Scheduler is off — enable it under Settings → Automatic scheduling, save, and restart the server."
+        );
+      }
+      els.gallerySourcesScheduleStatus.textContent = parts.join(" · ");
+    }
+  }
+
+  async function loadGallerySourcesSchedule() {
+    try {
+      var r = await fetch("/api/galleries/sources/schedule");
+      if (r.status === 404) {
+        if (els.gallerySourcesScheduleStatus) {
+          els.gallerySourcesScheduleStatus.textContent =
+            "Scheduled crawl requires a server restart — stop and start Archive Console, then hard-refresh this page (Ctrl+F5).";
+        }
+        return;
+      }
+      if (!r.ok) {
+        return;
+      }
+      var j = await r.json();
+      renderGallerySourcesSchedule(j);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function saveGallerySourcesSchedule() {
+    if (!els.gallerySourcesScheduleEnabled) {
+      return;
+    }
+    var freq = (els.gallerySourcesScheduleFreq && els.gallerySourcesScheduleFreq.value) || "daily";
+    var body = {
+      enabled: !!els.gallerySourcesScheduleEnabled.checked,
+      frequency: freq,
+      day_of_month: Math.min(
+        31,
+        Math.max(1, parseInt(els.gallerySourcesScheduleDay && els.gallerySourcesScheduleDay.value, 10) || 1)
+      ),
+      day_of_week: Math.min(
+        6,
+        Math.max(0, parseInt(els.gallerySourcesScheduleDow && els.gallerySourcesScheduleDow.value, 10) || 0)
+      ),
+      hour: Math.min(
+        23,
+        Math.max(0, parseInt(els.gallerySourcesScheduleHour && els.gallerySourcesScheduleHour.value, 10) || 0)
+      ),
+      minute: Math.min(
+        59,
+        Math.max(0, parseInt(els.gallerySourcesScheduleMin && els.gallerySourcesScheduleMin.value, 10) || 0)
+      ),
+      scheduled_max_run_sec: (function () {
+        var maxH = Math.min(
+          24,
+          Math.max(
+            0,
+            parseInt(
+              els.gallerySourcesScheduleMaxHours && els.gallerySourcesScheduleMaxHours.value,
+              10
+            ) || 0
+          )
+        );
+        return maxH <= 0 ? 0 : maxH * 3600;
+      })(),
+    };
+    try {
+      var r = await fetch("/api/galleries/sources/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!r.ok) {
+        var tx = await r.text();
+        if (els.gallerySourcesScheduleStatus) {
+          if (r.status === 404) {
+            els.gallerySourcesScheduleStatus.textContent =
+              "Save failed: server is running an older build. Restart Archive Console, hard-refresh (Ctrl+F5), then save again.";
+          } else {
+            els.gallerySourcesScheduleStatus.textContent =
+              "Save failed: " + r.status + " " + tx;
+          }
+        }
+        return;
+      }
+      var j = await r.json();
+      renderGallerySourcesSchedule(j);
+      if (els.gallerySourcesScheduleStatus) {
+        var okMsg = body.enabled ? "Schedule saved." : "Schedule saved (disabled).";
+        if (j.scheduler_enabled === false && body.enabled) {
+          okMsg +=
+            " Enable the scheduler under Settings → Automatic scheduling, save, and restart the server.";
+        }
+        var hint = els.gallerySourcesScheduleStatus.textContent || "";
+        els.gallerySourcesScheduleStatus.textContent = hint
+          ? okMsg + " · " + hint
+          : okMsg;
+      }
+    } catch {
+      if (els.gallerySourcesScheduleStatus) {
+        els.gallerySourcesScheduleStatus.textContent = "Save failed (network).";
+      }
+    }
+  }
+
+  function scheduleHintForYoutube(hints) {
+    return (hints || []).filter(function (h) {
+      return h && h.schedule && h.schedule.job !== GALLERY_SCHEDULE_JOB;
+    });
+  }
+
+  function schedulesForYoutube(schedules) {
+    return (schedules || []).filter(function (s) {
+      return s && s.job !== GALLERY_SCHEDULE_JOB;
+    });
+  }
+
+  function updateYoutubeSchedulerHint(j) {
+    if (!els.youtubeSchedulerHint) {
+      return;
+    }
+    var feats = (j && j.features) || {};
+    if (!feats.scheduler_enabled) {
+      els.youtubeSchedulerHint.textContent =
+        "Scheduler is off — enable it under Settings → Automatic scheduling, save, and restart the server.";
+      return;
+    }
+    if (j && j.scheduler_backend_active) {
+      els.youtubeSchedulerHint.textContent =
+        "Scheduler is active on this server. Enabled entries below run automatically.";
+      return;
+    }
+    els.youtubeSchedulerHint.textContent =
+      "Scheduler is enabled in settings but inactive until you restart Archive Console.";
+  }
+
+  var ytdlpBatchRunSaveTimer = null;
+  var lastYtdlpPreflightViaExtension = true;
+
+  function syncYtdlpPreflightUi() {
+    var on = !!(els.optPreflightViaExtension && els.optPreflightViaExtension.checked);
+    if (els.optPreflightWaitRow) {
+      els.optPreflightWaitRow.classList.toggle("is-disabled", !on);
+    }
+    if (els.optPreflightWaitSec) {
+      els.optPreflightWaitSec.disabled = !on;
+    }
+  }
+
+  function syncRunCookieGateHint() {
+    if (!els.runCookieGateHint) {
+      return;
+    }
+    if (lastYtdlpPreflightViaExtension) {
+      els.runCookieGateHint.hidden = false;
+      els.runCookieGateHint.textContent =
+        "Before each run, the Firefox extension should refresh cookies.txt from an open YouTube tab (preflight below). Dry-run skips preflight.";
+      return;
+    }
+    if (lastRemindersRequireCookieConfirmManual) {
+      els.runCookieGateHint.hidden = false;
+      els.runCookieGateHint.textContent =
+        "Manual runs require confirming cookies.txt before start (Settings → Cookie hygiene). Dry-run skips this gate.";
+      return;
+    }
+    els.runCookieGateHint.hidden = true;
+    els.runCookieGateHint.textContent = "";
+  }
+
+  function syncYtdlpCookiePollUi() {
+    var on = !!(els.optPauseOnCookieError && els.optPauseOnCookieError.checked);
+    if (els.optCookieAuthPollRow) {
+      els.optCookieAuthPollRow.classList.toggle("is-disabled", !on);
+    }
+    if (els.optCookieAuthPollSec) {
+      els.optCookieAuthPollSec.disabled = !on;
+    }
+  }
+
+  function applyYtdlpBatchRunFromSettings(j) {
+    var ybr = (j && j.ytdlp_batch_run) || {};
+    if (els.optPreflightViaExtension) {
+      els.optPreflightViaExtension.checked =
+        ybr.preflight_via_extension !== false;
+    }
+    if (els.optPreflightWaitSec) {
+      var wait = ybr.preflight_wait_sec;
+      els.optPreflightWaitSec.value = String(
+        wait != null && wait !== undefined && isFinite(Number(wait))
+          ? Number(wait)
+          : 120
+      );
+    }
+    lastYtdlpPreflightViaExtension =
+      ybr.preflight_via_extension !== false;
+    if (els.optPauseOnCookieError) {
+      els.optPauseOnCookieError.checked = !!ybr.pause_on_cookie_error;
+    }
+    if (els.optCookieAuthPollSec) {
+      var poll = ybr.cookie_auth_poll_sec;
+      els.optCookieAuthPollSec.value = String(
+        poll != null && poll !== undefined && isFinite(Number(poll)) ? Number(poll) : 15
+      );
+    }
+    syncYtdlpPreflightUi();
+    syncYtdlpCookiePollUi();
+    syncRunCookieGateHint();
+  }
+
+  function readYtdlpBatchRunPatch() {
+    var waitRaw =
+      els.optPreflightWaitSec && els.optPreflightWaitSec.value != null
+        ? parseInt(String(els.optPreflightWaitSec.value), 10)
+        : 120;
+    var waitSec = isFinite(waitRaw) ? waitRaw : 120;
+    waitSec = Math.min(600, Math.max(10, waitSec));
+    if (els.optPreflightWaitSec) {
+      els.optPreflightWaitSec.value = String(waitSec);
+    }
+    var pollRaw =
+      els.optCookieAuthPollSec && els.optCookieAuthPollSec.value != null
+        ? parseInt(String(els.optCookieAuthPollSec.value), 10)
+        : 15;
+    var poll = isFinite(pollRaw) ? pollRaw : 15;
+    poll = Math.min(3600, Math.max(5, poll));
+    if (els.optCookieAuthPollSec) {
+      els.optCookieAuthPollSec.value = String(poll);
+    }
+    lastYtdlpPreflightViaExtension = !!(
+      els.optPreflightViaExtension && els.optPreflightViaExtension.checked
+    );
+    return {
+      preflight_via_extension: lastYtdlpPreflightViaExtension,
+      preflight_wait_sec: waitSec,
+      pause_on_cookie_error: !!(els.optPauseOnCookieError && els.optPauseOnCookieError.checked),
+      cookie_auth_poll_sec: poll,
+    };
+  }
+
+  function scheduleSaveYtdlpBatchRunSettings() {
+    window.clearTimeout(ytdlpBatchRunSaveTimer);
+    ytdlpBatchRunSaveTimer = window.setTimeout(function () {
+      void saveYtdlpBatchRunSettings();
+    }, 400);
+  }
+
+  async function saveYtdlpBatchRunSettings() {
+    try {
+      var r = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ ytdlp_batch_run: readYtdlpBatchRunPatch() }),
+      });
+      if (!r.ok) {
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function loadYoutubeScheduleForm() {
+    try {
+      var r = await fetch("/api/settings");
+      if (!r.ok) {
+        return;
+      }
+      var j = await r.json();
+      applyYtdlpBatchRunFromSettings(j);
+      updateYoutubeSchedulerHint(j);
+      renderScheduleEditor(
+        schedulesForYoutube(j.schedules),
+        scheduleHintForYoutube(j.schedule_hints),
+        YOUTUBE_SCHEDULE_JOBS
+      );
+      if (els.scheduleSaveMsg) {
+        els.scheduleSaveMsg.textContent = "";
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function mergeAndSaveSchedules(youtubeRows) {
+    var cur = await fetch("/api/settings");
+    if (!cur.ok) {
+      throw new Error("Could not load current schedules.");
+    }
+    var cj = await cur.json();
+    var galleryRows = (cj.schedules || []).filter(function (s) {
+      return s && s.job === GALLERY_SCHEDULE_JOB;
+    });
+    var merged = galleryRows.concat(youtubeRows || []);
+    var r = await fetch("/api/settings/schedules", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ schedules: merged }),
+    });
+    if (!r.ok) {
+      var tx = await r.text();
+      throw new Error(r.status + " " + tx);
+    }
+  }
+
   function renderScheduleEditor(schedList, hints, jobKeys) {
     if (!els.scheduleEditor) {
       return;
@@ -5766,11 +8024,38 @@
             "\"" +
             (String(s.job) === String(j) ? " selected" : "") +
             ">" +
-            esc(j) +
+            esc(scheduleJobLabel(j)) +
             "</option>"
           );
         })
         .join("");
+      var freq = s.frequency || "monthly";
+      var freqOpts = ["daily", "weekly", "monthly"]
+        .map(function (f) {
+          return (
+            "<option value=\"" +
+            f +
+            "\"" +
+            (String(freq) === f ? " selected" : "") +
+            ">" +
+            f.charAt(0).toUpperCase() +
+            f.slice(1) +
+            "</option>"
+          );
+        })
+        .join("");
+      var dow = typeof s.day_of_week === "number" ? s.day_of_week : 0;
+      var dowOpts = SCHEDULE_WEEKDAYS.map(function (pair) {
+        return (
+          "<option value=\"" +
+          pair[0] +
+          "\"" +
+          (String(dow) === pair[0] ? " selected" : "") +
+          ">" +
+          esc(pair[1]) +
+          "</option>"
+        );
+      }).join("");
       row.innerHTML =
         "<input type=\"hidden\" class=\"sch-id\" value=\"" +
         esc(sid) +
@@ -5778,9 +8063,15 @@
         "<label class=\"field compact\"><span>Job</span><select class=\"sch-job\">" +
         jobOpts +
         "</select></label>" +
-        "<label class=\"field compact\"><span>Day (1–31)</span><input type=\"number\" class=\"sch-day\" min=\"1\" max=\"31\" value=\"" +
+        "<label class=\"field compact\"><span>Repeat</span><select class=\"sch-freq\">" +
+        freqOpts +
+        "</select></label>" +
+        "<label class=\"field compact sch-day-wrap\"><span>Day (1–31)</span><input type=\"number\" class=\"sch-day\" min=\"1\" max=\"31\" value=\"" +
         esc(s.day_of_month) +
         "\" /></label>" +
+        "<label class=\"field compact sch-dow-wrap\"><span>Weekday</span><select class=\"sch-dow\">" +
+        dowOpts +
+        "</select></label>" +
         "<label class=\"field compact\"><span>Hour</span><input type=\"number\" class=\"sch-hour\" min=\"0\" max=\"23\" value=\"" +
         esc(s.hour) +
         "\" /></label>" +
@@ -5797,6 +8088,13 @@
       row.querySelector(".sch-del").addEventListener("click", function () {
         row.remove();
       });
+      var freqEl = row.querySelector(".sch-freq");
+      if (freqEl) {
+        freqEl.addEventListener("change", function () {
+          syncScheduleRowFields(row);
+        });
+      }
+      syncScheduleRowFields(row);
       els.scheduleEditor.appendChild(row);
     });
   }
@@ -5809,17 +8107,25 @@
     els.scheduleEditor.querySelectorAll(".schedule-row").forEach(function (row) {
       var idEl = row.querySelector(".sch-id");
       var job = row.querySelector(".sch-job");
+      var freq = row.querySelector(".sch-freq");
       var day = row.querySelector(".sch-day");
+      var dow = row.querySelector(".sch-dow");
       var hour = row.querySelector(".sch-hour");
       var min = row.querySelector(".sch-min");
       var en = row.querySelector(".sch-en");
       if (!job) {
         return;
       }
+      var frequency = (freq && freq.value) || "monthly";
+      if (frequency !== "daily" && frequency !== "weekly" && frequency !== "monthly") {
+        frequency = "monthly";
+      }
       out.push({
         id: idEl ? idEl.value || "" : "",
         job: job.value,
+        frequency: frequency,
         day_of_month: Math.min(31, Math.max(1, parseInt(day && day.value, 10) || 1)),
+        day_of_week: Math.min(6, Math.max(0, parseInt(dow && dow.value, 10) || 0)),
         hour: Math.min(23, Math.max(0, parseInt(hour && hour.value, 10) || 0)),
         minute: Math.min(59, Math.max(0, parseInt(min && min.value, 10) || 0)),
         enabled: !!(en && en.checked),
@@ -5967,13 +8273,7 @@
           pt.textContent = "";
         }
       }
-      if (els.runCookieGateHint) {
-        if (lastRemindersRequireCookieConfirmManual) {
-          els.runCookieGateHint.hidden = false;
-        } else {
-          els.runCookieGateHint.hidden = true;
-        }
-      }
+      syncRunCookieGateHint();
       if (els.oneoffCookieGateHint) {
         if (lastRemindersRequireCookieConfirmManual) {
           els.oneoffCookieGateHint.hidden = false;
@@ -6001,14 +8301,34 @@
     const r = await fetch("/api/settings");
     const j = await r.json();
     els.setPort.value = j.port;
-    els.setAllow.value = (j.allowlisted_rel_prefixes || []).join(", ");
-    els.settingsArchiveRoot.textContent = "Archive root: " + j.archive_root;
+    if (els.setAllowSummary) {
+      var allowParts = (j.allowlisted_rel_prefixes || []).join(", ");
+      var allowNote = j.allowlist_note || "";
+      els.setAllowSummary.textContent = allowParts
+        ? "Accessible: " + allowParts + (allowNote ? " — " + allowNote : "")
+        : allowNote ||
+          "Accessible folders come from Download output folders plus logs/ and cookies/.";
+    }
+    if (els.setArchiveRoot) {
+      els.setArchiveRoot.value =
+        j.archive_root != null && j.archive_root !== undefined
+          ? String(j.archive_root)
+          : "";
+    }
     if (els.setEditorBackupMax) {
       els.setEditorBackupMax.value = j.editor_backup_max != null ? j.editor_backup_max : 10;
     }
     if (els.setFfmpegExe) {
       els.setFfmpegExe.value =
         j.ffmpeg_exe != null && j.ffmpeg_exe !== undefined ? String(j.ffmpeg_exe) : "";
+    }
+    if (els.setGifskiExe) {
+      els.setGifskiExe.value =
+        j.gifski_exe != null && j.gifski_exe !== undefined ? String(j.gifski_exe) : "";
+    }
+    if (els.setCzkawkaExe) {
+      els.setCzkawkaExe.value =
+        j.czkawka_exe != null && j.czkawka_exe !== undefined ? String(j.czkawka_exe) : "";
     }
     if (els.setMediainfoExe) {
       els.setMediainfoExe.value =
@@ -6075,7 +8395,37 @@
     if (els.deeplSettingsMsg) {
       els.deeplSettingsMsg.textContent = "";
     }
-    dupAllowlistPrefixes = j.allowlisted_rel_prefixes || [];
+    if (els.setWeatherLat) {
+      els.setWeatherLat.value =
+        j.weather_latitude != null ? String(j.weather_latitude) : "";
+    }
+    if (els.setWeatherLon) {
+      els.setWeatherLon.value =
+        j.weather_longitude != null ? String(j.weather_longitude) : "";
+    }
+    if (els.setOpenweatherApiKey) {
+      els.setOpenweatherApiKey.value = "";
+      var owmSaved = !!j.openweather_api_key_saved;
+      var owmEff = !!j.openweather_api_key_configured;
+      if (owmSaved) {
+        els.setOpenweatherApiKey.placeholder =
+          "•••••••• (saved in state — type a new key to replace)";
+      } else if (owmEff) {
+        els.setOpenweatherApiKey.placeholder =
+          "Using OPENWEATHER_API_KEY from environment (optional: store here)";
+      } else {
+        els.setOpenweatherApiKey.placeholder =
+          "Optional — Open-Meteo used when blank";
+      }
+    }
+    if (els.optOpenweatherKeyClear) {
+      els.optOpenweatherKeyClear.checked = false;
+    }
+    if (els.homeWeatherSettingsMsg) {
+      els.homeWeatherSettingsMsg.textContent = "";
+    }
+    homeApplyClock24FromLs();
+    dupDownloadOutputRoots = dupOutputRootsFromSettings(j);
     if (activeViewId === "library" && els.dupRootChecks) {
       renderDupRootCheckboxes();
     }
@@ -6147,6 +8497,9 @@
     if (els.optTrayNotifySchedule) {
       els.optTrayNotifySchedule.checked = !!feats.tray_notify_before_schedule;
     }
+    if (els.optSchedulerEnabled) {
+      els.optSchedulerEnabled.checked = !!feats.scheduler_enabled;
+    }
     if (els.setTrayNotifyPort) {
       els.setTrayNotifyPort.value =
         j.tray_notify_port != null ? j.tray_notify_port : 0;
@@ -6168,6 +8521,48 @@
         els.trayNotifyFailureLine.textContent = "";
       }
     }
+    if (els.optGotifyEnabled) {
+      els.optGotifyEnabled.checked = !!j.gotify_enabled;
+    }
+    if (els.setGotifyBaseUrl) {
+      els.setGotifyBaseUrl.value = j.gotify_base_url || "";
+    }
+    if (els.setGotifyAppToken) {
+      els.setGotifyAppToken.value = "";
+      els.setGotifyAppToken.placeholder = j.gotify_app_token_saved
+        ? "Token saved (paste new token to replace, then Save)"
+        : "Paste application token from Gotify → Apps";
+    }
+    if (els.optGotifyNotifyStart) {
+      els.optGotifyNotifyStart.checked = j.gotify_notify_on_start !== false;
+    }
+    if (els.optGotifyNotifyComplete) {
+      els.optGotifyNotifyComplete.checked = j.gotify_notify_on_complete !== false;
+    }
+    if (els.optGotifyNotifyScheduled) {
+      els.optGotifyNotifyScheduled.checked = j.gotify_notify_scheduled !== false;
+    }
+    if (els.optGotifyNotifyManual) {
+      els.optGotifyNotifyManual.checked = !!j.gotify_notify_manual;
+    }
+    if (els.setGotifyPriority) {
+      els.setGotifyPriority.value =
+        j.gotify_priority != null ? j.gotify_priority : 5;
+    }
+    if (els.gotifySettingsMsg) {
+      els.gotifySettingsMsg.textContent = "";
+    }
+    if (els.gotifyFailureLine) {
+      var gfu = j.gotify_last_failure_unix || 0;
+      var gfm = String(j.gotify_last_failure_message || "").trim();
+      if (gfu > 0 && gfm) {
+        els.gotifyFailureLine.hidden = false;
+        els.gotifyFailureLine.textContent = "Last Gotify error: " + gfm;
+      } else {
+        els.gotifyFailureLine.hidden = true;
+        els.gotifyFailureLine.textContent = "";
+      }
+    }
     var prs = j.pre_run_reminder_settings || {};
     lastPreRunReminder = {
       snooze_until_unix: prs.snooze_until_unix || 0,
@@ -6182,11 +8577,17 @@
     if (els.schedulerStatusLine) {
       els.schedulerStatusLine.textContent = j.scheduler_note || "";
     }
-    var jobKeys = j.jobs || ["watch_later", "channels", "videos"];
-    renderScheduleEditor(j.schedules || [], j.schedule_hints || [], jobKeys);
-    if (els.scheduleSaveMsg) {
-      els.scheduleSaveMsg.textContent = "";
+    if (els.schedulerGlobalSaveMsg) {
+      els.schedulerGlobalSaveMsg.textContent = "";
     }
+    if (els.setShowGettingStarted) {
+      els.setShowGettingStarted.checked = j.show_getting_started !== false;
+    }
+    if (els.setDefaultLandingView) {
+      var dl = normalizeDefaultLandingView(j.default_landing_view);
+      els.setDefaultLandingView.value = dl;
+    }
+    applyShowGettingStartedFromSettingsPayload(j);
     refreshCookieReminder();
   }
 
@@ -6218,7 +8619,7 @@
               ? "Videos"
               : k === "galleries"
                 ? "Galleries"
-                : "One-off";
+                : "Single download";
       var abs = o.effective_abs || "—";
       var cr =
         o.configured_rel != null
@@ -6313,6 +8714,9 @@
     }
     await loadDownloadDirsForm();
     await refreshOneoffOutputEffective();
+    if (activeViewId === "library") {
+      syncDupRootCheckboxesFromApi();
+    }
     return { ok: true };
   }
 
@@ -6438,16 +8842,111 @@
     });
   });
 
+  document.querySelectorAll(".btn-settings-browse").forEach(function (btn) {
+    btn.addEventListener("click", async function () {
+      var kind = btn.getAttribute("data-settings-browse") || "file";
+      var targetId = btn.getAttribute("data-settings-target");
+      var title = btn.getAttribute("data-settings-title") || "";
+      var input = targetId ? document.getElementById(targetId) : null;
+      if (!input || btn.disabled) {
+        return;
+      }
+      function hostBrowseFeedback(text) {
+        var statusId = btn.getAttribute("data-settings-status");
+        if (statusId) {
+          var node = document.getElementById(statusId);
+          if (node) {
+            node.textContent = text || "";
+            return;
+          }
+        }
+        if (els.settingsMsg) {
+          els.settingsMsg.textContent = text || "";
+        }
+      }
+      hostBrowseFeedback(
+        kind === "file"
+          ? "Opening file picker on this PC… (check behind this window if you do not see it)."
+          : "Opening folder picker on this PC… (check behind this window if you do not see it)."
+      );
+      btn.disabled = true;
+      try {
+        var browseBody = { kind: kind, title: title };
+        var currentPath = (input.value || "").trim();
+        if (currentPath) {
+          browseBody.initial_path = currentPath;
+        }
+        var r = await fetch("/api/settings/browse-host", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(browseBody),
+        });
+        if (r.status === 204) {
+          hostBrowseFeedback(
+            "No path selected. If no dialog appeared, it may be behind this window — try again or type the path manually."
+          );
+          return;
+        }
+        if (r.status === 503) {
+          var d503 = await r.json().catch(function () {
+            return {};
+          });
+          hostBrowseFeedback(
+            (d503.detail && String(d503.detail)) ||
+              "Native picker unavailable on this server — type the path manually."
+          );
+          return;
+        }
+        if (!r.ok) {
+          var errJ = await r.json().catch(function () {
+            return null;
+          });
+          var detail =
+            errJ && errJ.detail != null
+              ? typeof errJ.detail === "string"
+                ? errJ.detail
+                : JSON.stringify(errJ.detail)
+              : await r.text();
+          hostBrowseFeedback("Browse failed: " + r.status + " " + detail);
+          return;
+        }
+        var j = await r.json();
+        if (kind === "archive_relative" && j.rel != null) {
+          input.value = j.rel || "";
+        } else if (j.path != null) {
+          input.value = j.path || "";
+        }
+        input.focus();
+        if (btn.getAttribute("data-settings-status")) {
+          hostBrowseFeedback(
+            kind === "archive_relative" && j.rel
+              ? "Selected " + j.rel + ". Click Scan folder."
+              : "Path selected."
+          );
+        } else {
+          hostBrowseFeedback("Path selected — click Save general to persist.");
+        }
+      } catch (ex) {
+        hostBrowseFeedback(
+          "Browse failed (network or server). Check that Archive Console is running."
+        );
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+
   /* Navigation */
   els.nav.forEach(function (btn) {
     btn.addEventListener("click", function () {
       const v = btn.getAttribute("data-view");
+      var prevNavView = activeViewId;
       clearOneoffCookieBannerTimer();
       activateView(v);
       if (v === "history") {
         loadRunOverview();
       }
-      if (v === "library") {
+      if (v === "library" && prevNavView !== "library") {
         void openFilesViewWithOptionalWatch();
       }
       if (v === "settings") {
@@ -6469,10 +8968,29 @@
         }
       }
       if (v === "gallerydl") {
-        void loadGallerydlFile();
+        loadGallerydlFile();
+      }
+      if (v === "gifskyconf") {
+        if (typeof window.gifskyconfSetupLoad === "function") {
+          window.gifskyconfSetupLoad();
+        } else {
+          var gifskyWarn = document.getElementById("gifskyconfMsg");
+          if (gifskyWarn) {
+            gifskyWarn.textContent =
+              "gifsky.conf editor script did not load. Hard-refresh (Ctrl+F5) or check Network for /static/gifski_setup.js.";
+          }
+        }
       }
       if (v === "supportedsites") {
         void loadSupportedsites(false);
+      }
+      if (v === "getting-started") {
+        replaceStateView("getting-started", null);
+        initGettingStartedView();
+      }
+      if (v === "home") {
+        replaceStateView("home", null);
+        initHomeView();
       }
       if (v === "run") {
         refreshRunPanel();
@@ -6489,6 +9007,12 @@
       if (v === "galleries") {
         loadDownloadDirsForm();
         refreshGalleryOutputEffective();
+        void loadGallerySources();
+        void refreshCookieReminder();
+      }
+      if (v === "gifsky") {
+        loadDownloadDirsForm();
+        void loadGifskyScan();
         void refreshCookieReminder();
       }
       if (v === "rename") {
@@ -6496,6 +9020,133 @@
       }
     });
   });
+
+  (function bindGettingStartedUi() {
+    if (els.btnGsVerifyAll) {
+      els.btnGsVerifyAll.addEventListener("click", function () {
+        void fetchAndApplyToolVersions(null, null);
+      });
+    }
+    document.querySelectorAll("[data-gs-verify-tool]").forEach(function (btn) {
+      btn.addEventListener("click", function (ev) {
+        var t = btn.getAttribute("data-gs-verify-tool");
+        var el = ev.currentTarget;
+        void fetchAndApplyToolVersions(t || null, el instanceof HTMLElement ? el : null);
+      });
+    });
+    if (els.btnGsOpenCookies) {
+      els.btnGsOpenCookies.addEventListener("click", function () {
+        clearOneoffCookieBannerTimer();
+        goToInputsFile("cookies.txt");
+      });
+    }
+    if (els.btnGsOpenSiteCookies) {
+      els.btnGsOpenSiteCookies.addEventListener("click", function () {
+        clearOneoffCookieBannerTimer();
+        activateView("inputs");
+        replaceStateView("inputs", null);
+        loadDownloadDirsForm();
+        void refreshSiteCookiesPanel();
+        var panel = document.getElementById("siteCookiesPanel");
+        if (panel && panel.scrollIntoView) {
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+    if (els.btnSiteCookieAdd) {
+      els.btnSiteCookieAdd.addEventListener("click", function () {
+        void addSiteCookieFile();
+      });
+    }
+    if (els.btnSiteCookiesRefresh) {
+      els.btnSiteCookiesRefresh.addEventListener("click", function () {
+        void refreshSiteCookiesPanel();
+      });
+    }
+    if (els.btnGsOpenInputs) {
+      els.btnGsOpenInputs.addEventListener("click", function () {
+        clearOneoffCookieBannerTimer();
+        activateView("inputs");
+        replaceStateView("inputs", null);
+        loadEditorFile(editorFile);
+        loadDownloadDirsForm();
+      });
+    }
+    if (els.btnGsOpenYtdlp) {
+      els.btnGsOpenYtdlp.addEventListener("click", function () {
+        clearOneoffCookieBannerTimer();
+        activateView("ytdlp");
+        replaceStateView("ytdlp", null);
+        if (typeof window.ytdlpSetupLoad === "function") {
+          window.ytdlpSetupLoad();
+        }
+      });
+    }
+    if (els.btnGsOpenGallerydl) {
+      els.btnGsOpenGallerydl.addEventListener("click", function () {
+        clearOneoffCookieBannerTimer();
+        activateView("gallerydl");
+        replaceStateView("gallerydl", null);
+        loadGallerydlFile();
+      });
+    }
+    function gsOpenGifskyconf() {
+      clearOneoffCookieBannerTimer();
+      activateView("gifskyconf");
+      replaceStateView("gifskyconf", null);
+      if (typeof window.gifskyconfSetupLoad === "function") {
+        window.gifskyconfSetupLoad();
+      }
+    }
+    if (els.btnGsOpenGifsky) {
+      els.btnGsOpenGifsky.addEventListener("click", function () {
+        clearOneoffCookieBannerTimer();
+        activateView("gifsky");
+        replaceStateView("gifsky", null);
+        loadDownloadDirsForm();
+        void loadGifskyScan();
+      });
+    }
+    if (els.btnGsOpenLibrary) {
+      els.btnGsOpenLibrary.addEventListener("click", function () {
+        clearOneoffCookieBannerTimer();
+        activateView("library");
+        replaceStateView("library", null);
+        var dup = document.getElementById("libraryDuplicates");
+        if (dup && dup.scrollIntoView) {
+          dup.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+    var btnGsOpenCzkawka = document.getElementById("btnGsOpenCzkawka");
+    if (btnGsOpenCzkawka) {
+      btnGsOpenCzkawka.addEventListener("click", function () {
+        clearOneoffCookieBannerTimer();
+        activateView("czkawka");
+        replaceStateView("czkawka", null);
+      });
+    }
+    document.querySelectorAll(".js-gs-open-gifskyconf, #btnGsOpenGifskyconf").forEach(function (btn) {
+      btn.addEventListener("click", gsOpenGifskyconf);
+    });
+    if (els.btnGsOpenSettings) {
+      els.btnGsOpenSettings.addEventListener("click", function () {
+        clearOneoffCookieBannerTimer();
+        activateView("settings");
+        replaceStateView("settings", null);
+        loadSettingsForm();
+      });
+    }
+    var gsView = document.getElementById("view-getting-started");
+    if (gsView) {
+      gsView.addEventListener("change", function (ev) {
+        var t = ev.target;
+        if (t && t.matches && t.matches("[data-gs-check]")) {
+          persistGettingStartedChecklist();
+        }
+      });
+    }
+  })();
 
   els.editorTabs.forEach(function (tab) {
     tab.addEventListener("click", function () {
@@ -6517,25 +9168,12 @@
     saveEditorFile();
   });
 
-  if (els.gallerydlTextarea) {
-    els.gallerydlTextarea.addEventListener("input", gallerydlUpdateDirty);
-  }
-  if (els.btnGallerydlReload) {
-    els.btnGallerydlReload.addEventListener("click", function () {
-      void gallerydlReloadFromDisk();
-    });
-  }
-  if (els.btnGallerydlSave) {
-    els.btnGallerydlSave.addEventListener("click", function () {
-      void saveGallerydlFile();
-    });
-  }
   if (els.linkGalleriesToGallerydl) {
     els.linkGalleriesToGallerydl.addEventListener("click", function (ev) {
       ev.preventDefault();
       clearOneoffCookieBannerTimer();
       activateView("gallerydl");
-      void loadGallerydlFile();
+      loadGallerydlFile();
     });
   }
 
@@ -6581,6 +9219,49 @@
   els.btnLogFontPlus.addEventListener("click", function () {
     logFontPx = Math.min(22, logFontPx + 1);
     applyLogFont();
+  });
+
+  if (els.btnLibraryFileListFontMinus) {
+    els.btnLibraryFileListFontMinus.addEventListener("click", function () {
+      libraryFileListFontPx = Math.max(10, libraryFileListFontPx - 1);
+      try {
+        localStorage.setItem(
+          STORAGE_LIBRARY_FILE_LIST_FONT,
+          String(libraryFileListFontPx)
+        );
+      } catch (_e) {
+        void _e;
+      }
+      applyLibraryFileListFont();
+    });
+  }
+  if (els.btnLibraryFileListFontPlus) {
+    els.btnLibraryFileListFontPlus.addEventListener("click", function () {
+      libraryFileListFontPx = Math.min(22, libraryFileListFontPx + 1);
+      try {
+        localStorage.setItem(
+          STORAGE_LIBRARY_FILE_LIST_FONT,
+          String(libraryFileListFontPx)
+        );
+      } catch (_e2) {
+        void _e2;
+      }
+      applyLibraryFileListFont();
+    });
+  }
+  document.addEventListener("input", function (ev) {
+    var t = ev.target;
+    if (!t || t.id !== "filesListFilter") {
+      return;
+    }
+    filesListOnFilterInput();
+  });
+  document.addEventListener("search", function (ev) {
+    var t = ev.target;
+    if (!t || t.id !== "filesListFilter") {
+      return;
+    }
+    filesListOnFilterInput();
   });
 
   if (els.optOneoffLogWrap) {
@@ -6864,6 +9545,17 @@
           return;
         }
       }
+      if (r.status === 503) {
+        var d503one = await r.json().catch(function () {
+          return {};
+        });
+        appendOneoffLogLine(
+          "[console] Cookie preflight timed out: " +
+            ((d503one.detail && String(d503one.detail)) ||
+              "enable Archive cookies bridge and keep a YouTube tab open.")
+        );
+        return;
+      }
       if (r.status === 409) {
         appendOneoffLogLine("[console] " + (await r.text()));
         return;
@@ -6885,23 +9577,29 @@
   }
 
   if (els.btnOneoffStop) {
-    els.btnOneoffStop.addEventListener("click", async function () {
-      if (
-        !window.confirm(
-          "Stop this run? The job may leave partial files on disk. You can re-run or clean up manually."
-        )
-      ) {
-        return;
-      }
-      var r = await fetch("/api/run/stop", { method: "POST" });
-      if (r.status === 409) {
-        appendStreamLine("[console] Stop: " + (await r.text()));
-        return;
-      }
-      if (!r.ok) {
-        appendStreamLine("[console] Stop failed: " + r.status);
-      }
+    els.btnOneoffStop.addEventListener("click", function () {
+      void postRunStop();
     });
+  }
+
+  function galleryPreviewHttpHref(raw) {
+    try {
+      var u = new URL(String(raw).trim());
+      if (u.protocol !== "http:" && u.protocol !== "https:") {
+        return "";
+      }
+      return u.href;
+    } catch (_e) {
+      return "";
+    }
+  }
+
+  function galleryPreviewTruncateUrl(href, maxLen) {
+    if (href.length <= maxLen) {
+      return href;
+    }
+    var keep = Math.max(16, maxLen - 21);
+    return href.slice(0, keep) + "…" + href.slice(-16);
   }
 
   function renderGalleryPreviewRows(j) {
@@ -6921,21 +9619,38 @@
     wrap.removeAttribute("hidden");
     rows.forEach(function (row) {
       var tr = document.createElement("tr");
-      var type = esc(String(row.type || ""));
-      var title = esc(String(row.title || ""));
+      var td0 = document.createElement("td");
+      td0.textContent = String(row.type || "");
+      var td1 = document.createElement("td");
+      td1.textContent = String(row.title || "");
+      var td2 = document.createElement("td");
+      td2.className = "gallery-preview-media-cell";
       var urls = Array.isArray(row.media_urls) ? row.media_urls : [];
-      var urlStr = esc(urls.join("\n"));
-      var fn = esc(String(row.suggested_filename || ""));
-      tr.innerHTML =
-        "<td>" +
-        type +
-        "</td><td>" +
-        title +
-        "</td><td><code style=\"white-space:pre-wrap;word-break:break-all\">" +
-        urlStr +
-        "</code></td><td>" +
-        fn +
-        "</td>";
+      urls.forEach(function (u, idx) {
+        if (idx > 0) {
+          td2.appendChild(document.createElement("br"));
+        }
+        var href = galleryPreviewHttpHref(u);
+        if (href) {
+          var a = document.createElement("a");
+          a.href = href;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.title = href;
+          a.textContent = galleryPreviewTruncateUrl(href, 80);
+          td2.appendChild(a);
+        } else {
+          var span = document.createElement("span");
+          span.textContent = String(u);
+          td2.appendChild(span);
+        }
+      });
+      var td3 = document.createElement("td");
+      td3.textContent = String(row.suggested_filename || "");
+      tr.appendChild(td0);
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
       tb.appendChild(tr);
     });
   }
@@ -6995,9 +9710,22 @@
         if (j.truncated) {
           parts.push("(truncated at 500)");
         }
+        if (j.cookies_passed_to_gallery_dl === false) {
+          parts.push(
+            "no root cookies.txt — optional gallery fallback; map cookies/<site>.txt in gallery-dl.conf for other sites."
+          );
+        }
         if (j.cookie_required_hint) {
           parts.push(
-            "Empty result — try refreshing cookies.txt (Reddit NSFW/private)."
+            "Preview empty or blocked — Reddit: OAuth or cookies/reddit.txt; other sites: cookies/<site>.txt in gallery-dl.conf, or skip preview and Run."
+          );
+        }
+        if (j.stderr_preview) {
+          parts.push("gallery-dl: " + j.stderr_preview);
+        }
+        if (j.parse_warnings && j.parse_warnings.length) {
+          parts.push(
+            "Parse / job: " + j.parse_warnings.slice(0, 4).join(" · ")
           );
         }
         if (els.galleryPreviewMsg) {
@@ -7034,135 +9762,745 @@
     });
   }
 
+  function formatGallerySourceDisplayUrl(url) {
+    var u = String(url || "").trim();
+    if (!u) {
+      return "";
+    }
+    return u.replace(
+      /^(https?:\/\/(?:www\.)?reddit\.com\/user\/[^/?#]+)\/submitted\/?(?=[?#]|$)/i,
+      "$1"
+    );
+  }
+
+  function formatGalleryUtc(unix) {
+    var n = Number(unix);
+    if (!isFinite(n) || n <= 0) {
+      return "—";
+    }
+    try {
+      return new Date(n * 1000).toISOString().replace("T", " ").slice(0, 19);
+    } catch {
+      return "—";
+    }
+  }
+
+  function buildGalleryStartBody(url) {
+    var snap = null;
+    if (galleryLastPreview && galleryLastPreview.url === url) {
+      snap = {
+        rows: galleryLastPreview.rows,
+        truncated: galleryLastPreview.truncated,
+        url: galleryLastPreview.url,
+      };
+    }
+    return {
+      url: url,
+      output_rel: getGalleriesDirFormValue(),
+      dry_run: !!(els.optGalleryDryRun && els.optGalleryDryRun.checked),
+      video_fallback: !!(
+        els.optGalleryVideoFallback && els.optGalleryVideoFallback.checked
+      ),
+      update_gallery_dl: !!(
+        els.optGalleryUpdateGalleryDl && els.optGalleryUpdateGalleryDl.checked
+      ),
+      preview_snapshot: snap,
+    };
+  }
+
+  async function startGalleryRunWithUrl(url) {
+    var u = String(url || "").trim();
+    if (!u) {
+      if (els.galleryStartMsg) {
+        els.galleryStartMsg.textContent = "Enter a gallery URL.";
+      }
+      return false;
+    }
+    if (els.galleryUrlInput) {
+      els.galleryUrlInput.value =
+        formatGallerySourceDisplayUrl(u) || u;
+    }
+    var body = buildGalleryStartBody(u);
+    let r = await fetch("/api/galleries/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (r.status === 428) {
+      let gate = {};
+      try {
+        gate = await r.json();
+      } catch {
+        appendGalleryLogLine(
+          "[console] Cookie confirmation required (bad response)."
+        );
+        return false;
+      }
+      if (gate.error === "cookie_confirm_required") {
+        if (els.galleryStartMsg) {
+          els.galleryStartMsg.textContent =
+            gate.message || "Confirm cookies in the dialog to continue.";
+        }
+        appendGalleryLogLine(
+          "[console] Cookie confirmation required — confirm in the dialog or use Dry-run to skip."
+        );
+        const ok = await showCookieGateModal();
+        if (!ok) {
+          appendGalleryLogLine(
+            "[console] Galleries run cancelled (cookies not confirmed)."
+          );
+          if (els.galleryStartMsg) {
+            els.galleryStartMsg.textContent = "";
+          }
+          return false;
+        }
+        if (els.galleryStartMsg) {
+          els.galleryStartMsg.textContent = "";
+        }
+        body.cookie_confirm = true;
+        r = await fetch("/api/galleries/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      } else {
+        appendGalleryLogLine(
+          "[console] Precondition required: " +
+            (gate.message || String(r.status))
+        );
+        return false;
+      }
+    }
+    if (r.status === 409) {
+      var t409g = await r.text();
+      if (els.galleryStartMsg) {
+        els.galleryStartMsg.textContent =
+          t409g || "Another job is already running.";
+      }
+      appendGalleryLogLine("[console] " + (t409g || "Conflict (409)."));
+      return false;
+    }
+    if (r.status === 400) {
+      var tx2 = await r.text();
+      var tx2s = tx2 || "Invalid request.";
+      if (els.galleryStartMsg) {
+        els.galleryStartMsg.textContent = tx2s;
+      }
+      appendGalleryLogLine("[console] Galleries start rejected: " + tx2s);
+      return false;
+    }
+    if (!r.ok) {
+      var failDetail = "Start failed (" + r.status + ").";
+      try {
+        var ej = await r.json();
+        if (ej.detail != null) {
+          failDetail =
+            typeof ej.detail === "string"
+              ? ej.detail
+              : JSON.stringify(ej.detail);
+        }
+      } catch (_fe) {
+        void _fe;
+      }
+      if (els.galleryStartMsg) {
+        els.galleryStartMsg.textContent = failDetail;
+      }
+      appendGalleryLogLine("[console] " + failDetail);
+      return false;
+    }
+    try {
+      await r.json();
+    } catch (_rj) {
+      void _rj;
+    }
+    activeStreamJob = "galleries";
+    return true;
+  }
+
+  function renderGallerySources(entries) {
+    gallerySourcesEntries = Array.isArray(entries) ? entries : [];
+    var tbody = els.gallerySourcesTbody;
+    var wrap = els.gallerySourcesTableWrap;
+    var scroll = els.gallerySourcesScroll;
+    var countBadge = els.gallerySourcesCountBadge;
+    var empty = els.gallerySourcesEmpty;
+    if (!tbody) {
+      return;
+    }
+    tbody.textContent = "";
+    var count = gallerySourcesEntries.length;
+    var has = count > 0;
+    if (wrap) {
+      wrap.hidden = !has;
+    }
+    if (scroll) {
+      scroll.classList.toggle("is-scrollable", count > 10);
+    }
+    if (countBadge) {
+      countBadge.textContent = has ? " (" + count + ")" : "";
+    }
+    if (empty) {
+      empty.hidden = has;
+    }
+    gallerySourcesEntries.forEach(function (row) {
+      var tr = document.createElement("tr");
+      var tdCb = document.createElement("td");
+      tdCb.className = "gallery-sources-check-col";
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.className = "gallery-source-row-cb";
+      cb.checked = true;
+      cb.dataset.sourceId = String(row.id || "");
+      cb.dataset.sourceUrl = String(row.url || "");
+      tdCb.appendChild(cb);
+      tr.appendChild(tdCb);
+      function tdText(t, cls) {
+        var td = document.createElement("td");
+        if (cls) {
+          td.className = cls;
+        }
+        td.textContent = t != null ? String(t) : "";
+        return td;
+      }
+      tr.appendChild(tdText(row.label || "—", "gallery-source-label"));
+      var tdUrl = document.createElement("td");
+      tdUrl.className = "gallery-source-url muted small";
+      var displayUrl =
+        row.url_display ||
+        formatGallerySourceDisplayUrl(row.url_input || row.url || "");
+      tdUrl.textContent = displayUrl;
+      tdUrl.title = displayUrl;
+      tr.appendChild(tdUrl);
+      tr.appendChild(tdText(formatGalleryUtc(row.last_run_unix)));
+      tr.appendChild(tdText(row.run_count != null ? row.run_count : "0"));
+      var exit =
+        row.last_exit_code != null && row.last_exit_code !== ""
+          ? String(row.last_exit_code)
+          : "—";
+      tr.appendChild(tdText(exit));
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function loadGallerySources() {
+    try {
+      var r = await fetch("/api/galleries/sources");
+      if (!r.ok) {
+        if (els.gallerySourcesMsg) {
+          els.gallerySourcesMsg.textContent = "Could not load saved sources.";
+        }
+        return;
+      }
+      var j = await r.json();
+      renderGallerySources(j.entries || []);
+      void loadGallerySourcesSchedule();
+      if (els.gallerySourcesMsg) {
+        els.gallerySourcesMsg.textContent = "";
+      }
+    } catch {
+      if (els.gallerySourcesMsg) {
+        els.gallerySourcesMsg.textContent = "Could not load saved sources.";
+      }
+    }
+  }
+
+  function getSelectedGallerySourceUrls() {
+    var urls = [];
+    document.querySelectorAll(".gallery-source-row-cb:checked").forEach(function (cb) {
+      var u = cb.dataset.sourceUrl || "";
+      if (u) {
+        urls.push(u);
+      }
+    });
+    return urls;
+  }
+
+  function getSelectedGallerySourceIds() {
+    var ids = [];
+    document.querySelectorAll(".gallery-source-row-cb:checked").forEach(function (cb) {
+      var id = cb.dataset.sourceId || "";
+      if (id) {
+        ids.push(id);
+      }
+    });
+    return ids;
+  }
+
+  async function runGalleryBatch(urls) {
+    if (!urls.length) {
+      if (els.gallerySourcesMsg) {
+        els.gallerySourcesMsg.textContent = "Select at least one source.";
+      }
+      return;
+    }
+    if (els.galleryStartMsg) {
+      els.galleryStartMsg.textContent = "";
+    }
+    galleryBatchTotal = urls.length;
+    galleryBatchQueue = urls.slice(1);
+    if (els.gallerySourcesMsg) {
+      els.gallerySourcesMsg.textContent =
+        "Batch 1/" + galleryBatchTotal + "…";
+    }
+    var ok = await startGalleryRunWithUrl(urls[0]);
+    if (!ok) {
+      galleryBatchQueue = [];
+      galleryBatchTotal = 0;
+      if (els.gallerySourcesMsg) {
+        els.gallerySourcesMsg.textContent = "Batch stopped (could not start run).";
+      }
+    }
+  }
+
+  function continueGalleryBatchIfAny() {
+    if (!galleryBatchQueue.length) {
+      return;
+    }
+    var url = galleryBatchQueue.shift();
+    var done = galleryBatchTotal - galleryBatchQueue.length;
+    if (els.gallerySourcesMsg) {
+      els.gallerySourcesMsg.textContent =
+        "Batch " + done + "/" + galleryBatchTotal + "…";
+    }
+    void startGalleryRunWithUrl(url);
+  }
+
   if (els.btnGalleryStart) {
     els.btnGalleryStart.addEventListener("click", async function () {
       if (els.galleryStartMsg) {
         els.galleryStartMsg.textContent = "";
       }
+      galleryBatchQueue = [];
+      galleryBatchTotal = 0;
+      if (els.gallerySourcesMsg) {
+        els.gallerySourcesMsg.textContent = "";
+      }
+      var url =
+        (els.galleryUrlInput && els.galleryUrlInput.value.trim()) || "";
+      await startGalleryRunWithUrl(url);
+    });
+  }
+
+  if (els.btnGalleryRunSelected) {
+    els.btnGalleryRunSelected.addEventListener("click", function () {
+      void runGalleryBatch(getSelectedGallerySourceUrls());
+    });
+  }
+
+  if (els.btnGallerySaveCurrent) {
+    els.btnGallerySaveCurrent.addEventListener("click", async function () {
       var url =
         (els.galleryUrlInput && els.galleryUrlInput.value.trim()) || "";
       if (!url) {
-        if (els.galleryStartMsg) {
-          els.galleryStartMsg.textContent = "Enter a gallery URL.";
+        if (els.gallerySourcesMsg) {
+          els.gallerySourcesMsg.textContent = "Enter a URL to save.";
         }
         return;
       }
-      var snap = null;
-      if (galleryLastPreview && galleryLastPreview.url === url) {
-        snap = {
-          rows: galleryLastPreview.rows,
-          truncated: galleryLastPreview.truncated,
-          url: galleryLastPreview.url,
-        };
+      try {
+        var r = await fetch("/api/galleries/sources", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: url }),
+        });
+        if (!r.ok) {
+          var tx = await r.text();
+          if (els.gallerySourcesMsg) {
+            els.gallerySourcesMsg.textContent = tx || "Save failed.";
+          }
+          return;
+        }
+        if (els.gallerySourcesMsg) {
+          els.gallerySourcesMsg.textContent =
+            "Saved (not run). Use Run selected or Run galleries when ready.";
+        }
+        await loadGallerySources();
+      } catch {
+        if (els.gallerySourcesMsg) {
+          els.gallerySourcesMsg.textContent = "Save failed.";
+        }
       }
-      var body = {
-        url: url,
-        output_rel: getGalleriesDirFormValue(),
-        dry_run: !!(els.optGalleryDryRun && els.optGalleryDryRun.checked),
-        skip_pip_update: !!(
-          els.optGallerySkipPip && els.optGallerySkipPip.checked
-        ),
-        skip_ytdlp_update: !!(
-          els.optGallerySkipYtdlp && els.optGallerySkipYtdlp.checked
-        ),
-        video_fallback: !!(
-          els.optGalleryVideoFallback && els.optGalleryVideoFallback.checked
-        ),
-        preview_snapshot: snap,
-      };
-      let r = await fetch("/api/galleries/start", {
+    });
+  }
+
+  if (els.btnGallerySourcesSelectAll) {
+    els.btnGallerySourcesSelectAll.addEventListener("click", function () {
+      document
+        .querySelectorAll(".gallery-source-row-cb")
+        .forEach(function (cb) {
+          cb.checked = true;
+        });
+    });
+  }
+
+  if (els.btnGallerySourcesSelectNone) {
+    els.btnGallerySourcesSelectNone.addEventListener("click", function () {
+      document
+        .querySelectorAll(".gallery-source-row-cb")
+        .forEach(function (cb) {
+          cb.checked = false;
+        });
+    });
+  }
+
+  if (els.btnGalleryRemoveSelected) {
+    els.btnGalleryRemoveSelected.addEventListener("click", async function () {
+      var ids = getSelectedGallerySourceIds();
+      if (!ids.length) {
+        if (els.gallerySourcesMsg) {
+          els.gallerySourcesMsg.textContent = "Select sources to remove.";
+        }
+        return;
+      }
+      if (
+        !window.confirm(
+          "Remove " + ids.length + " saved source(s) from the list? (Files on disk are kept.)"
+        )
+      ) {
+        return;
+      }
+      try {
+        var r = await fetch("/api/galleries/sources/remove", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: ids }),
+        });
+        if (!r.ok) {
+          if (els.gallerySourcesMsg) {
+            els.gallerySourcesMsg.textContent = "Remove failed.";
+          }
+          return;
+        }
+        await loadGallerySources();
+        if (els.gallerySourcesMsg) {
+          els.gallerySourcesMsg.textContent = "Removed selected sources.";
+        }
+      } catch {
+        if (els.gallerySourcesMsg) {
+          els.gallerySourcesMsg.textContent = "Remove failed.";
+        }
+      }
+    });
+  }
+
+  if (els.gallerySourcesScheduleFreq) {
+    els.gallerySourcesScheduleFreq.addEventListener("change", syncGallerySourcesScheduleFields);
+  }
+  if (els.btnSaveGallerySourcesSchedule) {
+    els.btnSaveGallerySourcesSchedule.addEventListener("click", function () {
+      void saveGallerySourcesSchedule();
+    });
+  }
+
+  var gifskyPollTimer = null;
+
+  function appendGifskyLogLine(line) {
+    if (!els.gifskyLogBody) {
+      return;
+    }
+    els.gifskyLogBody.textContent += String(line) + "\n";
+    if (els.gifskyLogFrame) {
+      els.gifskyLogFrame.scrollTop = els.gifskyLogFrame.scrollHeight;
+    }
+  }
+
+  function clearGifskyLogView() {
+    if (els.gifskyLogBody) {
+      els.gifskyLogBody.textContent = "";
+    }
+  }
+
+  function formatGifskyComparison(comp) {
+    if (!comp || comp.video_bytes == null || comp.gif_bytes == null) {
+      return "—";
+    }
+    var line =
+      formatFileSize(comp.video_bytes) +
+      " → " +
+      formatFileSize(comp.gif_bytes);
+    if (comp.label) {
+      line += " (" + comp.label + ")";
+    }
+    return line;
+  }
+
+  function renderGifskyScan(j) {
+    var tbody = els.gifskyFolderTbody;
+    var wrap = els.gifskyFolderTableWrap;
+    var scroll = els.gifskyFolderScroll;
+    if (!tbody) {
+      return;
+    }
+    tbody.textContent = "";
+    var folders = (j && j.folders) || [];
+    var has = folders.length > 0;
+    if (wrap) {
+      wrap.hidden = !has;
+    }
+    if (scroll) {
+      scroll.classList.toggle("is-scrollable", folders.length > 10);
+    }
+    folders.forEach(function (row) {
+      var tr = document.createElement("tr");
+      var pendingN = row.pending_count != null ? row.pending_count : 0;
+      var tdCb = document.createElement("td");
+      tdCb.className = "gallery-sources-check-col";
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.className = "gifsky-folder-row-cb";
+      cb.checked = pendingN > 0;
+      cb.disabled = pendingN <= 0;
+      cb.dataset.folderRel = String(row.rel || "");
+      tdCb.appendChild(cb);
+      tr.appendChild(tdCb);
+      function td(t) {
+        var el = document.createElement("td");
+        el.textContent = t != null ? String(t) : "";
+        tr.appendChild(el);
+      }
+      td(row.rel || "");
+      td(row.video_count != null ? row.video_count : "0");
+      td(pendingN);
+      td(row.gif_count != null ? row.gif_count : "0");
+      var comp = row.size_comparison;
+      td(comp && comp.video_bytes != null ? formatFileSize(comp.video_bytes) : "—");
+      td(comp && comp.gif_bytes != null ? formatFileSize(comp.gif_bytes) : "—");
+      td(formatGifskyComparison(comp));
+      tbody.appendChild(tr);
+    });
+    if (els.gifskyGalleriesRoot && j && j.galleries_root_rel) {
+      els.gifskyGalleriesRoot.textContent = j.galleries_root_rel + "/";
+    }
+    if (els.gifskyScanSummary && j && j.totals) {
+      var t = j.totals;
+      var summary =
+        "Videos: " +
+        (t.videos || 0) +
+        " | pending conversion: " +
+        (t.pending || 0) +
+        " | existing GIFs: " +
+        (t.gifs || 0) +
+        " | skipped by rules: " +
+        (t.skipped || 0);
+      if (j.scan_warnings && j.scan_warnings.length) {
+        summary += " — " + j.scan_warnings.join(" ");
+      }
+      if (j.size_comparison && j.size_comparison.paired_count) {
+        summary +=
+          " | paired vid→gif: " + formatGifskyComparison(j.size_comparison);
+      }
+      els.gifskyScanSummary.textContent = summary;
+    }
+  }
+
+  async function loadGifskyScan() {
+    if (els.gifskyMsg) {
+      els.gifskyMsg.textContent = "Scanning…";
+    }
+    try {
+      var r = await fetch("/api/gifsky/scan");
+      if (!r.ok) {
+        var tx = await r.text();
+        if (els.gifskyMsg) {
+          els.gifskyMsg.textContent = "Scan failed: " + tx;
+        }
+        return;
+      }
+      var j = await r.json();
+      renderGifskyScan(j);
+      if (els.gifskyMsg) {
+        els.gifskyMsg.textContent = "";
+      }
+    } catch {
+      if (els.gifskyMsg) {
+        els.gifskyMsg.textContent = "Scan failed (network).";
+      }
+    }
+  }
+
+  function stopGifskyPoll() {
+    if (gifskyPollTimer != null) {
+      window.clearInterval(gifskyPollTimer);
+      gifskyPollTimer = null;
+    }
+  }
+
+  function startGifskyPoll() {
+    stopGifskyPoll();
+    gifskyPollTimer = window.setInterval(function () {
+      void pollGifskyStatus();
+    }, 800);
+  }
+
+  var gifskyLastLogLen = 0;
+
+  async function pollGifskyStatus() {
+    try {
+      var r = await fetch("/api/gifsky/status");
+      if (!r.ok) {
+        return;
+      }
+      var j = await r.json();
+      var logs = j.logs || [];
+      for (var i = gifskyLastLogLen; i < logs.length; i++) {
+        appendGifskyLogLine(logs[i]);
+      }
+      gifskyLastLogLen = logs.length;
+      var phase = j.phase || "idle";
+      var running = phase === "running";
+      if (els.btnGifskyStart) {
+        els.btnGifskyStart.disabled = running;
+      }
+      if (els.btnGifskyCancel) {
+        els.btnGifskyCancel.disabled = !running;
+      }
+      if (!running && gifskyPollTimer != null) {
+        stopGifskyPoll();
+        void loadGifskyScan();
+        if (els.gifskyMsg && j.job) {
+          var msg =
+            "Finished — converted " +
+            (j.job.converted || 0) +
+            ", failed " +
+            (j.job.failed || 0);
+          if (j.job.size_comparison && j.job.size_comparison.gif_bytes) {
+            msg += " | " + formatGifskyComparison(j.job.size_comparison);
+          }
+          els.gifskyMsg.textContent = msg;
+        }
+      }
+    } catch {
+      /* ignore poll errors */
+    }
+  }
+
+  function getSelectedGifskyFolderRels() {
+    var rels = [];
+    document.querySelectorAll(".gifsky-folder-row-cb:checked").forEach(function (cb) {
+      var rel = cb.dataset.folderRel || "";
+      if (rel) {
+        rels.push(rel);
+      }
+    });
+    return rels;
+  }
+
+  function setAllGifskyFolderChecks(checked) {
+    document.querySelectorAll(".gifsky-folder-row-cb").forEach(function (cb) {
+      if (!cb.disabled) {
+        cb.checked = checked;
+      }
+    });
+  }
+
+  async function startGifskyBatch() {
+    var folderRels = getSelectedGifskyFolderRels();
+    if (!folderRels.length) {
+      if (els.gifskyMsg) {
+        els.gifskyMsg.textContent =
+          "Select at least one folder with pending videos.";
+      }
+      return;
+    }
+    var deleteSrc =
+      els.optGifskyDeleteSource && els.optGifskyDeleteSource.checked;
+    var dryRun = els.optGifskyDryRun && els.optGifskyDryRun.checked;
+    if (deleteSrc && !dryRun) {
+      if (
+        !window.confirm(
+          "Delete each source video after its GIF passes verification? This cannot be undone."
+        )
+      ) {
+        return;
+      }
+    }
+    clearGifskyLogView();
+    gifskyLastLogLen = 0;
+    if (els.gifskyMsg) {
+      els.gifskyMsg.textContent = "Starting…";
+    }
+    try {
+      var r = await fetch("/api/gifsky/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          delete_source_after_verify: !!deleteSrc,
+          dry_run: !!dryRun,
+          folder_rels: folderRels,
+        }),
       });
-      if (r.status === 428) {
-        let gate = {};
-        try {
-          gate = await r.json();
-        } catch {
-          appendGalleryLogLine(
-            "[console] Cookie confirmation required (bad response)."
-          );
-          return;
-        }
-        if (gate.error === "cookie_confirm_required") {
-          const ok = await showCookieGateModal();
-          if (!ok) {
-            appendGalleryLogLine(
-              "[console] Galleries run cancelled (cookies not confirmed)."
-            );
-            return;
-          }
-          body.cookie_confirm = true;
-          r = await fetch("/api/galleries/start", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          });
-        } else {
-          appendGalleryLogLine(
-            "[console] Precondition required: " +
-              (gate.message || String(r.status))
-          );
-          return;
-        }
-      }
-      if (r.status === 409) {
-        appendGalleryLogLine("[console] " + (await r.text()));
-        return;
-      }
-      if (r.status === 400) {
-        var tx2 = await r.text();
-        if (els.galleryStartMsg) {
-          els.galleryStartMsg.textContent = tx2 || "Invalid request.";
-        }
-        return;
-      }
       if (!r.ok) {
-        if (els.galleryStartMsg) {
-          els.galleryStartMsg.textContent = "Start failed (" + r.status + ").";
+        if (els.gifskyMsg) {
+          els.gifskyMsg.textContent = "Start failed: " + (await r.text());
         }
         return;
+      }
+      var j = await r.json();
+      var logs = (j.status && j.status.logs) || [];
+      logs.forEach(function (ln) {
+        appendGifskyLogLine(ln);
+      });
+      gifskyLastLogLen = logs.length;
+      if (els.gifskyMsg) {
+        els.gifskyMsg.textContent = "";
+      }
+      startGifskyPoll();
+    } catch {
+      if (els.gifskyMsg) {
+        els.gifskyMsg.textContent = "Start failed (network).";
+      }
+    }
+  }
+
+  if (els.btnGifskyScan) {
+    els.btnGifskyScan.addEventListener("click", function () {
+      void loadGifskyScan();
+    });
+  }
+  if (els.btnGifskyFoldersSelectAll) {
+    els.btnGifskyFoldersSelectAll.addEventListener("click", function () {
+      setAllGifskyFolderChecks(true);
+    });
+  }
+  if (els.btnGifskyFoldersSelectNone) {
+    els.btnGifskyFoldersSelectNone.addEventListener("click", function () {
+      setAllGifskyFolderChecks(false);
+    });
+  }
+  if (els.btnGifskyStart) {
+    els.btnGifskyStart.addEventListener("click", function () {
+      void startGifskyBatch();
+    });
+  }
+  if (els.btnGifskyCancel) {
+    els.btnGifskyCancel.addEventListener("click", function () {
+      void fetch("/api/gifsky/cancel", { method: "POST" }).then(function () {
+        void pollGifskyStatus();
+      });
+    });
+  }
+  if (els.btnGifskyClearLog) {
+    els.btnGifskyClearLog.addEventListener("click", clearGifskyLogView);
+  }
+  if (els.linkGifskyToConf) {
+    els.linkGifskyToConf.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      activateView("gifskyconf");
+      replaceStateView("gifskyconf", null);
+      if (window.gifskyconfSetupLoad) {
+        window.gifskyconfSetupLoad();
       }
     });
   }
 
   if (els.btnGalleryStop) {
-    els.btnGalleryStop.addEventListener("click", async function () {
-      if (
-        !window.confirm(
-          "Stop this run? The job may leave partial files on disk. You can re-run or clean up manually."
-        )
-      ) {
-        return;
-      }
-      var r = await fetch("/api/run/stop", { method: "POST" });
-      if (r.status === 409) {
-        appendStreamLine("[console] Stop: " + (await r.text()));
-        return;
-      }
-      if (!r.ok) {
-        appendStreamLine("[console] Stop failed: " + r.status);
-      }
+    els.btnGalleryStop.addEventListener("click", function () {
+      void postRunStop();
     });
   }
 
-  els.btnStopRun.addEventListener("click", async function () {
-    if (
-      !window.confirm(
-        "Stop this run? The batch may leave partial files on disk (download state, pointers). You can re-run or clean up manually."
-      )
-    ) {
-      return;
-    }
-    var r = await fetch("/api/run/stop", { method: "POST" });
-    if (r.status === 409) {
-      appendStreamLine("[console] Stop: " + (await r.text()));
-      return;
-    }
-    if (!r.ok) {
-      appendStreamLine("[console] Stop failed: " + r.status);
-    }
+  els.btnStopRun.addEventListener("click", function () {
+    void postRunStop();
   });
 
   els.btnCopyRunId.addEventListener("click", function () {
@@ -7172,6 +10510,28 @@
     }
     navigator.clipboard.writeText(id).catch(function () {});
   });
+
+  if (els.optPreflightViaExtension) {
+    els.optPreflightViaExtension.addEventListener("change", function () {
+      syncYtdlpPreflightUi();
+      syncRunCookieGateHint();
+      scheduleSaveYtdlpBatchRunSettings();
+    });
+  }
+  if (els.optPreflightWaitSec) {
+    els.optPreflightWaitSec.addEventListener("change", scheduleSaveYtdlpBatchRunSettings);
+    els.optPreflightWaitSec.addEventListener("input", scheduleSaveYtdlpBatchRunSettings);
+  }
+  if (els.optPauseOnCookieError) {
+    els.optPauseOnCookieError.addEventListener("change", function () {
+      syncYtdlpCookiePollUi();
+      scheduleSaveYtdlpBatchRunSettings();
+    });
+  }
+  if (els.optCookieAuthPollSec) {
+    els.optCookieAuthPollSec.addEventListener("change", scheduleSaveYtdlpBatchRunSettings);
+    els.optCookieAuthPollSec.addEventListener("input", scheduleSaveYtdlpBatchRunSettings);
+  }
 
   els.runBtns.forEach(function (btn) {
     btn.addEventListener("click", async function () {
@@ -7218,6 +10578,17 @@
           );
           return;
         }
+      }
+      if (r.status === 503) {
+        var d503run = await r.json().catch(function () {
+          return {};
+        });
+        appendLogLine(
+          "[console] Cookie preflight timed out: " +
+            ((d503run.detail && String(d503run.detail)) ||
+              "enable Archive cookies bridge and keep a YouTube tab open.")
+        );
+        return;
       }
       if (r.status === 409) {
         appendLogLine("[console] " + (await r.text()));
@@ -7269,21 +10640,23 @@
 
   els.btnSaveSettings.addEventListener("click", async function () {
     els.settingsMsg.textContent = "";
-    const prefixes = els.setAllow.value
-      .split(",")
-      .map(function (s) {
-        return s.trim();
-      })
-      .filter(Boolean);
     var body = {
       port: Number(els.setPort.value),
-      allowlisted_rel_prefixes: prefixes,
     };
+    if (els.setArchiveRoot) {
+      body.archive_root = els.setArchiveRoot.value.trim();
+    }
     if (els.setEditorBackupMax) {
       body.editor_backup_max = Number(els.setEditorBackupMax.value);
     }
     if (els.setFfmpegExe) {
       body.ffmpeg_exe = els.setFfmpegExe.value.trim();
+    }
+    if (els.setGifskiExe) {
+      body.gifski_exe = els.setGifskiExe.value.trim();
+    }
+    if (els.setCzkawkaExe) {
+      body.czkawka_exe = els.setCzkawkaExe.value.trim();
     }
     if (els.setMediainfoExe) {
       body.mediainfo_exe = els.setMediainfoExe.value.trim();
@@ -7300,18 +10673,35 @@
     if (els.setDuplicatesPreferQuarantine) {
       body.duplicates_prefer_quarantine = els.setDuplicatesPreferQuarantine.checked;
     }
+    if (els.setShowGettingStarted) {
+      body.show_getting_started = !!els.setShowGettingStarted.checked;
+    }
+    if (els.setDefaultLandingView) {
+      body.default_landing_view = normalizeDefaultLandingView(
+        els.setDefaultLandingView.value
+      );
+    }
     const r = await fetch("/api/settings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
     if (!r.ok) {
-      var failDetail = "Save failed.";
+      var failDetail = "Save failed (" + r.status + ").";
       try {
-        var ej = await r.json();
-        if (ej.detail != null) {
-          failDetail =
-            typeof ej.detail === "string" ? ej.detail : JSON.stringify(ej.detail);
+        var errText = await r.text();
+        if (errText) {
+          try {
+            var ej = JSON.parse(errText);
+            if (ej.detail != null) {
+              failDetail =
+                typeof ej.detail === "string" ? ej.detail : JSON.stringify(ej.detail);
+            } else {
+              failDetail = "Save failed (" + r.status + "): " + errText.slice(0, 240);
+            }
+          } catch (_parseErr) {
+            failDetail = "Save failed (" + r.status + "): " + errText.slice(0, 240);
+          }
         }
       } catch (_e) {
         void _e;
@@ -7320,9 +10710,64 @@
       return;
     }
     els.settingsMsg.textContent =
-      "Saved. Restart the console if you changed the port.";
+      "Saved. Restart the console if you changed the port or archive root.";
     syncDupRootCheckboxesFromApi();
+    if (els.setShowGettingStarted) {
+      lastShowGettingStarted = !!els.setShowGettingStarted.checked;
+      syncGettingStartedSidebar(lastShowGettingStarted);
+    }
   });
+
+  if (els.btnSaveHomeWeather) {
+    els.btnSaveHomeWeather.addEventListener("click", async function () {
+      if (els.homeWeatherSettingsMsg) {
+        els.homeWeatherSettingsMsg.textContent = "";
+      }
+      var body = {};
+      if (els.setWeatherLat) {
+        body.weather_latitude = els.setWeatherLat.value.trim();
+      }
+      if (els.setWeatherLon) {
+        body.weather_longitude = els.setWeatherLon.value.trim();
+      }
+      if (els.optOpenweatherKeyClear && els.optOpenweatherKeyClear.checked) {
+        body.openweather_api_key_clear = true;
+      } else if (
+        els.setOpenweatherApiKey &&
+        els.setOpenweatherApiKey.value.trim()
+      ) {
+        body.openweather_api_key = els.setOpenweatherApiKey.value.trim();
+      }
+      var rw = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!rw.ok) {
+        var wmsg = "Save failed.";
+        try {
+          var wj = await rw.json();
+          if (wj.detail != null) {
+            wmsg =
+              typeof wj.detail === "string" ? wj.detail : JSON.stringify(wj.detail);
+          }
+        } catch (_w) {
+          void _w;
+        }
+        if (els.homeWeatherSettingsMsg) {
+          els.homeWeatherSettingsMsg.textContent = wmsg;
+        }
+        return;
+      }
+      await loadSettingsForm();
+      if (els.homeWeatherSettingsMsg) {
+        els.homeWeatherSettingsMsg.textContent = "Weather settings saved.";
+      }
+      if (activeViewId === "home") {
+        void refreshHomeWeather();
+      }
+    });
+  }
 
   if (els.btnSaveDeepLSettings) {
     els.btnSaveDeepLSettings.addEventListener("click", async function () {
@@ -7372,37 +10817,140 @@
     });
   }
 
-  if (els.btnLibraryQueueRename) {
-    els.btnLibraryQueueRename.addEventListener("click", function () {
-      var rels = filesListPlayableSelectedInOrder();
+  if (els.btnFileDetailSendRename) {
+    els.btnFileDetailSendRename.addEventListener("click", function () {
+      var rels = libraryCollectRelsForRenameSend();
       if (!rels.length) {
-        fpMsg("Select playable file(s) in the list first.");
+        libraryViewToast(
+          "No files to add — select files or open a folder that lists files.",
+          true
+        );
         return;
       }
       var a = renameQueueAddRels(rels);
-      fpMsg(
-        "Added " +
-          a +
-          " file(s) to the Rename queue (sidebar → Rename)."
+      renderRenameQueue();
+      libraryViewToast(
+        "Added " + a + " path(s) to Rename queue (sidebar → Rename).",
+        false
       );
     });
   }
 
-  if (els.btnRenameAddFromLibrary) {
-    els.btnRenameAddFromLibrary.addEventListener("click", function () {
-      var rels = filesListPlayableSelectedInOrder();
-      if (!rels.length) {
-        if (els.renameMsg) {
-          els.renameMsg.textContent =
-            "No Library selection — open Library, select files, then try again.";
-        }
+  if (els.btnFileDetailAddPlayerQueue) {
+    els.btnFileDetailAddPlayerQueue.addEventListener("click", function () {
+      var playables = libraryCollectPlayablesForPlayerSend();
+      if (!playables.length) {
+        libraryViewToast(
+          "No queueable files — select video, audio, or images, or open a folder that lists them.",
+          true
+        );
         return;
       }
-      renameQueueAddRels(rels);
-      renderRenameQueue();
-      if (els.renameMsg) {
-        els.renameMsg.textContent = "Queued from Library selection.";
+      var added = fpAddPlayablesToQueue(playables);
+      if (added === 0) {
+        libraryViewToast("Those files were already in the player queue.", false);
+      } else {
+        libraryViewToast(
+          "Added " +
+            added +
+            " to player queue (" +
+            fpBaseQueue.length +
+            " track(s) total). Open the player below to play.",
+          false
+        );
       }
+      fpMsg("");
+    });
+  }
+
+  if (els.btnRenameBrowseFiles) {
+    els.btnRenameBrowseFiles.addEventListener("click", async function () {
+      if (els.renameMsg) {
+        els.renameMsg.textContent =
+          "Opening file picker on this PC… (check behind this window if you do not see it).";
+      }
+      els.btnRenameBrowseFiles.disabled = true;
+      try {
+        var r = await fetch("/api/rename/browse-files", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        if (r.status === 204) {
+          if (els.renameMsg) {
+            els.renameMsg.textContent = "";
+          }
+          return;
+        }
+        if (r.status === 503) {
+          var d503 = await r.json().catch(function () {
+            return {};
+          });
+          if (els.renameMsg) {
+            els.renameMsg.textContent =
+              (d503.detail && String(d503.detail)) ||
+              "Native picker unavailable on this host — use Library → Send to Rename queue.";
+          }
+          return;
+        }
+        if (!r.ok) {
+          var errJ = await r.json().catch(function () {
+            return null;
+          });
+          var detail =
+            errJ && errJ.detail != null
+              ? typeof errJ.detail === "string"
+                ? errJ.detail
+                : JSON.stringify(errJ.detail)
+              : "Browse failed.";
+          if (els.renameMsg) {
+            els.renameMsg.textContent = detail;
+          }
+          return;
+        }
+        var j = await r.json();
+        var added = renameQueueAddRels(j.rels || []);
+        renderRenameQueue();
+        if (els.renameMsg) {
+          var msg =
+            added > 0
+              ? "Added " + added + " file(s) to queue."
+              : "No new files added (already queued or duplicates skipped).";
+          if (j.skipped && j.skipped.length) {
+            msg += " Skipped " + j.skipped.length + ".";
+            if (j.skipped[0] && j.skipped[0].reason) {
+              msg += " " + j.skipped[0].reason + ".";
+            }
+          }
+          els.renameMsg.textContent = msg;
+        }
+      } catch (ex) {
+        if (els.renameMsg) {
+          els.renameMsg.textContent =
+            "Browse failed: " + (ex && ex.message ? ex.message : String(ex));
+        }
+      } finally {
+        els.btnRenameBrowseFiles.disabled = false;
+      }
+    });
+  }
+
+  if (els.btnRenameFolderScan) {
+    els.btnRenameFolderScan.addEventListener("click", function () {
+      void renameFolderScan();
+    });
+  }
+
+  if (els.btnRenameFolderRun) {
+    els.btnRenameFolderRun.addEventListener("click", function () {
+      void renameFolderBatchRun();
+    });
+  }
+
+  if (els.btnRenameFolderStop) {
+    els.btnRenameFolderStop.addEventListener("click", function () {
+      renameFolderBatchAbort = true;
+      renameFolderSetStatus("Stopping after current batch…");
     });
   }
 
@@ -7452,6 +11000,9 @@
 
   if (els.btnDupScan) {
     els.btnDupScan.addEventListener("click", async function () {
+      if (dupScanBusy) {
+        return;
+      }
       var roots = collectDupScanRoots();
       if (!roots.length) {
         fpMsg("Select at least one scan root (checkbox or Add current folder).");
@@ -7475,7 +11026,7 @@
       if (els.dupScanProgress) {
         els.dupScanProgress.textContent = "Starting…";
       }
-      pollDupStatusLoop();
+      setDupScanUiBusy(true);
       try {
         var r = await fetch("/api/duplicates/scan", {
           method: "POST",
@@ -7498,35 +11049,68 @@
           } catch (_p) {
             void _p;
           }
-          fpMsg("Scan failed: " + detail);
+          if (r.status === 409) {
+            fpMsg(
+              "Scan already running (UI may be out of sync). Click Reset scan, then try again."
+            );
+            if (els.btnDupReset) {
+              els.btnDupReset.hidden = false;
+            }
+          } else {
+            fpMsg("Scan failed: " + detail);
+          }
           return;
         }
-        for (;;) {
-          await new Promise(function (res) {
-            setTimeout(res, 450);
-          });
-          var rs = await fetch("/api/duplicates/status", {
-            credentials: "same-origin",
-          });
-          var st = await rs.json();
-          if ((st.phase || "") !== "running") {
-            if (st.scan && st.scan.error) {
-              fpMsg("Scan error: " + st.scan.error);
-              dupLastGroups = [];
-            } else {
-              dupLastGroups = (st.scan && st.scan.groups) || [];
-            }
-            renderDupResults();
-            break;
-          }
+        var st = await waitForDupScanComplete();
+        if (st.scan && st.scan.error) {
+          fpMsg("Scan error: " + st.scan.error);
+          dupLastGroups = [];
+        } else if ((st.phase || "") === "success") {
+          var res = await fetchDupResults();
+          dupLastGroups = res.groups || [];
+        } else {
+          dupLastGroups = [];
         }
+        renderDupResults();
       } catch (e) {
         fpMsg("Scan failed: " + (e && e.message ? e.message : String(e)));
       } finally {
-        stopDupPoll();
+        setDupScanUiBusy(false);
+        if (els.dupScanProgress && !dupScanBusy) {
+          var keepDone =
+            dupLastGroups.length &&
+            els.dupScanProgress.textContent === "Done.";
+          if (!keepDone) {
+            els.dupScanProgress.textContent = "";
+          }
+        }
+      }
+    });
+  }
+
+  if (els.btnDupReset) {
+    els.btnDupReset.addEventListener("click", async function () {
+      try {
+        var r = await fetch("/api/duplicates/reset", {
+          method: "POST",
+          credentials: "same-origin",
+        });
+        var j = await r.json();
+        if (!r.ok) {
+          fpMsg("Reset failed: " + r.statusText);
+          return;
+        }
+        setDupScanUiBusy(false);
         if (els.dupScanProgress) {
           els.dupScanProgress.textContent = "";
         }
+        fpMsg(
+          j.reset
+            ? "Scan state cleared — you can run a new scan."
+            : "No running scan to reset."
+        );
+      } catch (e) {
+        fpMsg("Reset failed: " + (e && e.message ? e.message : String(e)));
       }
     });
   }
@@ -7660,11 +11244,17 @@
         if (els.dupPreviewOut) {
           els.dupPreviewOut.hidden = true;
         }
+        if (els.dupScanProgress) {
+          els.dupScanProgress.textContent = "";
+        }
         if (els.btnDupPreviewRemove) {
           els.btnDupPreviewRemove.disabled = true;
         }
         if (els.btnDupApplyRemove) {
           els.btnDupApplyRemove.disabled = true;
+        }
+        if (activeViewId === "library" && filePath) {
+          void browseTo(filePath);
         }
       } catch (e) {
         fpMsg("Apply failed: " + (e && e.message));
@@ -8142,13 +11732,15 @@
       var cur = collectSchedulesFromForm();
       cur.push({
         id: "sch_" + Date.now(),
-        job: settingsJobsCache[0] || "watch_later",
+        job: YOUTUBE_SCHEDULE_JOBS[0] || "watch_later",
+        frequency: "daily",
         day_of_month: 1,
-        hour: 3,
+        day_of_week: 0,
+        hour: 2,
         minute: 0,
         enabled: false,
       });
-      renderScheduleEditor(cur, [], settingsJobsCache);
+      renderScheduleEditor(cur, [], YOUTUBE_SCHEDULE_JOBS);
     });
   }
 
@@ -8158,21 +11750,153 @@
         els.scheduleSaveMsg.textContent = "";
       }
       var rows = collectSchedulesFromForm();
-      var r = await fetch("/api/settings/schedules", {
+      try {
+        await mergeAndSaveSchedules(rows);
+      } catch (ex) {
+        if (els.scheduleSaveMsg) {
+          els.scheduleSaveMsg.textContent =
+            "Save failed: " + (ex && ex.message ? ex.message : String(ex));
+        }
+        return;
+      }
+      await loadYoutubeScheduleForm();
+      if (els.scheduleSaveMsg) {
+        els.scheduleSaveMsg.textContent = "Schedules saved.";
+      }
+    });
+  }
+
+  if (els.btnSaveSchedulerGlobal) {
+    els.btnSaveSchedulerGlobal.addEventListener("click", async function () {
+      if (els.schedulerGlobalSaveMsg) {
+        els.schedulerGlobalSaveMsg.textContent = "";
+      }
+      var r = await fetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ schedules: rows }),
+        body: JSON.stringify({
+          scheduler_enabled: !!(els.optSchedulerEnabled && els.optSchedulerEnabled.checked),
+        }),
       });
       if (!r.ok) {
         var tx = await r.text();
-        if (els.scheduleSaveMsg) {
-          els.scheduleSaveMsg.textContent = "Save failed: " + r.status + " " + tx;
+        if (els.schedulerGlobalSaveMsg) {
+          els.schedulerGlobalSaveMsg.textContent = "Save failed: " + r.status + " " + tx;
         }
         return;
       }
       await loadSettingsForm();
-      if (els.scheduleSaveMsg) {
-        els.scheduleSaveMsg.textContent = "Schedules saved.";
+      void loadYoutubeScheduleForm();
+      if (els.schedulerGlobalSaveMsg) {
+        els.schedulerGlobalSaveMsg.textContent =
+          "Saved. Restart Archive Console for the scheduler to start or stop.";
+      }
+    });
+  }
+
+  function collectGotifySettingsPayload() {
+    var payload = {
+      gotify_enabled: !!(els.optGotifyEnabled && els.optGotifyEnabled.checked),
+      gotify_base_url: els.setGotifyBaseUrl
+        ? els.setGotifyBaseUrl.value.trim()
+        : "",
+      gotify_notify_on_start: !!(
+        els.optGotifyNotifyStart && els.optGotifyNotifyStart.checked
+      ),
+      gotify_notify_on_complete: !!(
+        els.optGotifyNotifyComplete && els.optGotifyNotifyComplete.checked
+      ),
+      gotify_notify_scheduled: !!(
+        els.optGotifyNotifyScheduled && els.optGotifyNotifyScheduled.checked
+      ),
+      gotify_notify_manual: !!(
+        els.optGotifyNotifyManual && els.optGotifyNotifyManual.checked
+      ),
+      gotify_priority: els.setGotifyPriority
+        ? Number(els.setGotifyPriority.value)
+        : 5,
+    };
+    if (els.setGotifyAppToken && els.setGotifyAppToken.value.trim()) {
+      payload.gotify_app_token = els.setGotifyAppToken.value.trim();
+    }
+    return payload;
+  }
+
+  async function saveGotifySettingsFromForm() {
+    if (els.gotifySettingsMsg) {
+      els.gotifySettingsMsg.textContent = "";
+    }
+    var rg = await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(collectGotifySettingsPayload()),
+    });
+    if (!rg.ok) {
+      var gfail = "Save failed.";
+      try {
+        var ge = await rg.json();
+        if (ge.detail != null) {
+          gfail =
+            typeof ge.detail === "string" ? ge.detail : JSON.stringify(ge.detail);
+        }
+      } catch (_ge) {
+        void _ge;
+      }
+      if (els.gotifySettingsMsg) {
+        els.gotifySettingsMsg.textContent = gfail;
+      }
+      return false;
+    }
+    await loadSettingsForm();
+    return true;
+  }
+
+  if (els.btnSaveGotifySettings) {
+    els.btnSaveGotifySettings.addEventListener("click", async function () {
+      var ok = await saveGotifySettingsFromForm();
+      if (ok && els.gotifySettingsMsg) {
+        els.gotifySettingsMsg.textContent = "Gotify settings saved.";
+      }
+    });
+  }
+
+  if (els.btnGotifyTest) {
+    els.btnGotifyTest.addEventListener("click", async function () {
+      if (els.gotifySettingsMsg) {
+        els.gotifySettingsMsg.textContent = "";
+      }
+      var tokenInForm =
+        els.setGotifyAppToken && els.setGotifyAppToken.value.trim();
+      if (tokenInForm) {
+        var saved = await saveGotifySettingsFromForm();
+        if (!saved) {
+          return;
+        }
+      }
+      var rt = await fetch("/api/settings/gotify/test", { method: "POST" });
+      if (!rt.ok) {
+        var tmsg = "Test failed.";
+        try {
+          var tj = await rt.json();
+          if (tj.detail != null) {
+            tmsg =
+              typeof tj.detail === "string" ? tj.detail : JSON.stringify(tj.detail);
+          }
+        } catch (_tj) {
+          void _tj;
+        }
+        if (els.gotifySettingsMsg) {
+          els.gotifySettingsMsg.textContent = tmsg;
+        }
+        return;
+      }
+      await loadSettingsForm();
+      if (els.gotifyFailureLine) {
+        els.gotifyFailureLine.hidden = true;
+        els.gotifyFailureLine.textContent = "";
+      }
+      if (els.gotifySettingsMsg) {
+        els.gotifySettingsMsg.textContent = "Test message sent.";
       }
     });
   }
@@ -8416,71 +12140,115 @@
     });
   }
 
+  if (els.homeApplicationsToggle) {
+    els.homeApplicationsToggle.addEventListener("click", function () {
+      homeSetApplicationsEdit(!homeApplicationsEdit);
+    });
+  }
+  if (els.btnHomeAddBookmark) {
+    els.btnHomeAddBookmark.addEventListener("click", function () {
+      openHomeBookmarkModal(null);
+    });
+  }
+  if (els.btnHomeBookmarkCancel) {
+    els.btnHomeBookmarkCancel.addEventListener("click", homeCloseBookmarkModal);
+  }
+  if (els.homeBookmarkModalBackdrop) {
+    els.homeBookmarkModalBackdrop.addEventListener("click", homeCloseBookmarkModal);
+  }
+  if (els.btnHomeBookmarkSave) {
+    els.btnHomeBookmarkSave.addEventListener("click", function () {
+      homeCommitBookmarkFromModal();
+    });
+  }
+  if (els.inpHomeBookmarkUrl) {
+    els.inpHomeBookmarkUrl.addEventListener("input", function () {
+      window.clearTimeout(homeUrlDebounceTimer);
+      homeUrlDebounceTimer = window.setTimeout(function () {
+        var raw =
+          (els.inpHomeBookmarkUrl && els.inpHomeBookmarkUrl.value) || "";
+        var ok = homeValidateUrl(raw.trim());
+        if (els.homeBookmarkUrlMsg) {
+          if (!raw.trim()) {
+            els.homeBookmarkUrlMsg.textContent = "";
+          } else if (!ok) {
+            els.homeBookmarkUrlMsg.textContent =
+              "Enter a valid http or https URL.";
+          } else {
+            els.homeBookmarkUrlMsg.textContent = "";
+          }
+        }
+        homeSyncBookmarkSaveEnabled();
+      }, HOME_URL_DEBOUNCE_MS);
+    });
+    els.inpHomeBookmarkUrl.addEventListener("keydown", function (ev) {
+      if (
+        ev.key === "Enter" &&
+        els.btnHomeBookmarkSave &&
+        !els.btnHomeBookmarkSave.disabled
+      ) {
+        homeCommitBookmarkFromModal();
+      }
+    });
+  }
+  if (els.optHomeClock24) {
+    els.optHomeClock24.addEventListener("change", function () {
+      try {
+        localStorage.setItem(
+          HOME_LS_CLOCK24,
+          els.optHomeClock24.checked ? "1" : "0"
+        );
+      } catch (_e) {
+        void _e;
+      }
+      tickHomeClock();
+    });
+  }
+
   connectStream();
   window.setInterval(refreshReminders, 120000);
-  var initialView = getInitialViewFromUrl();
-  activateView(initialView);
-  if (initialView === "inputs") {
-    loadDownloadDirsForm();
-  }
-  if (initialView === "settings") {
-    loadSettingsForm();
-  }
-  if (initialView === "oneoff") {
-    loadDownloadDirsForm();
-    loadOneoffRolling();
-    refreshOneoffOutputEffective();
-    void refreshReminders().then(function () {
-      scheduleOneoffCookieChecks();
-    });
-  } else if (initialView === "galleries") {
-    loadDownloadDirsForm();
-    refreshGalleryOutputEffective();
-    void refreshReminders();
-  } else {
-    void refreshReminders();
-  }
-  if (initialView === "library") {
-    void openFilesViewWithOptionalWatch();
-  }
-  if (initialView === "rename") {
-    renderRenameQueue();
-  }
-  if (initialView === "gallerydl") {
-    void loadGallerydlFile();
-  }
-  if (initialView === "supportedsites") {
-    void loadSupportedsites(false);
-  }
-  loadRunOverview();
-  applyLogFont();
-  applyLogWrap();
-  scrollHistorySectionFromUrl();
-  initFilesSplitResizer();
-  initFilesWorkspaceShellResize();
-  fpInitPlayerUi();
-  fetch("/api/run/status")
+  void (async function bootstrapArchiveConsoleUi() {
+    var settingsPayload = null;
+    try {
+      var sr = await fetch("/api/settings");
+      settingsPayload = await sr.json();
+    } catch (_se) {
+      void _se;
+    }
+    applyShowGettingStartedFromSettingsPayload(settingsPayload || {});
+    applyYtdlpBatchRunFromSettings(settingsPayload || {});
+    var initialView = resolveInitialViewFromSettings(settingsPayload);
+    activateView(initialView);
+    var fileOpt =
+      initialView === "inputs"
+        ? getInitialInputsFileFromUrl(initialView)
+        : null;
+    replaceStateView(initialView, fileOpt);
+    runInitialViewBootstrap(initialView);
+    void loadGallerySources();
+    loadRunOverview();
+    try {
+      var _lfv = localStorage.getItem(STORAGE_LIBRARY_FILE_LIST_FONT);
+      var _lfn = _lfv != null ? parseInt(_lfv, 10) : NaN;
+      if (isFinite(_lfn) && _lfn >= 10 && _lfn <= 22) {
+        libraryFileListFontPx = _lfn;
+      }
+    } catch (_lx) {
+      void _lx;
+    }
+    applyLibraryFileListFont();
+    applyLogFont();
+    applyLogWrap();
+    scrollHistorySectionFromUrl();
+    initFilesSplitResizer();
+    fpInitPlayerUi();
+    fetch("/api/run/status")
     .then(function (r) {
       return r.json();
     })
     .then(function (j) {
-      if (j.phase) {
-        setPhase(j.phase);
-      }
-      renderRunPanel(j);
-      if (j.phase === "running" && j.run && j.run.job) {
-        activeStreamJob = j.run.job;
-      } else {
-        activeStreamJob = null;
-      }
-      if (j.phase === "running") {
-        disableRunButtons(true);
-        editorJobRunning = true;
-        setEditorRunning(true);
-      } else {
-        editorJobRunning = false;
-        setEditorRunning(false);
-      }
+      applyRunStatusFromServer(j);
     });
+  })();
 
 })();

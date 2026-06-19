@@ -14,9 +14,10 @@ _SAFE_NAME = re.compile(r"^[\w.\-]+$")
 
 
 def backup_filename_stem(editor_basename: str) -> str:
-    if not _SAFE_NAME.match(editor_basename):
+    safe = editor_basename.replace("\\", "/").replace("/", "__")
+    if not _SAFE_NAME.match(safe):
         raise ValueError("invalid backup stem")
-    return editor_basename
+    return safe
 
 
 def rotate_backups(

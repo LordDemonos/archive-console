@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
+import platform
 import re
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -14,10 +16,13 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger(__name__)
 
 _BAD_EXE_CHARS = re.compile(r"[\r\n;&|<>`\"$]")
+_WIN_ABS_PATH = re.compile(r"[A-Za-z]:\\[^\s]{2,}")
+_UNIXY_ABS = re.compile(r"/(?:home|Users)/[^\s]+")
 
 # Operator guard: skip very large files to avoid long runs / memory pressure.
 MEDIAINFO_MAX_FILE_BYTES = 64 * 1024 * 1024 * 1024  # 64 GiB
 MEDIAINFO_TIMEOUT_SEC = 30.0
+MEDIAINFO_CLI_DOWNLOAD_URL = "https://mediaarea.net/en/MediaInfo/Download/CLI"
 
 
 def validate_mediainfo_exe_setting(raw: str | None) -> str:
@@ -34,8 +39,39 @@ def validate_mediainfo_exe_setting(raw: str | None) -> str:
 
 
 def resolve_mediainfo_bin(explicit: str) -> str:
+    """
+    Resolve the MediaInfo CLI executable.
+    Empty setting: try PATH for mediainfo / MediaInfo (Windows often ships as MediaInfo.exe).
+    Explicit value: if it is an existing file, use it; else treat as a single command name and shutil.which.
+    """
     v = (explicit or "").strip()
-    return v if v else "mediainfo"
+    if v:
+        p = Path(v)
+        try:
+            if p.is_file():
+                return str(p.resolve())
+        except OSError:
+            pass
+        found = shutil.which(v)
+        return found if found else v
+    order = ["mediainfo", "MediaInfo"]
+    if platform.system() == "Windows":
+        order.extend(["mediainfo.exe", "MediaInfo.exe"])
+    for name in order:
+        found = shutil.which(name)
+        if found:
+            return found
+    return "mediainfo"
+
+
+def _sanitize_mediainfo_client_error(msg: str, max_len: int = 600) -> str:
+    """Strip likely path leaks from CLI stderr for API responses; keep logs free of raw stderr."""
+    s = (msg or "").strip().replace("\r\n", "\n")
+    s = _WIN_ABS_PATH.sub("[path]", s)
+    s = _UNIXY_ABS.sub("[path]", s)
+    if len(s) > max_len:
+        s = s[: max_len - 1] + "…"
+    return s
 
 
 class MediaInfoStreamDto(BaseModel):
@@ -186,7 +222,7 @@ def run_mediainfo_json_subprocess(
         partial_err = (e.stderr or "") if isinstance(e.stderr, str) else ""
         return -124, partial_out, partial_err + "\n[timeout]"
     except FileNotFoundError:
-        return -127, "", "mediainfo executable not found"
+        return -127, "", "executable not found"
     except OSError as e:
         return -1, "", str(e)
 
@@ -220,13 +256,22 @@ def mediainfo_for_file(
         exe, file_abs, timeout_sec=timeout_sec
     )
     if code == -127:
-        return {"ok": False, "error": "MediaInfo not found or not executable"}
+        return {
+            "ok": False,
+            "error": (
+                "MediaInfo CLI not found or not executable. Install the command-line build, "
+                "ensure it is on PATH (Windows: often MediaInfo.exe), or set the full path under Settings."
+            ),
+            "error_code": "executable_not_found",
+            "help_url": MEDIAINFO_CLI_DOWNLOAD_URL,
+        }
     if code == -124:
-        return {"ok": False, "error": "MediaInfo timed out"}
+        return {"ok": False, "error": "MediaInfo timed out", "error_code": "timeout"}
     if code != 0:
-        tail = (err or out or "unknown error")[-2000:]
+        raw_tail = (err or out or "unknown error")[-2000:]
+        safe = _sanitize_mediainfo_client_error(raw_tail) or f"exit code {code}"
         logger.warning("mediainfo nonzero exit=%s", code)
-        return {"ok": False, "error": tail.strip() or f"exit code {code}"}
+        return {"ok": False, "error": safe, "error_code": "cli_failed"}
 
     out_s = (out or "").strip()
     if not out_s:

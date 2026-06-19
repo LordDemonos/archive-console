@@ -15,13 +15,25 @@ import os
 import pathlib
 import re
 import sys
+import threading
 import time
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Callable
 
 import yt_dlp
 from yt_dlp import YoutubeDL
 
+from archive_cookies import (
+    ARCHIVE_COOKIES_NO_PER_VIDEO_SYNC_ENV,
+    _file_mtime,
+    append_ytdlp_staged_cookies_argv,
+    clear_cookie_refresh_request,
+    is_staged_cookie_path,
+    request_cookie_refresh,
+    source_cookies_path,
+    stage_cookies_for_ytdlp,
+    sync_staged_cookies_from_source_if_newer,
+)
 from archive_run_console import (
     augment_ytdlp_console_message,
     color_enabled,
@@ -89,6 +101,16 @@ _REMEDIATION_RULES: tuple[tuple[re.Pattern[str], str], ...] = (
         "Mux: ensure ffmpeg is on PATH; see --merge-output-format mkv in yt-dlp.conf.",
     ),
     (
+        re.compile(
+            r"confirm your age|age[-\s]?restricted|age[-\s]?verification|"
+            r"inappropriate for some users",
+            re.I,
+        ),
+        "AGE-RESTRICTED: needs an age-verified YouTube account; cookie refresh alone won't fix it. "
+        "If it plays signed-in in your browser, add 'web' to youtube:player_client and RERUN this "
+        "video manually (Single download / one-off).",
+    ),
+    (
         re.compile(r"Sign in to confirm|not a bot|cookies", re.I),
         "Auth: refresh cookies or --cookies-from-browser; confirm account can play the video in a browser.",
     ),
@@ -116,6 +138,8 @@ ARCHIVE_PAUSE_ON_COOKIE_ERROR_ENV = "ARCHIVE_PAUSE_ON_COOKIE_ERROR"
 # Optional: poll this file's mtime every N seconds until it increases (non-interactive / Task Scheduler).
 ARCHIVE_COOKIE_AUTH_POLL_SEC_ENV = "ARCHIVE_COOKIE_AUTH_POLL_SEC"
 ARCHIVE_COOKIE_AUTH_POLL_MAX_SEC_ENV = "ARCHIVE_COOKIE_AUTH_POLL_MAX_SEC"
+# Optional: poll cookies.txt mtime during a run and reload jar when you replace the source file.
+ARCHIVE_COOKIE_SOURCE_POLL_SEC_ENV = "ARCHIVE_COOKIE_SOURCE_POLL_SEC"
 
 # yt-dlp / YouTube strings that strongly suggest cookies or login session — not bare HTTP 403.
 COOKIE_AUTH_LINE_PATTERNS: tuple[re.Pattern[str], ...] = (
@@ -132,6 +156,8 @@ COOKIE_AUTH_LINE_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"(?:unable\s+to\s+)?log\s+in", re.I),
     re.compile(r"account\s+.{0,40}(?:needed|required)\s+to\s+view", re.I),
     re.compile(r"refresh\s+your\s+cookies", re.I),
+    re.compile(r"cookies?\s+are\s+no\s+longer\s+valid", re.I),
+    re.compile(r"rotated\s+in\s+the\s+browser", re.I),
     # 403 only when auth-related tokens appear nearby on the same line
     re.compile(r"403(?:\s|$).{0,120}(?:cookie|login|sign\s*in|consent|bot|challenge)", re.I),
     re.compile(r"(?:cookie|login|sign\s*in|consent|bot|challenge).{0,120}403", re.I),
@@ -162,6 +188,11 @@ def _cookie_auth_selftest() -> int:
         ("Requested format is not available", False),
         ("ERROR: 403 Forbidden — bot detection failed", True),
         ("Login required to view this video", True),
+        (
+            "WARNING: [youtube] The provided YouTube account cookies are no longer valid. "
+            "They have likely been rotated in the browser",
+            True,
+        ),
     )
     bad = [c for c in cases if looks_like_likely_cookie_auth_error(c[0]) != c[1]]
     if bad:
@@ -210,8 +241,9 @@ def _emit_cookie_auth_pause_banner(cookie_path: str, reporter: RunReporter) -> N
         bar,
         " ARCHIVE PAUSE - likely YouTube cookie / session / auth issue (heuristic match)",
         bar,
-        " Fix: re-export cookies.txt, or adjust --cookies / --cookies-from-browser in yt-dlp.conf.",
-        "      On Windows, close extra browser profiles; the browser must allow yt-dlp to read DB.",
+        " Fix: update cookies.txt in the archive root (not cookies.run.txt — yt-dlp uses the run copy).",
+        "      Extension / Console: PUT http://127.0.0.1:<port>/api/cookies/youtube when ready.",
+        "      Or poll GET /api/cookies/youtube-refresh — sentinel .archive_needs_cookies.txt is set.",
         f" Cookie file for mtime poll (hint): {cookie_path}",
         (
             f" Polling every {poll}s until that file's modification time changes "
@@ -247,7 +279,12 @@ def _emit_cookie_auth_pause_banner(cookie_path: str, reporter: RunReporter) -> N
             print(ln, file=sys.stdout)
 
 
-def _run_cookie_auth_blocking_wait(cookie_path: str, reporter: RunReporter) -> None:
+def _run_cookie_auth_blocking_wait(
+    cookie_path: str,
+    reporter: RunReporter,
+    *,
+    on_source_updated: Callable[[], None] | None = None,
+) -> None:
     poll_raw = os.environ.get(ARCHIVE_COOKIE_AUTH_POLL_SEC_ENV, "").strip()
     try:
         poll_sec = float(poll_raw) if poll_raw else 0.0
@@ -276,6 +313,9 @@ def _run_cookie_auth_blocking_wait(cookie_path: str, reporter: RunReporter) -> N
             time.sleep(min(poll_sec, max(0.1, deadline - time.monotonic())))
             cur = _mtime(cookie_path)
             if cur is not None and (baseline is None or cur > baseline):
+                if on_source_updated is not None:
+                    on_source_updated()
+                clear_cookie_refresh_request(SCRIPT_DIR)
                 reporter.log_line("[archive] Cookie file mtime increased - resuming yt-dlp queue.")
                 msg = "\n[archive] cookies file updated - continuing run.\n"
                 if color_enabled():
@@ -1309,25 +1349,99 @@ class RunReporter:
 class ManifestYoutubeDL(YoutubeDL):
     def __init__(self, params: dict, reporter: RunReporter):
         self._reporter = reporter
+        self._cookie_source_path = source_cookies_path(SCRIPT_DIR)
         cf = (params.get("cookiefile") or "").strip()
         if cf:
             p = os.path.normpath(os.path.expanduser(cf))
-            self._cookiefile_path_for_pause = (
+            resolved = (
                 p if os.path.isabs(p) else os.path.normpath(os.path.join(SCRIPT_DIR, p))
             )
+            self._cookies_staged = is_staged_cookie_path(resolved, SCRIPT_DIR)
         else:
-            self._cookiefile_path_for_pause = os.path.join(SCRIPT_DIR, "cookies.txt")
+            self._cookies_staged = False
+        self._cookie_source_mtime_at_sync = (
+            _file_mtime(self._cookie_source_path) if self._cookies_staged else None
+        )
+        self._cookie_poll_stop: threading.Event | None = None
+        self._cookie_poll_thread: threading.Thread | None = None
+        # Poll the operator export (cookies.txt), not cookies.run.txt.
+        self._cookiefile_path_for_pause = self._cookie_source_path
         super().__init__(params)
 
-    def _trigger_cookie_auth_operator_pause_if_needed(self, plain: str) -> None:
-        if not _env_truthy(ARCHIVE_PAUSE_ON_COOKIE_ERROR_ENV):
+    def __enter__(self):
+        super().__enter__()
+        poll_raw = os.environ.get(ARCHIVE_COOKIE_SOURCE_POLL_SEC_ENV, "").strip()
+        try:
+            poll_sec = float(poll_raw) if poll_raw else 0.0
+        except ValueError:
+            poll_sec = 0.0
+        if self._cookies_staged and poll_sec > 0:
+            self._cookie_poll_stop = threading.Event()
+            self._cookie_poll_thread = threading.Thread(
+                target=self._cookie_source_poll_loop,
+                args=(poll_sec,),
+                daemon=True,
+                name="archive-cookie-source-poll",
+            )
+            self._cookie_poll_thread.start()
+            self._reporter.log_line(
+                f"[archive] Cookie source poll: every {poll_sec}s on cookies.txt "
+                f"({ARCHIVE_COOKIE_SOURCE_POLL_SEC_ENV})."
+            )
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self._cookie_poll_stop is not None:
+            self._cookie_poll_stop.set()
+        if self._cookie_poll_thread is not None:
+            self._cookie_poll_thread.join(timeout=2.0)
+        return super().__exit__(exc_type, exc_val, exc_tb)
+
+    def _cookie_source_poll_loop(self, poll_sec: float) -> None:
+        stop = self._cookie_poll_stop
+        if stop is None:
             return
+        while not stop.wait(timeout=max(0.5, poll_sec)):
+            synced = sync_staged_cookies_from_source_if_newer(
+                self,
+                SCRIPT_DIR,
+                baseline_source_mtime=self._cookie_source_mtime_at_sync,
+                log=self._reporter.log_line,
+            )
+            if synced is not None:
+                self._cookie_source_mtime_at_sync = synced
+
+    def _maybe_reload_cookies_from_source(self) -> bool:
+        if not self._cookies_staged:
+            return False
+        synced = sync_staged_cookies_from_source_if_newer(
+            self,
+            SCRIPT_DIR,
+            baseline_source_mtime=self._cookie_source_mtime_at_sync,
+            log=self._reporter.log_line,
+        )
+        if synced is None:
+            return False
+        self._cookie_source_mtime_at_sync = synced
+        clear_cookie_refresh_request(SCRIPT_DIR)
+        return True
+
+    def _on_cookie_source_updated(self) -> None:
+        self._maybe_reload_cookies_from_source()
+
+    def _handle_possible_cookie_auth_line(self, plain: str) -> None:
         if not looks_like_likely_cookie_auth_error(plain):
             return
         now = time.monotonic()
         if now - self._reporter._cookie_auth_pause_last_mono < 3.0:
             return
         self._reporter._cookie_auth_pause_last_mono = now
+        if self._maybe_reload_cookies_from_source():
+            clear_cookie_refresh_request(SCRIPT_DIR)
+            return
+        if not _env_truthy(ARCHIVE_PAUSE_ON_COOKIE_ERROR_ENV):
+            return
+        request_cookie_refresh(SCRIPT_DIR, reason="cookie_auth_warning")
         _emit_cookie_auth_pause_banner(self._cookiefile_path_for_pause, self._reporter)
         self._reporter.record_issue(
             "warning",
@@ -1337,7 +1451,22 @@ class ManifestYoutubeDL(YoutubeDL):
             "[archive] Operator cookie/auth pause - see run.log banner; queue continued after wait.",
             "",
         )
-        _run_cookie_auth_blocking_wait(self._cookiefile_path_for_pause, self._reporter)
+        _run_cookie_auth_blocking_wait(
+            self._cookiefile_path_for_pause,
+            self._reporter,
+            on_source_updated=(
+                self._on_cookie_source_updated if self._cookies_staged else None
+            ),
+        )
+
+    def _trigger_cookie_auth_operator_pause_if_needed(self, plain: str) -> None:
+        self._handle_possible_cookie_auth_line(plain)
+
+    def process_info(self, info_dict):
+        """Before each video download: pick up a newer cookies.txt if the operator replaced it."""
+        if self._cookies_staged and not _env_truthy(ARCHIVE_COOKIES_NO_PER_VIDEO_SYNC_ENV):
+            self._maybe_reload_cookies_from_source()
+        return super().process_info(info_dict)
 
     def record_download_archive(self, info_dict):
         """
@@ -1361,6 +1490,7 @@ class ManifestYoutubeDL(YoutubeDL):
         if plain:
             self._reporter.log_line(plain)
             self._parse_screen_message(plain)
+            self._handle_possible_cookie_auth_line(plain)
         msg_out = augment_ytdlp_console_message(str(message), plain)
         return super().to_screen(
             msg_out, skip_eol=skip_eol, quiet=quiet, only_once=only_once
@@ -1475,7 +1605,11 @@ def main() -> int:
         subtitle="yt-dlp + deferred download-archive sync after verification",
     )
 
-    argv = list(_build_argv(SCRIPT_DIR))
+    argv = append_ytdlp_staged_cookies_argv(
+        _build_argv(SCRIPT_DIR),
+        SCRIPT_DIR,
+        log=reporter.log_line,
+    )
     if _env_truthy("ARCHIVE_DRY_RUN"):
         argv.append("--simulate")
         reporter.log_line(

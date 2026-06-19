@@ -8,6 +8,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+GALLERY_DL_PIP_PACKAGE = "gallery-dl"
+GALLERY_DL_PIP_UPDATE_TIMEOUT_SEC = 300.0
+
 
 def resolve_gallery_dl_exe(explicit: str | None) -> str:
     r"""
@@ -63,7 +66,7 @@ def run_gallery_dl_json_dump(
 ) -> tuple[int, str, str]:
     """
     Run gallery-dl in simulate + JSON dump mode (no media files written).
-    Returns (exit_code, combined_stdout, combined_stderr).
+    Returns (exit_code, stdout, stderr) as separate strings (stderr for UI diagnostics).
     """
     cmd: list[str] = [exe]
     if conf_file and conf_file.is_file():
@@ -82,8 +85,51 @@ def run_gallery_dl_json_dump(
             timeout=timeout_sec,
             env={**os.environ, "PYTHONUNBUFFERED": "1"},
         )
-        out = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
-        return proc.returncode, proc.stdout or "", out
+        return proc.returncode, proc.stdout or "", proc.stderr or ""
     except subprocess.TimeoutExpired as e:
-        partial = (e.stdout or "") + ("\n" + (e.stderr or ""))
-        return -124, e.stdout or "", partial + "\n[timeout]"
+        return -124, e.stdout or "", (e.stderr or "") + "\n[timeout]"
+
+
+def run_gallery_dl_pip_update(
+    python_exe: Path,
+    *,
+    timeout_sec: float = GALLERY_DL_PIP_UPDATE_TIMEOUT_SEC,
+) -> tuple[int, list[str]]:
+    """
+    ``pip install -U gallery-dl`` using the Archive Console driver Python.
+    Returns (exit_code, combined output lines). Non-zero exit still allows the
+    caller to continue with the existing install (monthly bat parity).
+    """
+    cmd: list[str] = [
+        str(python_exe),
+        "-m",
+        "pip",
+        "install",
+        "-U",
+        "--disable-pip-version-check",
+    ]
+    if os.environ.get("ARCHIVE_PIP_VERBOSE", "").strip().lower() not in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    ):
+        cmd.append("-q")
+    cmd.append(GALLERY_DL_PIP_PACKAGE)
+    try:
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout_sec,
+            env={**os.environ, "PYTHONUNBUFFERED": "1"},
+        )
+    except subprocess.TimeoutExpired:
+        return -124, ["[console] gallery-dl pip update timed out"]
+    except OSError as e:
+        return -1, [f"[console] gallery-dl pip update failed to run: {e!r}"]
+    combined = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
+    lines = [ln.rstrip("\r") for ln in combined.splitlines() if ln.strip()]
+    return proc.returncode, lines

@@ -1,7 +1,8 @@
-"""In-process monthly scheduler when ``features.scheduler_enabled``."""
+"""In-process scheduler when ``features.scheduler_enabled``."""
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from collections.abc import Awaitable, Callable
@@ -9,10 +10,15 @@ from pathlib import Path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from .download_output import extra_env_for_job
+from .download_output import extra_env_for_job, extra_env_for_ytdlp_batch
+from .gallery_source_batch import (
+    GALLERY_SOURCES_SCHEDULE_JOB,
+    start_gallery_sources_batch,
+)
 from .paths import PathNotAllowedError
-from .run_manager import RunManager, RunState
-from .schedule_times import occurrence_date_local
+from .cookie_preflight import CookiePreflightTimeoutError
+from .run_manager import BATCH_NAMES, RunManager, RunState
+from .schedule_times import fire_occurrence_key, schedule_matches_moment
 from .settings import load_state
 
 logger = logging.getLogger(__name__)
@@ -43,7 +49,6 @@ async def _tick(
 
     tz = datetime.now().astimezone().tzinfo
     now = datetime.now(tz)  # type: ignore[arg-type]
-    today = now.date()
 
     mgr = get_manager_fn()
     status = await mgr.status()
@@ -52,21 +57,46 @@ async def _tick(
         return
 
     for s in st.schedules:
-        if not s.enabled or s.job not in ("watch_later", "channels", "videos"):
+        if not s.enabled:
             continue
-        if occurrence_date_local(today, s) != today:
+        if not schedule_matches_moment(now, s):
             continue
-        if now.hour != s.hour or now.minute != s.minute:
-            continue
-        key = f"{s.id or s.job}:{today.isoformat()}:{s.hour}:{s.minute}"
+        key = fire_occurrence_key(s, now.replace(second=0, microsecond=0))
         if key in _fired_today:
             continue
+
+        if s.job == GALLERY_SOURCES_SCHEDULE_JOB:
+            _fired_today.add(key)
+            _prune_keys()
+            logger.info(
+                "scheduler: starting gallery saved-sources batch (schedule id=%s)",
+                s.id or "",
+            )
+            try:
+                await start_gallery_sources_batch(
+                    mgr,
+                    on_complete_fn,
+                    st=st,
+                    schedule_id=s.id or "",
+                    schedule_frequency=s.frequency,
+                    trigger="scheduler",
+                )
+            except RuntimeError as e:
+                logger.info("scheduler: gallery batch did not start: %s", e)
+            except FileNotFoundError as e:
+                logger.warning("scheduler: gallery batch %s", e)
+            continue
+
+        if s.job not in BATCH_NAMES:
+            continue
+
         _fired_today.add(key)
         _prune_keys()
         logger.info("scheduler: starting job %s (schedule id=%s)", s.job, s.id or "")
         root = Path(st.archive_root).expanduser().resolve()
         try:
             sched_extra = extra_env_for_job(root, st.download_dirs, s.job)
+            sched_extra.update(extra_env_for_ytdlp_batch(st.ytdlp_batch_run))
         except PathNotAllowedError:
             logger.warning(
                 "scheduler: invalid download_dirs in state; skip scheduled job %s",
@@ -74,18 +104,33 @@ async def _tick(
             )
             continue
         try:
-            await mgr.start(
+            ybr = st.ytdlp_batch_run
+            run_state = await mgr.start(
                 s.job,
                 dry_run=False,
                 skip_ytdlp_update=True,
                 skip_pip_update=True,
                 on_complete=on_complete_fn,
                 extra_env=sched_extra or None,
+                run_meta={
+                    "trigger": "scheduler",
+                    "schedule_id": s.id,
+                    "schedule_frequency": s.frequency,
+                },
+                preflight_via_extension=ybr.preflight_via_extension,
+                preflight_wait_sec=ybr.preflight_wait_sec,
             )
         except RuntimeError as e:
             logger.info("scheduler: did not start %s: %s", s.job, e)
         except FileNotFoundError as e:
             logger.warning("scheduler: %s", e)
+        except CookiePreflightTimeoutError as e:
+            logger.warning("scheduler: cookie preflight timed out for %s: %s", s.job, e)
+        else:
+            from .gotify_notify import notify_run_started
+
+            st_g = load_state()
+            await asyncio.to_thread(notify_run_started, st_g, run_state)
 
 
 def start_background_scheduler(

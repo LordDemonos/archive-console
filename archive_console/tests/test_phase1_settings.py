@@ -60,6 +60,34 @@ def test_next_run_iso_enabled():
     assert iso and "T" in iso
 
 
+def test_load_state_repairs_missing_archive_root(tmp_path: Path, monkeypatch):
+    """Broken archive_root in state.json is reset to default_archive_root()."""
+    good = tmp_path / "scripts"
+    good.mkdir()
+    p = tmp_path / "state.json"
+    p.write_text(
+        json.dumps(
+            {
+                "host": "127.0.0.1",
+                "port": 8756,
+                "archive_root": "C:/ar",
+                "allowlisted_rel_prefixes": ["logs"],
+                "features": {"scheduler_enabled": False, "notifications_stub": False},
+                "schedules": [],
+                "run_history": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    from app import settings as mod
+
+    monkeypatch.setattr(mod, "default_archive_root", lambda: good)
+    st = mod.load_state(p)
+    assert Path(st.archive_root).resolve() == good.resolve()
+    saved = json.loads(p.read_text(encoding="utf-8"))
+    assert Path(saved["archive_root"]).resolve() == good.resolve()
+
+
 def test_operator_backup_rejects_bad_destination(tmp_path: Path, monkeypatch):
     root = tmp_path / "ar"
     root.mkdir()

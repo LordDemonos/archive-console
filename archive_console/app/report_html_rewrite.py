@@ -9,6 +9,11 @@ from pathlib import Path
 from urllib.parse import quote, unquote, urlparse
 
 from .paths import is_allowed
+from .run_error_record import (
+    ERRORS_JSON_BASENAME,
+    errors_section_html,
+    inject_errors_before_body_close,
+)
 
 # href="file:///..." or src="file:..."
 _ATTR_FILE_URI = re.compile(
@@ -179,6 +184,22 @@ def rewrite_report_html(
     html: str,
     archive_root: Path,
     allowed_prefixes: list[str],
+    *,
+    report_path: Path | None = None,
 ) -> str:
     out = rewrite_file_attributes(html, archive_root, allowed_prefixes)
-    return inject_viewer_shim(out, archive_root)
+    out = inject_viewer_shim(out, archive_root)
+    errors_list: list[dict] = []
+    if report_path is not None:
+        sidecar = report_path.parent / ERRORS_JSON_BASENAME
+        if sidecar.is_file():
+            try:
+                raw = json.loads(sidecar.read_text(encoding="utf-8", errors="replace"))
+                if isinstance(raw, list):
+                    errors_list = [x for x in raw if isinstance(x, dict)]
+                elif isinstance(raw, dict) and isinstance(raw.get("errors"), list):
+                    errors_list = [x for x in raw["errors"] if isinstance(x, dict)]
+            except (OSError, json.JSONDecodeError):
+                errors_list = []
+    frag = errors_section_html(errors_list)
+    return inject_errors_before_body_close(out, frag)

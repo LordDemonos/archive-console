@@ -127,6 +127,8 @@ def render_exif_template(
     warnings: list[str] = []
     if used_tags is None:
         used_tags = {}
+    # re.sub callbacks must return str; coerce so None/int from upstream never raises TypeError.
+    pipeline_stem = "" if pipeline_stem is None else str(pipeline_stem)
 
     def repl(m: re.Match[str]) -> str:
         spec = m.group(1)

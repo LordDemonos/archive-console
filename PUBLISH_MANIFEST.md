@@ -44,6 +44,7 @@ This project is **not affiliated with YouTube, Google LLC, or the yt-dlp project
 - `channels_downloaded.txt — operator download-archive state`
 - `channels_downloaded_backup.txt — backup of operator state`
 - `channels_input.txt — operator URL lists (ship *.sample.txt)`
+- `cookies.run.txt — secrets, vendored binary, or local-only input (see manifest)`
 - `cookies.txt — secret / session (ship cookies.txt.example)`
 - `credentials.json — secrets, vendored binary, or local-only input (see manifest)`
 - `oneoff_downloaded.txt — operator download-archive state`
@@ -51,6 +52,7 @@ This project is **not affiliated with YouTube, Google LLC, or the yt-dlp project
 - `playlists_downloaded_backup.txt — backup of operator state`
 - `playlists_input.txt — operator URL lists (ship *.sample.txt)`
 - `remove_wl_token.json — secrets, vendored binary, or local-only input (see manifest)`
+- `temp_oauth.json — secrets, vendored binary, or local-only input (see manifest)`
 - `test_input.txt — secrets, vendored binary, or local-only input (see manifest)`
 - `videos_downloaded.txt — operator download-archive state`
 - `videos_input.txt — operator URL lists (ship *.sample.txt)`
@@ -60,7 +62,7 @@ This project is **not affiliated with YouTube, Google LLC, or the yt-dlp project
 ### Excluded — entire directory classes
 
 - `logs/` — run outputs
-- `playlists/`, `channels/`, `videos/`, top-level `test/` — download trees / scratch
+- `playlists/`, `channels/`, `videos/`, `galleries/`, `oneoff/`, `cookies/`, top-level `test/` — download trees / scratch / session exports
 - `Archivist Scripts/`, `Audio-Only Scripts/`, `Watch Scripts/` — local bundles not in core publish set
 - Root `credentials.json`, `remove_wl_token.json`, `yt-dlp.exe`, `yt-dlp_x86.exe`, `test_input.txt`
 - `.venv/`, `__pycache__/`, `.pytest_cache/` — environments

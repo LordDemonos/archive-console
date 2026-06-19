@@ -206,5 +206,95 @@ def test_duplicates_scan_api(dup_env) -> None:
     st = client.get("/api/duplicates/status").json()
     assert st.get("phase") == "success"
     scan = st.get("scan") or {}
+    assert scan.get("group_count", 0) >= 1
+    assert "groups" not in scan
+    res = client.get("/api/duplicates/results").json()
+    groups = res.get("groups") or []
+    assert len(groups) >= 1
+
+
+def test_duplicates_status_include_groups(dup_env) -> None:
+    client, ar = dup_env
+    (ar / "videos" / "a.mp4").write_bytes(b"dup")
+    (ar / "videos" / "b.mp4").write_bytes(b"dup")
+    client.post(
+        "/api/duplicates/scan",
+        json={
+            "root_rels": ["videos"],
+            "include_video": True,
+            "include_images": False,
+        },
+    )
+    import time
+
+    for _ in range(40):
+        st = client.get("/api/duplicates/status").json()
+        if st.get("phase") != "running":
+            break
+        time.sleep(0.1)
+    st = client.get("/api/duplicates/status", params={"include_groups": True}).json()
+    scan = st.get("scan") or {}
     groups = scan.get("groups") or []
     assert len(groups) >= 1
+
+
+def test_duplicates_force_reset(dup_env) -> None:
+    from app.duplicate_scan_manager import DupScanPhase, DupScanState
+
+    client, _ar = dup_env
+    mgr = main._get_dup_manager()
+    mgr._current = DupScanState(
+        scan_id="stuck01",
+        phase=DupScanPhase.running,
+        started_unix=0.0,
+    )
+    rr = client.post("/api/duplicates/reset")
+    assert rr.status_code == 200
+    assert rr.json().get("reset") is True
+    st = client.get("/api/duplicates/status").json()
+    assert st.get("phase") == "failed"
+
+
+def test_duplicates_apply_clears_scan_results(dup_env) -> None:
+    client, ar = dup_env
+    (ar / "videos" / "keep.mp4").write_bytes(b"dup")
+    (ar / "videos" / "drop.mp4").write_bytes(b"dup")
+    client.post(
+        "/api/duplicates/scan",
+        json={
+            "root_rels": ["videos"],
+            "include_video": True,
+            "include_images": False,
+        },
+    )
+    import time
+
+    for _ in range(40):
+        st = client.get("/api/duplicates/status").json()
+        if st.get("phase") != "running":
+            break
+        time.sleep(0.1)
+    res_before = client.get("/api/duplicates/results").json()
+    assert len(res_before.get("groups") or []) >= 1
+
+    apply = client.post(
+        "/api/duplicates/apply",
+        json={
+            "dry_run": False,
+            "mode": "delete",
+            "items": [
+                {
+                    "keep_rel": "videos/keep.mp4",
+                    "remove_rels": ["videos/drop.mp4"],
+                }
+            ],
+            "confirm": "DELETE_DUPLICATES",
+        },
+    )
+    assert apply.status_code == 200
+    assert not (ar / "videos" / "drop.mp4").is_file()
+
+    res_after = client.get("/api/duplicates/results").json()
+    assert res_after.get("groups") == []
+    st_after = client.get("/api/duplicates/status").json()
+    assert st_after.get("phase") == "idle"

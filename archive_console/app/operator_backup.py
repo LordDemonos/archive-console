@@ -10,6 +10,7 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .download_output import state_allowed_prefixes
 from .paths import PathNotAllowedError, assert_allowed_path, is_allowed, normalize_rel
 from .settings import DEFAULT_STATE_PATH, LastOperatorBackup, ConsoleState
 
@@ -56,7 +57,7 @@ def run_operator_backup(st: ConsoleState) -> LastOperatorBackup:
     started = time.time()
     cfg = st.operator_backup
     root = Path(st.archive_root).expanduser().resolve()
-    prefixes = st.allowlisted_rel_prefixes
+    prefixes = state_allowed_prefixes(st)
 
     try:
         dest_dir = assert_allowed_path(root, cfg.destination_rel, prefixes)

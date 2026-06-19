@@ -12,6 +12,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Literal
 
+from .download_output import state_allowed_prefixes
 from .file_serve import assert_reports_file_not_sensitive, is_playable_media_path
 from .paths import PathNotAllowedError, assert_allowed_path, is_allowed, normalize_rel
 from .settings import ConsoleState, append_history
@@ -296,7 +297,7 @@ class ClipExportManager:
                 raise RuntimeError("A clip export is already running")
             st = self.get_state()
             root = Path(st.archive_root).expanduser().resolve()
-            prefixes = st.allowlisted_rel_prefixes
+            prefixes = state_allowed_prefixes(st)
             try:
                 src_n = normalize_rel(source_rel.strip())
             except PathNotAllowedError as e:

@@ -10,6 +10,7 @@ from fastapi import HTTPException
 from fastapi.responses import FileResponse
 
 from .editor_files import COOKIES_TXT
+from .cookies_paths import COOKIES_DIR_REL, is_sensitive_cookie_rel
 from .paths import PathNotAllowedError, assert_allowed_path
 
 # Suffix (lower) -> Content-Type. Unknown -> application/octet-stream.
@@ -166,9 +167,20 @@ def allowlisted_file_response(path: Path, *, as_attachment: bool) -> FileRespons
 
 
 def assert_reports_file_not_sensitive(path: Path) -> None:
-    """Reject serving cookies via browse/report URL even if mis-configured allowlist."""
-    if path.name.lower() == COOKIES_TXT.lower():
+    """Reject serving cookie files via browse/report URL even if mis-configured allowlist."""
+    name = path.name.lower()
+    if name == COOKIES_TXT.lower():
         raise HTTPException(
             status_code=403,
             detail="cookies.txt is not served through this route",
         )
+    try:
+        parts = path.parts
+        if len(parts) >= 2 and parts[-2].lower() == COOKIES_DIR_REL:
+            if name.endswith(".txt"):
+                raise HTTPException(
+                    status_code=403,
+                    detail="site cookie files are not served through this route",
+                )
+    except (IndexError, ValueError):
+        pass

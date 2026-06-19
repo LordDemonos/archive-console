@@ -14,6 +14,7 @@ from app.supported_sites import (
     _safe_http_url,
     _unique_slug,
     build_supported_sites_payload,
+    enrich_supported_sites_with_cookies,
     invalidate_supported_sites_cache,
     parse_gallery_dl_list_extractors,
     parse_ytdlp_list_extractors,
@@ -116,3 +117,30 @@ def test_build_supported_sites_cache_hit() -> None:
     assert b.get("cached") is True
     assert a.get("cached") is False
     assert len(b["tools"]) == len(a["tools"])
+
+
+def test_enrich_supported_sites_with_cookies(tmp_path: Path) -> None:
+    ar = tmp_path / "archive"
+    (ar / "cookies").mkdir(parents=True)
+    (ar / "cookies" / "instagram.txt").write_text("", encoding="utf-8")
+    payload = {
+        "tools": [
+            {
+                "id": "gallery-dl",
+                "extractors": [
+                    {"id": "instagram:tag", "label": "Instagram"},
+                    {"id": "weird/id", "label": "Weird"},
+                ],
+            },
+            {"id": "yt-dlp", "extractors": []},
+        ]
+    }
+    enrich_supported_sites_with_cookies(payload, ar)
+    g = payload["tools"][0]
+    assert g["cookie_convention"]
+    assert g["site_cookies_on_disk"][0]["rel"] == "cookies/instagram.txt"
+    inst = g["extractors"][0]
+    assert inst["cookie_file"] == "cookies/instagram.txt"
+    assert inst["cookie_present"] is True
+    assert g["extractors"][1]["cookie_file"] is None
+    assert payload["tools"][1].get("cookie_note")

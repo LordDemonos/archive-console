@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from .download_output import state_allowed_prefixes
 from .latest_pointer import LATEST_POINTER_REL, read_latest_run_folder_rel
 from .operator_backup import BACKUP_ZIP_GLOB
 from .paths import PathNotAllowedError, assert_allowed_path, is_allowed
@@ -173,7 +174,7 @@ def build_preview(
 ) -> CleanupPreview:
     cfg = cfg or st.storage_retention
     root = Path(st.archive_root).expanduser().resolve()
-    prefixes = st.allowlisted_rel_prefixes
+    prefixes = state_allowed_prefixes(st)
     now = time.time()
     cutoff = now - cfg.retention_days * 86400
 
@@ -248,7 +249,7 @@ def execute_cleanup(
     """Delete eligible paths; best-effort per item. Returns summary dict."""
     cfg = cfg or st.storage_retention
     root = Path(st.archive_root).expanduser().resolve()
-    prefixes = st.allowlisted_rel_prefixes
+    prefixes = state_allowed_prefixes(st)
     t0 = time.time()
     cutoff = time.time() - cfg.retention_days * 86400
 

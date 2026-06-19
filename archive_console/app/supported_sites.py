@@ -10,8 +10,14 @@ import sys
 import threading
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
+from .cookies_paths import (
+    cookie_stem_for_extractor_id,
+    list_site_cookie_files,
+    site_cookie_rel_for_stem,
+)
 from .gallery_cli import gallery_dl_exe_invocable, resolve_gallery_dl_exe
 
 logger = logging.getLogger(__name__)
@@ -224,6 +230,52 @@ def _row_to_api(r: ExtractorRow) -> dict[str, Any]:
     if r.example_url:
         d["example_url"] = r.example_url
     return d
+
+
+GALLERY_DL_COOKIE_CONVENTION = (
+    "gallery-dl: drop Netscape exports as cookies/<extractor>.txt under the archive root "
+    "(name matches the extractor category — see table). Files on disk are auto-wired at "
+    "Galleries run/preview. Set extractor.<name>.cookies to \"\" in gallery-dl.conf to "
+    "disable auto-wire for that site. yt-dlp uses root cookies.txt or --cookies-from-browser "
+    "instead (not per-site files here)."
+)
+
+
+def enrich_supported_sites_with_cookies(
+    payload: dict[str, Any],
+    archive_root: Path | None,
+) -> dict[str, Any]:
+    """Attach cookie path hints to gallery-dl rows (live disk scan; not CLI-cacheable)."""
+    if not archive_root:
+        return payload
+    root = archive_root.expanduser().resolve()
+    on_disk = {
+        str(row["basename"]).lower(): str(row["rel"])
+        for row in list_site_cookie_files(root)
+    }
+    for tool in payload.get("tools") or []:
+        if tool.get("id") != "gallery-dl":
+            if tool.get("id") == "yt-dlp":
+                tool["cookie_note"] = (
+                    "yt-dlp: use cookies.txt at archive root or --cookies-from-browser "
+                    "in yt-dlp.conf — not cookies/<site>.txt."
+                )
+            continue
+        tool["cookie_convention"] = GALLERY_DL_COOKIE_CONVENTION
+        tool["site_cookies_on_disk"] = [
+            {"rel": rel, "basename": stem}
+            for stem, rel in sorted(on_disk.items())
+        ]
+        for row in tool.get("extractors") or []:
+            stem = cookie_stem_for_extractor_id(str(row.get("id") or ""))
+            if not stem:
+                row["cookie_file"] = None
+                row["cookie_present"] = False
+                continue
+            rel = site_cookie_rel_for_stem(stem)
+            row["cookie_file"] = rel
+            row["cookie_present"] = stem in on_disk
+    return payload
 
 
 def _tool_ytdlp() -> dict[str, Any]:

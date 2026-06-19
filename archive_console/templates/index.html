@@ -41,49 +41,69 @@
         </div>
       </div>
       <nav class="nav" aria-label="Primary views">
-        <button type="button" class="nav-item is-active" data-view="run" title="Watch Later, Channels, and Videos — same monthly .bat drivers">
-          <span class="nav-item__label">Run</span>
-          <span class="nav-item__sub">Monthly drivers</span>
+        <button type="button" class="nav-item" id="navGettingStarted" data-view="getting-started" title="Setup — tools, cookies, config paths (not runtime update toggles)">
+          <span class="nav-item__label">Setup</span>
+          <span class="nav-item__sub">Archive Console</span>
         </button>
-        <button type="button" class="nav-item" data-view="oneoff" title="Single YouTube URL — archive_oneoff_run.py, same run lock as monthly jobs">
-          <span class="nav-item__label">One-off</span>
-          <span class="nav-item__sub">Single URL</span>
+        <button type="button" class="nav-item" data-view="home" title="Bookmarks, clock, and weather — local dashboard">
+          <span class="nav-item__label">Dashboard</span>
+          <span class="nav-item__sub">Bookmarks &amp; weather</span>
+        </button>
+        <button type="button" class="nav-item is-active" data-view="run" title="Watch Later, Channels, and Videos — monthly_*.bat drivers; manual or scheduled">
+          <span class="nav-item__label">YouTube batch</span>
+          <span class="nav-item__sub">yt-dlp · batch drivers</span>
+        </button>
+        <button type="button" class="nav-item" data-view="oneoff" title="Single URL download — archive_oneoff_run.py, same run lock as batch jobs">
+          <span class="nav-item__label">Single download</span>
+          <span class="nav-item__sub">yt-dlp · one URL</span>
         </button>
         <button type="button" class="nav-item" data-view="galleries" title="gallery-dl batch URLs — archive_gallery_run.py, same run lock as other jobs">
-          <span class="nav-item__label">Galleries</span>
+          <span class="nav-item__label">Gallery batch</span>
           <span class="nav-item__sub">gallery-dl</span>
         </button>
+        <button type="button" class="nav-item" data-view="gifsky" title="Convert short gallery videos to GIF — ffmpeg + gifski, same folders as Gallery batch">
+          <span class="nav-item__label">Video to GIF</span>
+          <span class="nav-item__sub">gifski · ffmpeg</span>
+        </button>
+        <button type="button" class="nav-item" data-view="library" title="Download output folders — browse, play, queue, export clips">
+          <span class="nav-item__label">Browse library</span>
+          <span class="nav-item__sub">download folders</span>
+        </button>
+        <button type="button" class="nav-item" data-view="rename" title="Preview and apply renames — DeepL and ExifTool (download output folders)">
+          <span class="nav-item__label">Rename files</span>
+          <span class="nav-item__sub">DeepL · ExifTool</span>
+        </button>
+        <button type="button" class="nav-item" data-view="czkawka" title="Czkawka CLI — scan any folder on this PC for duplicates and similar media">
+          <span class="nav-item__label">Scan duplicates</span>
+          <span class="nav-item__sub" id="navCzkawkaSub">Czkawka CLI</span>
+        </button>
         <button type="button" class="nav-item" data-view="history" title="Run ledger from state — open report.html and artifacts via safe URLs">
-          <span class="nav-item__label">History &amp; reports</span>
-          <span class="nav-item__sub">Ledger &amp; artifacts</span>
+          <span class="nav-item__label">History</span>
+          <span class="nav-item__sub">runs · reports · logs</span>
         </button>
-        <button type="button" class="nav-item" data-view="library" title="Allowlisted folders — browse, play, queue, export clips">
-          <span class="nav-item__label">Library</span>
-          <span class="nav-item__sub">Browse &amp; clip</span>
-        </button>
-        <button type="button" class="nav-item" data-view="rename" title="Preview and apply renames — DeepL stem translation (allowlisted paths only)">
-          <span class="nav-item__label">Rename</span>
-          <span class="nav-item__sub">DeepL &amp; preview</span>
-        </button>
-        <button type="button" class="nav-item" data-view="inputs" title="list inputs, raw yt-dlp.conf, cookies.txt — gallery-dl.conf has its own nav item">
-          <span class="nav-item__label">Inputs &amp; config</span>
-          <span class="nav-item__sub">Lists &amp; raw files</span>
+        <button type="button" class="nav-item" data-view="inputs" title="Input lists, raw yt-dlp.conf, cookies.txt — gallery-dl.conf has its own nav item">
+          <span class="nav-item__label">Input lists</span>
+          <span class="nav-item__sub">URLs · cookies · raw</span>
         </button>
         <button type="button" class="nav-item" data-view="ytdlp" title="Tier A/B editor and presets — writes the same yt-dlp.conf as your batches">
-          <span class="nav-item__label">yt-dlp.conf</span>
-          <span class="nav-item__sub">Interactive editor</span>
+          <span class="nav-item__label">Download options</span>
+          <span class="nav-item__sub">yt-dlp.conf</span>
         </button>
-        <button type="button" class="nav-item" data-view="gallerydl" title="gallery-dl JSON config — same file Galleries and preview use (-c when present)">
-          <span class="nav-item__label">gallery-dl.conf</span>
-          <span class="nav-item__sub">Gallery-dl config</span>
+        <button type="button" class="nav-item" data-view="gallerydl" title="gallery-dl JSON config — same file Gallery batch and preview use (-c when present)">
+          <span class="nav-item__label">Gallery options</span>
+          <span class="nav-item__sub">gallery-dl.conf</span>
+        </button>
+        <button type="button" class="nav-item" data-view="gifskyconf" title="gifsky.conf presets — quality, fps, size limits for Video to GIF batch">
+          <span class="nav-item__label">GIF options</span>
+          <span class="nav-item__sub">gifsky.conf</span>
         </button>
         <button type="button" class="nav-item" data-view="supportedsites" title="Lists from your yt-dlp and gallery-dl installs — official docs only; not affiliated">
           <span class="nav-item__label">Supported sites</span>
-          <span class="nav-item__sub">yt-dlp &amp; gallery-dl</span>
+          <span class="nav-item__sub">yt-dlp · gallery-dl</span>
         </button>
-        <button type="button" class="nav-item" data-view="settings" title="Port, allowlist, cookie hygiene, scheduler, retention, backups, Stop server">
+        <button type="button" class="nav-item" data-view="settings" title="Port, download folders, cookie hygiene, scheduler, retention, backups, Stop server">
           <span class="nav-item__label">Settings</span>
-          <span class="nav-item__sub">Console &amp; scheduler</span>
+          <span class="nav-item__sub">server · scheduler</span>
         </button>
       </nav>
       <div class="sidebar-footer">
@@ -106,11 +126,57 @@
           <button type="button" class="btn ghost small" id="btnPreRunSnooze">Snooze 15 min</button>
         </span>
       </div>
-      <section class="view is-active" id="view-run" aria-label="Run jobs">
+      <div id="czkScanActiveBanner" class="czk-scan-active-banner" hidden role="status" aria-live="polite">
+        <span id="czkScanActiveBannerText">Czkawka scan in progress on this PC.</span>
+        <span class="reminder-banner-actions">
+          <button type="button" class="btn ghost small" id="btnCzkBannerOpen">Open Scan duplicates</button>
+          <button type="button" class="btn danger small" id="btnCzkBannerStop">Stop scan</button>
+        </span>
+      </div>
+      <section class="view home-flame" id="view-home" aria-label="Dashboard">
+        <header class="home-flame-top">
+          <div class="home-flame-top__left">
+            <div class="home-flame-dateline">
+              <span id="homeFlameDatetime" class="home-flame-datetime" aria-live="polite">—</span>
+            </div>
+            <h1 class="home-flame-greeting" id="homeFlameGreeting">—</h1>
+          </div>
+          <div class="home-flame-weather" id="homeWeather" role="status" aria-live="polite">
+            <span class="home-flame-weather__icon" id="homeWeatherIcon" aria-hidden="true"></span>
+            <div class="home-flame-weather__stack">
+              <span id="homeWeatherLine1" class="home-flame-weather__line home-flame-weather__line--temp">—</span>
+              <span id="homeWeatherLine2" class="home-flame-weather__line home-flame-weather__line--hum"></span>
+            </div>
+          </div>
+        </header>
+        <div class="home-flame-rule" aria-hidden="true"></div>
+        <div class="home-flame-apps" id="homeFlameApps">
+          <div class="home-flame-apps-bar">
+            <button
+              type="button"
+              class="home-flame-apps-title"
+              id="homeApplicationsToggle"
+              aria-expanded="false"
+              aria-controls="homeBookmarkGrid"
+              title="Toggle add / edit mode for bookmarks"
+            >
+              Bookmarks
+            </button>
+            <button type="button" class="btn ghost small home-flame-add" id="btnHomeAddBookmark" hidden>
+              + Add
+            </button>
+          </div>
+          <div id="homeBookmarkGrid" class="home-flame-grid" aria-label="Bookmarks"></div>
+          <p class="muted small home-flame-empty-hint" id="homeBookmarkEmpty" hidden>
+            No bookmarks yet. Open Bookmarks above, then use Add.
+          </p>
+        </div>
+      </section>
+      <section class="view is-active" id="view-run" aria-label="YouTube batch jobs">
         <header class="view-head">
-          <h1>Run</h1>
-          <p class="lede">Run the same <strong>yt-dlp</strong>-oriented <code>monthly_*.bat</code> drivers, <code>yt-dlp.conf</code>, and cookies you use on disk—live batch output below.</p>
-          <p class="muted small" id="runCookieGateHint" hidden>Manual runs require confirming <code>cookies.txt</code> before start (toggle under <strong>Settings → Cookie hygiene</strong>). <strong>Dry-run</strong> skips this gate.</p>
+          <h1>YouTube batch</h1>
+          <p class="lede">Run the same <strong>yt-dlp</strong>-oriented <code>monthly_*.bat</code> drivers, <code>yt-dlp.conf</code>, and cookies you use on disk—manually here or on a schedule below. Live batch output under the schedule card.</p>
+          <p class="muted small" id="runCookieGateHint" hidden></p>
         </header>
         <div class="grid-cards">
           <div class="card">
@@ -133,6 +199,26 @@
           <label class="chk"><input type="checkbox" id="optDryRun" /> ARCHIVE_DRY_RUN=1</label>
           <label class="chk"><input type="checkbox" id="optSkipPip" checked /> SKIP_PIP_UPDATE=1 <span class="muted small">(skip <code>pip</code> self-upgrade; off runs it before yt-dlp)</span></label>
           <label class="chk"><input type="checkbox" id="optSkipYtdlp" /> SKIP_YTDLP_UPDATE=1 <span class="muted small">(skip <code>yt-dlp[default]</code> install)</span></label>
+          <label class="chk"><input type="checkbox" id="optPreflightViaExtension" checked /> Refresh <code>cookies.txt</code> via Firefox extension <strong>before</strong> start <span class="muted small">(waits for extension poll; skips manual cookie confirmation)</span></label>
+          <label class="chk ytdlp-cookie-poll-row" id="optPreflightWaitRow">
+            <span>Preflight wait (seconds)</span>
+            <input type="number" id="optPreflightWaitSec" min="10" max="600" step="1" value="120" aria-label="Seconds to wait for extension cookie preflight" />
+          </label>
+          <label class="chk"><input type="checkbox" id="optPauseOnCookieError" /> ARCHIVE_PAUSE_ON_COOKIE_ERROR=1 <span class="muted small">(pause on cookie/auth warnings; replace <code>cookies.txt</code> to resume)</span></label>
+          <label class="chk ytdlp-cookie-poll-row" id="optCookieAuthPollRow">
+            <span>ARCHIVE_COOKIE_AUTH_POLL_SEC</span>
+            <input type="number" id="optCookieAuthPollSec" min="5" max="3600" step="1" value="15" aria-label="Poll cookies.txt every N seconds while paused" />
+            <span class="muted small">(poll <code>cookies.txt</code> mtime while paused; saved for manual + scheduled runs)</span>
+          </label>
+        </div>
+        <div class="card" id="youtubeScheduleCard">
+          <h2>Schedule</h2>
+          <p class="muted small" id="youtubeSchedulerHint" role="status"></p>
+          <p class="muted small">Each entry repeats <strong>daily</strong>, <strong>weekly</strong> (weekday + time), or <strong>monthly</strong> (day 1–31 + time; clamped in short months). Next-run hints use <strong>this machine’s local timezone</strong>. Turn on the scheduler globally under <strong>Settings → Automatic scheduling</strong> and restart the server. Gallery-dl saved-source crawls are scheduled on <strong>Gallery batch → Saved sources</strong>.</p>
+          <div id="scheduleEditor" class="schedule-editor" aria-label="YouTube batch schedule list"></div>
+          <button type="button" class="btn ghost" id="btnAddSchedule">Add schedule</button>
+          <button type="button" class="btn primary" id="btnSaveSchedules">Save schedules</button>
+          <p class="muted small" id="scheduleSaveMsg" role="status"></p>
         </div>
         <div class="card run-status-card" id="runStatusCard">
           <p class="run-status-summary muted" id="runStatusSummary">No job running.</p>
@@ -195,9 +281,203 @@
           </div>
         </div>
       </section>
-      <section class="view" id="view-oneoff" aria-label="One-off YouTube download">
+      <section class="view" id="view-getting-started" aria-label="Setup" tabindex="-1">
         <header class="view-head">
-          <h1>One-off</h1>
+          <h1>Setup</h1>
+          <p class="lede">Curated links and checks for this <strong>local</strong> console — not a substitute for upstream docs. Update skips (<code>SKIP_PIP_UPDATE</code>, <code>SKIP_YTDLP_UPDATE</code>, etc.) stay on <strong>YouTube batch</strong> and <strong>Gallery batch</strong>.</p>
+          <p class="muted small" id="gsPlatformHint" hidden role="note"></p>
+        </header>
+
+        <div class="card">
+          <h2>What you already have</h2>
+          <p class="muted small">This app listens on <strong>127.0.0.1</strong> only. Your <strong>archive root</strong> (see <strong>Settings</strong>) holds batch inputs and config files. Cookies are never read from your browser — export Netscape-format files yourself: <code>cookies.txt</code> at the root for <strong>yt-dlp</strong>, and <code>cookies/&lt;site&gt;.txt</code> for <strong>gallery-dl</strong> (see <strong>Cookies</strong> below).</p>
+        </div>
+
+        <div class="card">
+          <h2>Python</h2>
+          <p class="muted small"><strong>yt-dlp</strong> targets <strong>Python 3.10+</strong> per upstream. This server uses its own interpreter for the API; batch drivers may use <code>archive_console/.venv</code> when present.</p>
+          <p class="settings-row-actions">
+            <a class="btn ghost small" href="https://www.python.org/downloads/" target="_blank" rel="noopener noreferrer">Open python.org</a>
+            <a class="btn ghost small" href="https://github.com/yt-dlp/yt-dlp/blob/master/README.md#dependencies" target="_blank" rel="noopener noreferrer">Open yt-dlp dependencies (README)</a>
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>yt-dlp</h2>
+          <p class="muted small">Install via pip, pipx, or release binaries — see the official wiki. Use <strong>Verify</strong> to confirm the binary your shell would use (bounded subprocess on the server host).</p>
+          <p class="settings-row-actions">
+            <a class="btn ghost small" href="https://github.com/yt-dlp/yt-dlp/wiki/Installation" target="_blank" rel="noopener noreferrer">Open Installation (wiki)</a>
+            <a class="btn ghost small" href="https://github.com/yt-dlp/yt-dlp/blob/master/README.md" target="_blank" rel="noopener noreferrer">Open README</a>
+            <button type="button" class="btn small gs-verify" id="btnGsVerifyYtdlp" data-gs-verify-tool="yt-dlp">Verify yt-dlp</button>
+          </p>
+          <p class="muted small" data-gs-tool-status="yt-dlp" role="status">Not checked yet.</p>
+        </div>
+
+        <div class="card">
+          <h2>gallery-dl (optional)</h2>
+          <p class="muted small">Needed for the <strong>Galleries</strong> tab. Install separately and ensure <code>gallery-dl</code> is on <strong>PATH</strong> (or beside the console venv’s <code>Scripts</code>); preview/run use the same resolution as the server.</p>
+          <p class="settings-row-actions">
+            <a class="btn ghost small" href="https://github.com/mikf/gallery-dl#installation" target="_blank" rel="noopener noreferrer">Open gallery-dl (GitHub)</a>
+            <button type="button" class="btn small gs-verify" id="btnGsVerifyGalleryDl" data-gs-verify-tool="gallery-dl">Verify gallery-dl</button>
+          </p>
+          <p class="muted small" data-gs-tool-status="gallery-dl" role="status">Not checked yet.</p>
+        </div>
+
+        <div class="card">
+          <h2>Cookies</h2>
+          <p class="muted small"><strong>yt-dlp</strong> (Watch Later, channels, videos) reads <code>cookies.txt</code> at the archive root, or use <code>--cookies-from-browser</code> in <code>yt-dlp.conf</code> for YouTube-only work. <strong>gallery-dl</strong> (Galleries) uses <code>cookies/&lt;extractor&gt;.txt</code> — auto-wired when present; see <strong>Supported sites</strong> for names. Reddit user feeds: prefer <strong>OAuth</strong> in gallery-dl.conf.</p>
+          <p class="muted small">Official export guidance: <a class="link" href="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" target="_blank" rel="noopener noreferrer">FAQ — How do I pass cookies to yt-dlp?</a> Extensions cited there include <a class="link" href="https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc?pli=1" target="_blank" rel="noopener noreferrer">Get cookies.txt LOCALLY</a> (Chrome) and the <a class="link" href="https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/" target="_blank" rel="noopener noreferrer">cookies.txt</a> Firefox add-on. This UI never reads your browser jar — you export and drop files yourself.</p>
+          <p class="settings-row-actions">
+            <a class="btn ghost small" href="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" target="_blank" rel="noopener noreferrer">Open yt-dlp FAQ (cookies)</a>
+            <button type="button" class="btn ghost small" id="btnGsOpenCookies">Open Inputs (cookies.txt)</button>
+            <button type="button" class="btn ghost small" id="btnGsOpenSiteCookies">Open Inputs (site cookies)</button>
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>Config files</h2>
+          <p class="muted small">Jump to editors (allowlisted repo-root files only).</p>
+          <p class="settings-row-actions">
+            <button type="button" class="btn ghost small" id="btnGsOpenInputs">Inputs &amp; config</button>
+            <button type="button" class="btn ghost small" id="btnGsOpenYtdlp">Download settings (yt-dlp.conf)</button>
+            <button type="button" class="btn ghost small" id="btnGsOpenGallerydl">gallery-dl.conf</button>
+            <button type="button" class="btn ghost small" id="btnGsOpenGifskyconf">gifsky.conf</button>
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>MediaInfo (optional)</h2>
+          <p class="muted small">The <strong>Library</strong> file detail pane runs the <strong>MediaInfo CLI</strong> (<code>--Output=JSON</code>) for technical metadata. On Windows the binary is often <code>MediaInfo.exe</code> on PATH; otherwise install the CLI build and/or set the full path under <strong>Settings → General</strong>.</p>
+          <p class="settings-row-actions">
+            <a class="btn ghost small" href="https://mediaarea.net/en/MediaInfo/Download/CLI" target="_blank" rel="noopener noreferrer">MediaInfo CLI downloads</a>
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>Czkawka (optional)</h2>
+          <p class="muted small">External duplicate and similar-media scanner via <strong>czkawka_cli</strong>. Install from <a class="link" href="https://github.com/qarmin/czkawka/releases" target="_blank" rel="noopener noreferrer">GitHub releases</a> (Windows: often <code>windows_czkawka_cli.exe</code>). PATH must be the <strong>folder</strong> (e.g. <code>C:\czkawka</code>), not the <code>.exe</code> — or set the full exe path under <strong>Settings → General</strong>.</p>
+          <h3 class="h3">Scan folders</h3>
+          <ol class="muted small gs-steps">
+            <li><strong>Browse…</strong> on the Czkawka tab opens a native folder picker (any drive). Or paste one <strong>absolute</strong> path per line — e.g. <code><ARCHIVE_ROOT>galleries</code>, not a relative name like <code>galleries</code>.</li>
+            <li><strong>Install czkawka_cli.</strong> Download from <a class="link" href="https://github.com/qarmin/czkawka/releases" target="_blank" rel="noopener noreferrer">GitHub releases</a> (Windows build is often named <code>windows_czkawka_cli.exe</code>).</li>
+            <li><strong>PATH (optional):</strong> add the <strong>folder</strong> that contains the exe — e.g. <code>C:\czkawka</code> — <em>not</em> the full path to <code>windows_czkawka_cli.exe</code>. Close and reopen Archive Console after changing user PATH. Or skip PATH: <strong>Settings → General → Czkawka CLI executable</strong> → full path to the exe → <strong>Save general</strong> → restart.</li>
+            <li><strong>Duplicates mode:</strong> after a scan, choose <strong>Keep</strong> / <strong>Remove</strong> per group, run <strong>Preview removal</strong>, then <strong>Apply removal</strong> (quarantine or delete — type <code>DELETE_CZKAWKA_DUPLICATES</code> to confirm).</li>
+          </ol>
+          <p class="muted small">Verify on this page or the Czkawka tab checks that the console host can run the CLI. A path under <code>AppData\Local\Temp\pytest-…</code> in scan folders means archive root in Settings was wrong — fix <strong>Archive root</strong>, save, restart.</p>
+          <p class="settings-row-actions">
+            <a class="btn ghost small" href="https://github.com/qarmin/czkawka" target="_blank" rel="noopener noreferrer">Open Czkawka (GitHub)</a>
+            <button type="button" class="btn small gs-verify" data-gs-verify-tool="czkawka">Verify czkawka_cli</button>
+            <button type="button" class="btn ghost small" id="btnGsOpenCzkawka">Scan duplicates tab</button>
+          </p>
+          <p class="muted small" data-gs-tool-status="czkawka" role="status">Not checked yet.</p>
+        </div>
+
+        <div class="card">
+          <h2>Library (optional)</h2>
+          <p class="muted small">Browse your download output folders (and subfolders), play media, export clips with ffmpeg, and run the built-in <strong>Duplicate finder</strong> (size buckets + SHA-256). Duplicates live under <strong>Library</strong> — preview before any change; apply requires typing <code>DELETE_DUPLICATES</code>. Set the quarantine folder under <strong>Settings → General</strong>.</p>
+          <p class="settings-row-actions">
+            <button type="button" class="btn ghost small" id="btnGsOpenLibrary">Open Library</button>
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>ffmpeg</h2>
+          <p class="muted small">Used to merge best audio/video on many sites, for <strong>Library → Clip export</strong>, and for <strong>Gifsky</strong> (extracts PNG frames before gifski builds the GIF). Optional path override in <strong>Settings</strong> (<code>ffmpeg_exe</code>).</p>
+          <p class="settings-row-actions">
+            <a class="btn ghost small" href="https://www.ffmpeg.org/" target="_blank" rel="noopener noreferrer">Open ffmpeg.org</a>
+            <button type="button" class="btn small gs-verify" id="btnGsVerifyFfmpeg" data-gs-verify-tool="ffmpeg">Verify ffmpeg</button>
+          </p>
+          <p class="muted small" data-gs-tool-status="ffmpeg" role="status">Not checked yet.</p>
+        </div>
+
+        <div class="card">
+          <h2>Gifsky (optional)</h2>
+          <p class="muted small">Converts short <strong>gallery-dl</strong> videos (often <code>.m4v</code> / <code>.mp4</code> under <code>reddit_user_*</code>) to GIFs in the same folders. Needs <strong>ffmpeg</strong> (above) plus <strong>gifski</strong> on <strong>PATH</strong> (or set <code>gifski_exe</code> in <strong>Settings</strong>). Tune quality/size in <strong>gifsky.conf</strong>; run from the <strong>Gifsky</strong> tab after you have videos from <strong>Galleries</strong> (enable <em>Video fallback</em> if Reddit clips are missing).</p>
+          <p class="settings-row-actions">
+            <a class="btn ghost small" href="https://gif.ski/" target="_blank" rel="noopener noreferrer">Open gifski (gif.ski)</a>
+            <button type="button" class="btn small gs-verify" id="btnGsVerifyGifski" data-gs-verify-tool="gifski">Verify gifski</button>
+            <button type="button" class="btn ghost small" id="btnGsOpenGifsky">Video to GIF tab</button>
+            <button type="button" class="btn ghost small js-gs-open-gifskyconf">gifsky.conf</button>
+          </p>
+          <p class="muted small" data-gs-tool-status="gifski" role="status">Not checked yet.</p>
+        </div>
+
+        <div class="card">
+          <h2>Python runtime (server)</h2>
+          <p class="settings-row-actions">
+            <button type="button" class="btn small gs-verify" id="btnGsVerifyPython" data-gs-verify-tool="python">Refresh from server</button>
+          </p>
+          <p class="muted small" data-gs-tool-status="python" role="status">Not checked yet.</p>
+        </div>
+
+        <div class="card">
+          <h2>Verify all tools</h2>
+          <p class="settings-row-actions">
+            <button type="button" class="btn primary small" id="btnGsVerifyAll">Verify all</button>
+            <span id="gsVerifyAllHint" class="muted small" aria-live="polite"></span>
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>Launchers &amp; layout</h2>
+          <p class="muted small">Start the console with <code>start_archive_console.bat</code> (repo root) or the optional tray launcher (see project docs). Port, download folders, and tool paths: <strong>Settings</strong>.</p>
+          <p class="settings-row-actions">
+            <button type="button" class="btn ghost small" id="btnGsOpenSettings">Open Settings</button>
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>Security</h2>
+          <p class="muted small">Listen address stays loopback; treat <code>cookies.txt</code>, <code>cookies/*.txt</code>, and API keys as secrets; don’t expose this port beyond your machine.</p>
+        </div>
+
+        <div class="card">
+          <h2>Runtime updates</h2>
+          <p class="muted small">Batch <strong>update skips</strong> and related env toggles are configured on <strong>YouTube batch</strong> and <strong>Gallery batch</strong>, not on this page.</p>
+        </div>
+
+        <div class="card">
+          <h2>Troubleshooting</h2>
+          <details class="gs-details">
+            <summary>PATH / “not found”</summary>
+            <p class="muted small">If Verify reports missing tools, add their install directory to your user <strong>PATH</strong> or set explicit paths in <strong>Settings</strong> where available. Restart the console after environment changes.</p>
+          </details>
+          <details class="gs-details">
+            <summary>HTTP 428 — cookie confirm</summary>
+            <p class="muted small">Manual <strong>YouTube batch</strong> starts may require acknowledging <code>cookies.txt</code> (or disable the gate in <strong>Settings</strong>). Dry-run skips the gate.</p>
+          </details>
+          <details class="gs-details">
+            <summary>Reddit / block pages</summary>
+            <p class="muted small">Refresh cookies and try again; some extractors need logged-in sessions. See upstream FAQ and extractor notes.</p>
+          </details>
+          <details class="gs-details">
+            <summary>Empty gallery preview</summary>
+            <p class="muted small">Confirm <code>gallery-dl</code> works from a shell, URL is supported, and cookies/config match the site.</p>
+          </details>
+          <details class="gs-details">
+            <summary>Gifsky — no videos / huge GIFs</summary>
+            <p class="muted small">Scan finds <code>.m4v</code> and <code>.mp4</code> under your galleries output root — enable <strong>Galleries → Video fallback</strong> if Reddit clips are missing. HQ presets make large GIFs; try <strong>Compact</strong> or <strong>Balanced</strong> in <strong>gifsky.conf</strong>. Leftover <code>*_frame*.png</code> from older runs can be deleted manually; new runs clean temp frames automatically.</p>
+          </details>
+        </div>
+
+        <div class="card">
+          <h2>Setup checklist</h2>
+          <p class="muted small">Stored in your browser only (<code>localStorage</code>).</p>
+            <ul class="gs-checklist">
+            <li><label class="chk"><input type="checkbox" data-gs-check="python" /> Python available for yt-dlp</label></li>
+            <li><label class="chk"><input type="checkbox" data-gs-check="ytdlp" /> yt-dlp installed and verified</label></li>
+            <li><label class="chk"><input type="checkbox" data-gs-check="cookies" /> Cookies exported when needed (<code>cookies.txt</code> for yt-dlp; <code>cookies/&lt;site&gt;.txt</code> for Galleries)</label></li>
+            <li><label class="chk"><input type="checkbox" data-gs-check="ffmpeg" /> ffmpeg verified (merge / Library clip export)</label></li>
+            <li><label class="chk"><input type="checkbox" data-gs-check="galleries" /> gallery-dl installed (optional)</label></li>
+            <li><label class="chk"><input type="checkbox" data-gs-check="gifsky" /> Gifsky optional: gifski verified, galleries output folder set, gifsky.conf saved</label></li>
+            <li><label class="chk"><input type="checkbox" data-gs-check="duplicates" /> Library duplicate finder: scan download folders, quarantine path in Settings (optional)</label></li>
+            <li><label class="chk"><input type="checkbox" data-gs-check="czkawka" /> Czkawka optional: czkawka_cli verified, scan folders chosen (any path on this PC)</label></li>
+          </ul>
+        </div>
+      </section>
+      <section class="view" id="view-oneoff" aria-label="Single download">
+        <header class="view-head">
+          <h1>Single download</h1>
           <p class="lede">Download a <strong>single</strong> YouTube URL with the same Python stack as monthly drivers — live output below. Only one job (monthly or one-off) runs at a time.</p>
           <p class="muted small" id="oneoffCookieGateHint" hidden>Manual runs require confirming <code>cookies.txt</code> before start (see <strong>Settings → Cookie hygiene</strong>). <strong>Dry-run</strong> skips this gate.</p>
         </header>
@@ -282,36 +562,22 @@
       </section>
       <section class="view" id="view-galleries" aria-label="Galleries gallery-dl download">
         <header class="view-head">
-          <h1>Galleries</h1>
-          <p class="lede">Batch <strong>gallery-dl</strong> jobs (Reddit-first). <strong>Preview</strong> uses <code>-s -j</code> (simulate + JSON) — HTTP only, no media files. <strong>Run</strong> downloads into an allowlisted folder. Only one job runs at a time.</p>
-          <p class="muted small" id="galleryCookieGateHint" hidden>Manual runs require confirming <code>cookies.txt</code> before start. <strong>Dry-run</strong> skips this gate.</p>
-          <p class="muted small">For Reddit user feeds, <code>…/user/<em>name</em>/submitted/</code> often lists all posts; subreddits: <code>https://www.reddit.com/r/<em>name</em>/</code>. Many other sites are supported — see <a class="link" href="https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md" target="_blank" rel="noopener noreferrer">gallery-dl supported sites</a>. Optional JSON config next to <code>yt-dlp.conf</code> — edit from the sidebar: <a href="#" class="link" id="linkGalleriesToGallerydl">gallery-dl.conf</a>. Netscape cookies: <strong>Inputs &amp; config → cookies.txt</strong>.</p>
+          <h1>Gallery batch</h1>
+          <p class="lede">RipMe-style archiving: paste a URL and click <strong>Run galleries</strong>. Reddit → <code>reddit_sub_*</code> / <code>reddit_user_*</code>; Instagram → <code>instagram_&lt;username&gt;</code>; X/Twitter → <code>twitter_&lt;handle&gt;</code> under your galleries output root. Only one job at a time.</p>
+          <p class="muted small">Subreddit: <code>https://www.reddit.com/r/<em>name</em>/</code>. User profile: <code>…/user/<em>name</em></code> (auto-opens <code>/submitted/</code>). Public Reddit works with gallery-dl's built-in token — no setup needed. Optional <code>cookies/reddit.txt</code> is auto-wired. Other sites: drop <code>cookies/&lt;extractor&gt;.txt</code> — names in <strong>Supported sites</strong>. Root <code>cookies.txt</code> is for <strong>yt-dlp</strong> only. Images/GIFs only by default; tune under <a href="#" class="link" id="linkGalleriesToGallerydl">Gallery options</a> → Reddit.</p>
         </header>
         <div class="card oneoff-config-card">
-          <h2>URL &amp; preview</h2>
+          <h2>Reddit URL</h2>
           <div class="field oneoff-url-input-field">
-            <label for="galleryUrlInput">Gallery or subreddit URL</label>
-            <input type="text" id="galleryUrlInput" placeholder="https://www.reddit.com/r/…/ or …/user/…/submitted/" autocomplete="off" />
+            <label for="galleryUrlInput">Subreddit or user URL</label>
+            <input type="text" id="galleryUrlInput" placeholder="https://www.reddit.com/r/…/ or …/user/…" autocomplete="off" />
           </div>
-          <p class="muted small" id="galleryDriftNote" hidden role="status"></p>
-          <div class="oneoff-url-toolbar-actions" style="margin-top:0.5rem">
-            <button type="button" class="btn ghost" id="btnGalleryPreview">Preview</button>
+          <div class="oneoff-url-toolbar-actions" style="margin-top:0.75rem">
+            <button type="button" class="btn primary" id="btnGalleryStart">Run galleries</button>
+            <button type="button" class="btn danger" id="btnGalleryStop" hidden>Stop run</button>
           </div>
-          <p class="muted small" id="galleryPreviewMsg" role="status"></p>
-          <div class="table-wrap" id="galleryPreviewTableWrap" hidden>
-            <table class="table" id="galleryPreviewTable" aria-label="Preview results">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Title</th>
-                  <th>Media URL(s)</th>
-                  <th>Suggested file</th>
-                </tr>
-              </thead>
-              <tbody id="galleryPreviewTbody"></tbody>
-            </table>
-          </div>
-          <h2 style="margin-top:1.25rem">Download</h2>
+          <p class="muted small" id="galleryStartMsg" role="status"></p>
+          <h2 style="margin-top:1.25rem">Output</h2>
           <label class="field download-dir-field">
             <span>Output root (relative to archive; blank = default <code>galleries</code>)</span>
             <span class="field-inline-browse">
@@ -323,19 +589,111 @@
           <p class="muted small oneoff-output-effective" id="galleryOutputEffective" aria-live="polite"></p>
           <p class="oneoff-save-output-row">
             <button type="button" class="btn ghost small" id="btnGallerySaveOutput">Save output location</button>
-            <span class="muted small">Same as <strong>Inputs &amp; config → Save output folders</strong>.</span>
+            <span class="muted small">Set the galleries output folder under <strong>Input lists → Download output folders</strong> if saves fail.</span>
           </p>
           <div class="toggles oneoff-inline-toggles">
             <label class="chk"><input type="checkbox" id="optGalleryDryRun" /> ARCHIVE_DRY_RUN=1 <span class="muted small">(gallery-dl <code>-s</code>, no media files)</span></label>
             <label class="chk"><input type="checkbox" id="optGalleryVideoFallback" /> Video fallback (yt-dlp for <code>v.redd.it</code> still missing after gallery-dl)</label>
-            <label class="chk"><input type="checkbox" id="optGallerySkipPip" checked /> SKIP_PIP_UPDATE=1</label>
-            <label class="chk"><input type="checkbox" id="optGallerySkipYtdlp" /> SKIP_YTDLP_UPDATE=1</label>
+            <label class="chk"><input type="checkbox" id="optGalleryUpdateGalleryDl" /> Update gallery-dl before run <span class="muted small">(<code>pip install -U gallery-dl</code> in Archive Console venv)</span></label>
           </div>
-          <p class="muted small" id="galleryStartMsg" role="status"></p>
-          <div class="oneoff-url-toolbar-actions">
-            <button type="button" class="btn primary" id="btnGalleryStart">Run galleries</button>
-            <button type="button" class="btn danger" id="btnGalleryStop" hidden>Stop run</button>
-          </div>
+          <details class="gallery-preview-details" id="galleryPreviewDetails" style="margin-top:1.25rem">
+            <summary class="muted small" style="cursor:pointer">Optional: preview URL (simulate, no downloads)</summary>
+            <p class="muted small">Runs <code>gallery-dl -s -j</code> — can be slow or empty on large feeds. Use only to spot-check a URL.</p>
+            <div class="oneoff-url-toolbar-actions" style="margin-top:0.5rem">
+              <button type="button" class="btn ghost" id="btnGalleryPreview">Preview</button>
+            </div>
+            <p class="muted small" id="galleryDriftNote" hidden role="status"></p>
+            <p class="muted small" id="galleryPreviewMsg" role="status"></p>
+            <div class="table-wrap" id="galleryPreviewTableWrap" hidden>
+              <table class="table" id="galleryPreviewTable" aria-label="Preview results">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Title</th>
+                    <th>Media URL(s)</th>
+                    <th title="Advisory: sanitized title + extension for this preview; actual filenames follow gallery-dl.conf.">Suggested file</th>
+                  </tr>
+                </thead>
+                <tbody id="galleryPreviewTbody"></tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+        <div class="card gallery-sources-card">
+          <details class="gallery-sources-details" id="gallerySourcesDetails">
+            <summary class="gallery-sources-summary muted small">Saved sources<span id="gallerySourcesCountBadge"></span></summary>
+            <p class="muted small"><strong>Run galleries</strong> adds the URL here after a <strong>successful</strong> run. Check sources and click <strong>Run selected</strong> to fetch new posts only (duplicates are skipped automatically).</p>
+            <div class="oneoff-url-toolbar-actions gallery-sources-toolbar">
+              <button type="button" class="btn primary" id="btnGalleryRunSelected">Run selected</button>
+              <button type="button" class="btn ghost" id="btnGallerySaveCurrent" title="Bookmark the URL field without starting a download">Save without running</button>
+              <button type="button" class="btn ghost small" id="btnGallerySourcesSelectAll">All</button>
+              <button type="button" class="btn ghost small" id="btnGallerySourcesSelectNone">None</button>
+              <button type="button" class="btn ghost danger small" id="btnGalleryRemoveSelected">Remove selected</button>
+            </div>
+            <p class="muted small" id="gallerySourcesMsg" role="status"></p>
+            <div class="gallery-sources-scroll" id="gallerySourcesScroll">
+              <div class="table-wrap" id="gallerySourcesTableWrap" hidden>
+                <table class="table" id="gallerySourcesTable" aria-label="Saved gallery sources">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="gallery-sources-check-col">Run</th>
+                      <th>Source</th>
+                      <th>URL</th>
+                      <th>Last run (UTC)</th>
+                      <th>Runs</th>
+                      <th>Exit</th>
+                    </tr>
+                  </thead>
+                  <tbody id="gallerySourcesTbody"></tbody>
+                </table>
+              </div>
+            </div>
+            <p class="muted small" id="gallerySourcesEmpty" hidden>No saved sources yet — run a URL successfully, or use Save without running.</p>
+            <div class="gallery-sources-schedule" id="gallerySourcesSchedulePanel">
+              <p class="muted small"><strong>Scheduled crawl</strong> — run <em>all</em> saved sources in order (same as checking every row and clicking Run selected). Turn on the scheduler under <strong>Settings → Automatic scheduling</strong> and restart the server. <strong>Max h/source</strong> caps each source during scheduled runs only (stops slow Twitter crawls); <code>0</code> = no limit. Manual runs are unlimited.</p>
+              <label class="chk"><input type="checkbox" id="gallerySourcesScheduleEnabled" /> Enable scheduled crawl</label>
+              <div class="gallery-sources-schedule-fields field-row">
+                <label class="field compact">
+                  <span>Repeat</span>
+                  <select id="gallerySourcesScheduleFreq">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </label>
+                <label class="field compact" id="gallerySourcesScheduleDowWrap">
+                  <span>Weekday</span>
+                  <select id="gallerySourcesScheduleDow">
+                    <option value="0">Monday</option>
+                    <option value="1">Tuesday</option>
+                    <option value="2">Wednesday</option>
+                    <option value="3">Thursday</option>
+                    <option value="4">Friday</option>
+                    <option value="5">Saturday</option>
+                    <option value="6">Sunday</option>
+                  </select>
+                </label>
+                <label class="field compact" id="gallerySourcesScheduleDayWrap">
+                  <span>Day</span>
+                  <input type="number" id="gallerySourcesScheduleDay" min="1" max="31" value="1" />
+                </label>
+                <label class="field compact">
+                  <span>Hour</span>
+                  <input type="number" id="gallerySourcesScheduleHour" min="0" max="23" value="2" />
+                </label>
+                <label class="field compact">
+                  <span>Min</span>
+                  <input type="number" id="gallerySourcesScheduleMin" min="0" max="59" value="0" />
+                </label>
+                <label class="field compact" title="Scheduled crawl only; 0 = no per-source time limit">
+                  <span>Max h/source</span>
+                  <input type="number" id="gallerySourcesScheduleMaxHours" min="0" max="24" step="1" value="2" />
+                </label>
+                <button type="button" class="btn primary small" id="btnSaveGallerySourcesSchedule">Save schedule</button>
+              </div>
+              <p class="muted small" id="gallerySourcesScheduleStatus" role="status"></p>
+            </div>
+          </details>
         </div>
         <div class="log-panel card">
           <div class="log-toolbar">
@@ -355,9 +713,61 @@
           </div>
         </div>
       </section>
+      <section class="view" id="view-gifsky" aria-label="Video to GIF">
+        <header class="view-head">
+          <h1>Video to GIF</h1>
+          <p class="lede">Convert short <strong>gallery-dl</strong> videos to high-quality GIFs (ffmpeg frames + <a class="link link--info" href="https://gif.ski/" target="_blank" rel="noopener">gifski</a>) — same output tree as <strong>Galleries</strong>. Gallery-dl’s archive DB still prevents re-downloads after you remove source MP4s.</p>
+          <p class="muted small">Inspired by <a class="link" href="https://github.com/LordDemonos/Mp4ToGif" target="_blank" rel="noopener">Mp4ToGif</a>. Tune defaults under <a class="link" href="#" id="linkGifskyToConf">gifsky.conf</a>. Requires <code>ffmpeg</code> (Settings) and <code>gifski</code> on PATH (or Settings override).</p>
+        </header>
+        <div class="card">
+          <p class="muted small">Scan root: <code id="gifskyGalleriesRoot">galleries/</code></p>
+          <div class="oneoff-url-toolbar-actions">
+            <button type="button" class="btn ghost" id="btnGifskyScan">Scan for videos</button>
+            <button type="button" class="btn primary" id="btnGifskyStart">Convert selected</button>
+            <button type="button" class="btn ghost small" id="btnGifskyFoldersSelectAll">All</button>
+            <button type="button" class="btn ghost small" id="btnGifskyFoldersSelectNone">None</button>
+            <button type="button" class="btn ghost danger" id="btnGifskyCancel" disabled>Cancel</button>
+          </div>
+          <p class="muted small">Check folders below, then <strong>Convert selected</strong> — only pending videos in checked rows are processed.</p>
+          <div class="oneoff-inline-toggles" style="margin-top:0.75rem">
+            <label class="chk"><input type="checkbox" id="optGifskyDeleteSource" /> Delete source video after verified GIF <span class="muted small">(off by default — test playback in XnView first)</span></label>
+            <label class="chk"><input type="checkbox" id="optGifskyDryRun" /> Dry run (list only, no ffmpeg/gifski)</label>
+          </div>
+          <p class="muted small" id="gifskyScanSummary" role="status"></p>
+          <p class="muted small" id="gifskyMsg" role="status"></p>
+          <div class="gallery-sources-scroll is-scrollable" id="gifskyFolderScroll">
+            <div class="table-wrap" id="gifskyFolderTableWrap" hidden>
+              <table class="table" id="gifskyFolderTable" aria-label="Gallery folders with videos">
+                <thead>
+                  <tr>
+                    <th scope="col" class="gallery-sources-check-col">Convert</th>
+                    <th>Folder</th>
+                    <th>Videos</th>
+                    <th>Pending</th>
+                    <th>Paired</th>
+                    <th title="Total video bytes for items with a GIF beside them">Video Σ</th>
+                    <th title="Total GIF bytes for paired items">GIF Σ</th>
+                    <th title="GIF size vs video for paired items">Δ</th>
+                  </tr>
+                </thead>
+                <tbody id="gifskyFolderTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="log-panel card">
+          <div class="log-toolbar">
+            <span class="muted small">Output</span>
+            <button type="button" class="btn ghost small" id="btnGifskyClearLog">Clear view</button>
+          </div>
+          <div class="log-frame" id="gifskyLogFrame" tabindex="0" role="log" aria-live="polite">
+            <pre class="log-body" id="gifskyLogBody"></pre>
+          </div>
+        </div>
+      </section>
       <section class="view" id="view-history" aria-label="Run history and reports">
         <header class="view-head">
-          <h1>History &amp; reports</h1>
+          <h1>History</h1>
           <p class="lede">See how past jobs finished, then open HTML summaries or download artifacts from each run folder.</p>
           <p class="muted small">Data sources: saved run outcomes in console state; latest run paths from small pointer files under <code>logs/</code> (e.g. <code>latest_run.txt</code>). Times use your browser’s local timezone.</p>
         </header>
@@ -384,6 +794,9 @@
                   <th class="hist-stat hist-stat-wide">
                     <abbr title="Verified media on disk (manifest downloaded / merged).">Saved</abbr>
                   </th>
+                  <th>
+                    <abbr title="Console-captured errors for this run (see HTML report).">Errors</abbr>
+                  </th>
                   <th>Run folder</th>
                 </tr>
               </thead>
@@ -395,13 +808,19 @@
           </div>
         </div>
 
+        <div class="card history-subsection" id="globalConsoleErrorsWrap" hidden>
+          <h2 id="global-console-errors-heading">Console errors (off-run)</h2>
+          <p class="muted small">Structured failures for actions without a run log folder (metadata, duplicate apply, config saves, gallery preview). Per-run errors are listed in the <strong>Errors</strong> column and in the HTML report’s <strong>Archive Console — Errors</strong> section.</p>
+          <div id="globalConsoleErrorsBody" class="table-wrap"></div>
+        </div>
+
         <div class="history-subsection">
           <h2 id="reports-downloads">Reports &amp; downloads</h2>
           <p class="muted small">Latest completed run per job type (from pointer files). Use <strong>Open report</strong> for the in-app HTML view or <strong>Download</strong> for a file save.</p>
         </div>
         <div class="grid-cards" id="reportPointers"></div>
 
-        <div class="card">
+        <div class="card history-subsection">
           <h2>Recent run folders</h2>
           <p class="muted small">Browse other <code>archive_run_*</code> directories under <code>logs/</code> (newest first).</p>
           <ul class="link-list" id="reportRuns"></ul>
@@ -420,6 +839,7 @@
                 <tr>
                   <th>Started</th>
                   <th>Operation</th>
+                  <th>Result</th>
                   <th>OK</th>
                   <th>Skip</th>
                   <th>Fail</th>
@@ -434,320 +854,518 @@
       </section>
       <section class="view" id="view-library" aria-label="Library">
         <header class="view-head">
-          <h1>Library</h1>
+          <h1>Browse library</h1>
           <p class="lede">
-            Allowlisted roots — read-only listing, <strong>in-page player</strong> with queue/shuffle/loop, and
-            <strong>local clip export</strong> (ffmpeg) for archived video/audio only — same HTTP allowlist as
-            <strong>Open</strong>; no <code>file://</code>.
+            Download output folders — read-only listing, <strong>in-page player</strong> with queue/shuffle/loop, and
+            <strong>local clip export</strong> (ffmpeg) for archived video/audio only — same safe HTTP paths as
+            <strong>Open</strong>; no <code>file://</code>. File <strong>Media details</strong> use the optional
+            <strong>MediaInfo CLI</strong> (see <strong>Setup</strong> or <strong>Settings</strong>).
           </p>
         </header>
+        <p id="libraryViewToast" class="library-view-toast" hidden role="status" aria-live="polite"></p>
         <div class="card files-layout">
           <div class="files-workspace" id="filesWorkspace">
             <nav class="breadcrumb" id="fileBreadcrumb" aria-label="Path"></nav>
             <!--
-              FilesWorkspaceShell (#filesWorkspaceShell): single fixed-height box for BOTH columns.
-              Height is pixels from JS (default from viewport − measured top, persisted in localStorage).
-              Folder listing only changes scroll inside #fileList — never this outer height.
+              Library: R1 row (list | Selection | Duplicate finder), R2 Player, R3 Export — R1 height follows Selection;
+              #fileList scrolls inside Files; Duplicate finder body scrolls when needed. Primary vertical scroll on
+              #view-library > .files-layout. Horizontal split: archive_console_library_split_pct. Cold QA:
+              archive_console_library_split_pct, archive_console_files_split_pct (legacy), archive_console_library_file_list_font_px.
             -->
-            <div class="files-workspace-body">
+            <div class="files-workspace-body files-library-workspace-body">
               <div class="files-workspace-shell" id="filesWorkspaceShell">
                 <div class="files-workspace-split-wrap">
-              <div class="files-split" id="filesSplit">
-                <div class="files-pane-left">
-                  <ul class="file-list" id="fileList" role="listbox" aria-label="Files and folders" aria-multiselectable="true"></ul>
-                </div>
-                <div
-                  class="files-split-handle"
-                  id="filesSplitHandle"
-                  role="separator"
-                  aria-orientation="vertical"
-                  aria-label="Resize file list panel"
-                  tabindex="0"
-                ></div>
-                <div class="files-detail-stack">
-                  <div class="file-detail" id="fileDetail">
-                    <p class="muted">Select a file or folder from the list.</p>
-                  </div>
-                  <section class="library-duplicates" id="libraryDuplicates" aria-label="Duplicate finder">
-                    <h3 class="library-duplicates__title">Duplicate finder</h3>
-                    <p class="muted small">
-                      Pure Python scan (size buckets, then SHA-256). Allowlisted paths only. Preview before any change;
-                      apply requires typing <code>DELETE_DUPLICATES</code>. Quarantine folder is set in Settings.
-                    </p>
-                    <div class="library-duplicates__roots" id="dupRootsWrap">
-                      <span class="muted small">Scan roots:</span>
-                      <div id="dupRootChecks" class="library-duplicates__checks"></div>
-                      <button type="button" class="btn ghost small" id="btnDupAddCurrentFolder">Add current folder</button>
-                    </div>
-                    <div class="library-duplicates__filters">
-                      <label class="chk"><input type="checkbox" id="dupIncludeVideo" checked /> Video extensions</label>
-                      <label class="chk"><input type="checkbox" id="dupIncludeImages" /> Image extensions</label>
-                      <label class="chk"><input type="radio" name="dupApplyMode" id="dupModeQuarantine" value="quarantine" checked /> Quarantine</label>
-                      <label class="chk"><input type="radio" name="dupApplyMode" id="dupModeDelete" value="delete" /> Delete permanently</label>
-                    </div>
-                    <p class="library-duplicates__actions">
-                      <button type="button" class="btn primary" id="btnDupScan">Run scan</button>
-                      <span class="muted small" id="dupScanProgress" role="status"></span>
-                    </p>
-                    <pre class="library-duplicates__preview" id="dupPreviewOut" hidden></pre>
-                    <div id="dupResults" class="library-duplicates__results" hidden></div>
-                    <p class="library-duplicates__apply muted small">
-                      <button type="button" class="btn ghost" id="btnDupPreviewRemove" disabled>Preview removal (dry-run)</button>
-                      <button type="button" class="btn danger" id="btnDupApplyRemove" disabled>Apply removal…</button>
-                    </p>
-                  </section>
-                  <section class="files-player" id="filesPlayer" aria-label="Media player and playlist">
-                    <p id="filesPlayerToast" class="files-player-toast" role="status" hidden></p>
-                <h2 class="files-player-title">Player</h2>
-                <p class="muted small files-player-hint">
-                  Playback uses <strong>HTML5</strong> over <code>/reports/file</code>
-                  (<code>Accept-Ranges: bytes</code> for video seeking). Video/audio and slideshow images
-                  (jpg, png, gif, webp) share one queue. <strong>GIFs</strong> animate in the browser; timed
-                  slideshow advances after the interval regardless. Unsupported types are rejected when adding
-                  to the queue. Player height follows pane width and media aspect (<code>object-fit: contain</code>).
-                </p>
-                <div class="files-player-video-frame" id="filesVideoFrame">
-                  <div class="files-media-stage" id="filesMediaStage">
-                    <video
-                      id="filesVideo"
-                      class="files-player-video"
-                      controls
-                      playsinline
-                      preload="metadata"
-                    >
-                      Your browser does not support embedded video.
-                    </video>
-                    <img
-                      id="filesImageA"
-                      class="files-player-slide"
-                      alt=""
-                      draggable="false"
-                      width="0"
-                      height="0"
-                      hidden
-                    />
-                    <img
-                      id="filesImageB"
-                      class="files-player-slide"
-                      alt=""
-                      draggable="false"
-                      width="0"
-                      height="0"
-                      hidden
-                    />
-                    <div
-                      class="files-player-stage-meta"
-                      id="filesPlayerStageMeta"
-                      role="region"
-                      aria-label="Slide information"
-                      hidden
-                    >
-                      <div class="files-player-stage-meta-inner" id="filesPlayerStageMetaInner"></div>
+                  <!-- Splitter: list column vs (metadata + duplicate) pair; inner grid shares height (align-items: stretch). -->
+                  <div class="files-split files-library-r1-split" id="filesSplit">
+                    <div class="library-panel library-panel--list">
+                      <div class="library-panel__header library-panel__header--files">
+                        <h2 class="library-panel__title library-panel__title--files">Files</h2>
+                        <span class="log-font-controls muted small" aria-label="File list text size">
+                          <button type="button" class="btn ghost tiny" id="btnLibraryFileListFontMinus" title="Smaller file list text">A−</button>
+                          <button type="button" class="btn ghost tiny" id="btnLibraryFileListFontPlus" title="Larger file list text">A+</button>
+                        </span>
+                      </div>
+                      <label class="field files-list-filter-field">
+                        <span class="sr-only">Search files in this folder</span>
+                        <input type="search" id="filesListFilter" placeholder="Search in folder…" autocomplete="off" enterkeyhint="search" aria-label="Search files in this folder" />
+                      </label>
+                      <div class="library-panel__body library-panel__body--list">
+                        <ul class="file-list file-list--library-panel" id="fileList" role="listbox" aria-label="Files and folders" aria-multiselectable="true"></ul>
+                      </div>
                     </div>
                     <div
-                      class="files-player-fs-hud"
-                      id="filesPlayerFsHud"
-                      role="toolbar"
-                      aria-label="Fullscreen slideshow"
-                      hidden
-                    >
-                      <button type="button" class="files-player-fs-hudbtn" id="filesPlayerFsPrev" aria-label="Previous slide" title="Previous">Prev</button>
-                      <button type="button" class="files-player-fs-hudbtn" id="filesPlayerFsPause" aria-label="Pause or resume timed slideshow" title="Pause / resume timer">Pause</button>
-                      <button type="button" class="files-player-fs-hudbtn" id="filesPlayerFsNext" aria-label="Next slide" title="Next">Next</button>
-                      <button type="button" class="files-player-fs-hudbtn" id="filesPlayerFsOverlay" aria-label="Toggle info overlay" title="Info (I)">Info</button>
-                      <button type="button" class="files-player-fs-hudbtn" id="filesPlayerFsExit" aria-label="Exit fullscreen" title="Exit fullscreen (Esc)">Exit</button>
+                      class="files-split-handle"
+                      id="filesSplitHandle"
+                      role="separator"
+                      aria-orientation="vertical"
+                      aria-label="Resize file list panel"
+                      tabindex="0"
+                    ></div>
+                    <div class="files-library-r1-right">
+                      <div class="library-panel library-panel--meta">
+                        <h2 class="library-panel__title">Selection</h2>
+                        <div class="library-panel__body">
+                          <div class="file-detail" id="fileDetail">
+                            <div class="file-detail-top-actions">
+                              <div class="file-detail-top-actions__buttons">
+                              <button
+                                type="button"
+                                class="btn primary small"
+                                id="btnFileDetailSendRename"
+                                disabled
+                                title="Add files to Rename (see hint below)"
+                              >
+                                Send to Rename queue
+                              </button>
+                              <button
+                                type="button"
+                                class="btn ghost small"
+                                id="btnFileDetailAddPlayerQueue"
+                                disabled
+                                title="Add queueable files to the player playlist (see hint below)"
+                              >
+                                Add to player queue
+                              </button>
+                              </div>
+                              <p class="muted small" id="fileDetailRenameSendHint">
+                                With list selection: queued files only. With no selection: all files in this folder listing. Folders are skipped. Use sidebar <strong>Rename</strong> for queue playback paths.
+                              </p>
+                              <p class="muted small" id="fileDetailPlayerQueueHint">
+                                With list selection: selected video, audio, and images only. With no selection: every queueable file in this folder listing. Does not start playback.
+                              </p>
+                            </div>
+                            <div id="fileDetailMain">
+                              <p class="muted">Select a file or folder from the list.</p>
+                            </div>
+                          </div>
+                          <div class="library-selection-help" id="librarySelectionHelp" aria-labelledby="librarySelectionHelpHeading">
+                            <h3 class="library-selection-help__title" id="librarySelectionHelpHeading">Folders, files, and Explorer</h3>
+                            <p class="muted small files-list-hint" id="filesListHint">
+                              <strong>Folders:</strong> click to select (only); double-click or <span class="files-list-hint-kbd">Enter</span> to open. <strong>Files:</strong> double-click / <span class="files-list-hint-kbd">Enter</span> = play now; Alt+double-click / Alt+<span class="files-list-hint-kbd">Enter</span> = add to queue only.
+                              <strong>Multi-select:</strong> Ctrl+click or ⌘+click toggles; Shift+click selects a range (Explorer-style). <strong>Add to player queue</strong> and <strong>Send to Rename queue</strong> use the selection (or every file in the folder when nothing is selected). <strong>Add folder (here)</strong> in the player uses the first selected folder in list order if any, otherwise the current directory.
+                            </p>
+                            <p class="muted small" id="libraryPlayerKeysHint">
+                              <strong>Player</strong> (Library focused): <span class="files-list-hint-kbd">←</span>/<span class="files-list-hint-kbd">→</span> previous/next track, <span class="files-list-hint-kbd">Space</span> play/pause.
+                            </p>
+                            <div class="file-actions library-selection-help__actions">
+                              <button
+                                type="button"
+                                class="btn ghost"
+                                id="btnExplorer"
+                                disabled
+                                aria-label="Open in Windows Explorer"
+                              >
+                                Open in Explorer
+                              </button>
+                              <p class="muted small file-actions-hint" id="fileExplorerHint">
+                                Opens the <strong>current folder</strong> here, or <strong>reveals the selected file</strong> when one is highlighted.
+                              </p>
+                              <p class="muted small" id="fileExplorerMsg" role="status" aria-live="polite"></p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <section
+                        class="library-panel library-panel--dup library-duplicates"
+                        id="libraryDuplicates"
+                        aria-label="Duplicate finder"
+                      >
+                        <h2 class="library-panel__title">Duplicate finder</h2>
+                        <div class="library-panel__body">
+                          <p class="muted small library-duplicates__lede">
+                            Pure Python scan (size buckets, then SHA-256). Scan roots mirror
+                            <strong>Input lists → Download output folders</strong>. Preview before any change;
+                            apply requires typing <code>DELETE_DUPLICATES</code>. Quarantine folder is set in Settings.
+                          </p>
+                          <div class="library-duplicates__roots" id="dupRootsWrap">
+                            <span class="muted small">Scan roots (download output folders):</span>
+                            <div id="dupRootChecks" class="library-duplicates__checks"></div>
+                            <button type="button" class="btn ghost small" id="btnDupAddCurrentFolder">Add current folder</button>
+                          </div>
+                          <div class="library-duplicates__filters">
+                            <label class="chk"><input type="checkbox" id="dupIncludeVideo" checked /> Video extensions</label>
+                            <label class="chk"><input type="checkbox" id="dupIncludeImages" /> Image extensions</label>
+                            <label class="chk"><input type="radio" name="dupApplyMode" id="dupModeQuarantine" value="quarantine" checked /> Quarantine</label>
+                            <label class="chk"><input type="radio" name="dupApplyMode" id="dupModeDelete" value="delete" /> Delete permanently</label>
+                          </div>
+                          <p class="library-duplicates__actions">
+                            <button type="button" class="btn primary" id="btnDupScan">Run scan</button>
+                            <button type="button" class="btn ghost" id="btnDupReset" hidden>Reset scan</button>
+                            <span class="muted small" id="dupScanProgress" role="status"></span>
+                          </p>
+                          <pre class="library-duplicates__preview" id="dupPreviewOut" hidden></pre>
+                          <div id="dupResults" class="library-duplicates__results" hidden></div>
+                          <p class="library-duplicates__apply muted small">
+                            <button type="button" class="btn ghost" id="btnDupPreviewRemove" disabled>Preview removal (dry-run)</button>
+                            <button type="button" class="btn danger" id="btnDupApplyRemove" disabled>Apply removal…</button>
+                          </p>
+                        </div>
+                      </section>
                     </div>
                   </div>
                 </div>
-                <p id="filesPlayerError" class="files-player-error" role="alert" hidden></p>
-                <div
-                  class="files-player-toolbar files-player-toolbar--slideshow"
-                  role="toolbar"
-                  aria-label="Slideshow"
-                >
-                  <label class="files-player-slideshow-field">
-                    <input type="checkbox" id="filesPlayerSlideshowTimed" />
-                    <span>Timed</span>
-                  </label>
-                  <label class="files-player-slideshow-field">
-                    <span class="files-player-slideshow-label">Every</span>
-                    <input
-                      type="number"
-                      id="filesPlayerSlideshowInterval"
-                      class="files-player-slideshow-num"
-                      min="1"
-                      max="120"
-                      step="1"
-                      value="5"
-                      aria-label="Slideshow interval seconds"
-                    />
-                    <span class="files-player-slideshow-label">s</span>
-                  </label>
-                  <label class="files-player-slideshow-field">
-                    <span class="files-player-slideshow-label">Transition</span>
-                    <select id="filesPlayerTransition" aria-label="Slide transition">
-                      <option value="crossfade">Crossfade</option>
-                      <option value="none">None</option>
-                    </select>
-                  </label>
-                  <button type="button" class="files-player-iconbtn" id="filesPlayerFullscreen" aria-label="Fullscreen stage" title="Fullscreen slideshow stage (Esc to exit)">
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-                  </button>
-                  <button type="button" class="files-player-iconbtn" id="filesPlayerOverlayToggle" aria-label="Toggle slide info overlay" aria-pressed="true" title="Toggle filename, path, size, dimensions (I)">
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                  </button>
-                </div>
-                <div
-                  class="files-player-toolbar files-player-toolbar--controls"
-                  role="toolbar"
-                  aria-label="Player and queue actions"
-                >
-                  <button type="button" class="files-player-iconbtn" id="filesPlayerPlay" aria-label="Play or pause" title="Play selected / pause">
-                    <svg class="files-player-ic files-player-ic--play" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 5v14l11-7L8 5z"/></svg>
-                    <svg class="files-player-ic files-player-ic--pause" hidden width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></svg>
-                  </button>
-                  <button type="button" class="files-player-iconbtn" id="filesPlayerPrev" aria-label="Previous track" title="Previous track">
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M7 6H5v12h2V6zm2.5 6l9 5.64V6.36L9.5 12z"/></svg>
-                  </button>
-                  <button type="button" class="files-player-iconbtn" id="filesPlayerNext" aria-label="Next track" title="Next track">
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M7 6.36v11.28L16 12 7 6.36zM17 6v12h2V6h-2z"/></svg>
-                  </button>
-                  <button type="button" class="files-player-iconbtn" id="filesPlayerShuffle" aria-label="Shuffle queue" aria-pressed="false" title="Shuffle on: random order for the whole queue (Fisher–Yates once). Off: order items were added. Applies to video, audio, and images.">
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M14 5h7v7h-1.5V7.41l-9.3 9.29-1.06-1.06L19.59 6H14V5zM4 7h4l2 2H4V7zm16 10.5V14h-1.5v2.09l-9.3-9.29-1.06 1.06L17.91 18H14v1.5h7v-7h-1.5zM4 17h3.09l1 1H4v-1z"/></svg>
-                  </button>
-                  <button type="button" class="files-player-iconbtn" id="filesPlayerLoop" aria-label="Loop entire playlist" aria-pressed="false" title="Loop: when on, after the last track playback continues from the first (whole queue only).">
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-                  </button>
-                  <button type="button" class="files-player-iconbtn" id="filesPlayerAddFile" aria-label="Add selected files to queue" title="Add selected video, audio, or slideshow images (jpg/png/gif/webp) to queue">
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM11 17h2v-4h4v-2h-4V7h-2v4H7v2h4v4z"/></svg>
-                  </button>
-                  <button type="button" class="files-player-iconbtn" id="filesPlayerAddFolder" aria-label="Add folder to queue" title="Add video, audio, and slideshow images in this folder only (not subfolders)">
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7 7v3h-2v-3H8v-2h3V8h2v3h3v2h-3z"/></svg>
-                  </button>
-                  <button type="button" class="btn ghost small files-player-rename-queue" id="btnLibraryQueueRename" title="Append selected playable files to the Rename queue (see sidebar Rename)">
-                    Queue for rename
-                  </button>
-                  <button type="button" class="files-player-iconbtn" id="filesPlayerRemove" aria-label="Remove selected track from queue" title="Remove highlighted queue row">
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                  </button>
-                  <button type="button" class="files-player-iconbtn files-player-iconbtn--danger" id="filesPlayerClear" aria-label="Clear queue" title="Clear entire queue">
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
-                  </button>
-                </div>
-                <div class="files-player-now-band" aria-live="polite">
-                  <p class="files-player-now-line">
-                    <strong class="files-player-line-label">Now:</strong>
-                    <span class="files-player-line-body" id="filesPlayerNowText"></span>
-                  </p>
-                  <p class="files-player-next-line" id="filesPlayerNextWrap" hidden>
-                    <strong class="files-player-line-label muted">Next:</strong>
-                    <span class="files-player-line-body muted" id="filesPlayerNextText"></span>
-                  </p>
-                  <p
-                    class="files-player-stats muted small"
-                    id="filesPlayerStats"
-                    aria-label="Current track details"
-                  ></p>
-                </div>
-                <p class="muted small" id="filesPlayerMsg" role="status"></p>
-                <p class="muted small files-player-footnote">
-                  Playlist persists in <code>localStorage</code> (v3). <strong>Add folder</strong>: video, audio, and slideshow images in the current folder only (no subfolders); server cap 1000 (<code>max_files</code>).
-                  <strong>Shuffle</strong> reshuffles the whole queue when turned on (Fisher–Yates). <strong>Arrow keys</strong> prev/next on the Files tab; <strong>Space</strong> pauses video or timed slideshow.
-                </p>
-                <ol class="files-player-queue" id="filesPlayerQueue" aria-label="Playlist"></ol>
-                <div class="library-clip-panel" id="libraryClipPanel" aria-label="Clip export">
-                  <h3 class="library-clip-heading">Export clip</h3>
-                  <p class="muted small">
-                    <strong>Local archived files only</strong> — no streams or remote URLs. Configure <strong>ffmpeg</strong> under Settings (PATH or full path).
-                    Prefer <strong>MP4</strong> or <strong>WebM</strong> for quality; <strong>GIF</strong> uses a palette (smaller colors, larger files for long clips).
-                  </p>
-                  <p class="muted small" id="libraryClipSourceLine"><strong>Source:</strong> <span id="libraryClipSourceText">—</span> (current track)</p>
-                  <div class="library-clip-grid">
-                    <label class="field compact">
-                      <span>Start (s)</span>
-                      <input type="number" id="libraryClipStart" min="0" step="0.1" value="0" />
-                    </label>
-                    <label class="field compact">
-                      <span>Duration (s)</span>
-                      <input type="number" id="libraryClipDuration" min="0.1" step="0.1" value="30" />
-                    </label>
-                    <label class="field compact">
-                      <span>Or end (s)</span>
-                      <input type="number" id="libraryClipEnd" min="0" step="0.1" placeholder="optional" />
-                    </label>
-                    <label class="field compact">
-                      <span>Format</span>
-                      <select id="libraryClipFormat">
-                        <option value="mp4">MP4 (H.264 + AAC)</option>
-                        <option value="webm">WebM (VP9 + Opus)</option>
-                        <option value="gif">GIF (palette)</option>
-                      </select>
-                    </label>
-                    <label class="field compact library-clip-outdir">
-                      <span>Output folder (rel.)</span>
-                      <span class="field-inline-browse">
-                        <input type="text" id="libraryClipOutDir" placeholder="playlists/clips" autocomplete="off" />
-                        <button type="button" class="btn ghost small" id="libraryClipBrowseOut" aria-label="Choose output folder on this machine" title="Native folder picker on the console host">…</button>
-                      </span>
-                    </label>
-                    <label class="field compact">
-                      <span>Basename (optional)</span>
-                      <input type="text" id="libraryClipBasename" placeholder="auto from file + time" autocomplete="off" />
-                    </label>
+              </div>
+              <div class="files-library-player-band" id="filesLibraryPlayerBand" hidden>
+              <section class="files-player is-idle-mode" id="filesPlayer" aria-label="Media player and playlist">
+                                  <p id="filesPlayerToast" class="files-player-toast" role="status" hidden></p>
+                              <div class="files-player-video-only">
+                              <h2 class="files-player-title">Player</h2>
+                              <p class="muted small files-player-hint">
+                                <strong>HTML5</strong> via <code>/reports/file</code> (range requests). One queue for video, audio, and images (jpg/png/gif/webp). Stage is <strong>16:9</strong> with a minimum size; <code>object-fit: contain</code> letterboxes other aspects. List, Explorer, and playback shortcuts are under <strong>Selection</strong> above.
+                              </p>
+                              </div>
+                              <div class="files-player-slideshow-only">
+                              <h2 class="files-player-title">Slideshow</h2>
+                              <p class="muted small files-player-hint">
+                                Images from the queue (jpg/png/gif/webp). Use timed slideshow controls below or <span class="files-list-hint-kbd">←</span>/<span class="files-list-hint-kbd">→</span> to change slides.
+                              </p>
+                              </div>
+                              <div class="files-player-video-frame" id="filesVideoFrame">
+                                <div class="files-media-stage" id="filesMediaStage">
+                                  <video
+                                    id="filesVideo"
+                                    class="files-player-video"
+                                    controls
+                                    playsinline
+                                    preload="metadata"
+                                  >
+                                    Your browser does not support embedded video.
+                                  </video>
+                                  <img
+                                    id="filesImageA"
+                                    class="files-player-slide"
+                                    alt=""
+                                    draggable="false"
+                                    width="0"
+                                    height="0"
+                                    hidden
+                                  />
+                                  <img
+                                    id="filesImageB"
+                                    class="files-player-slide"
+                                    alt=""
+                                    draggable="false"
+                                    width="0"
+                                    height="0"
+                                    hidden
+                                  />
+                                  <div
+                                    class="files-player-stage-meta"
+                                    id="filesPlayerStageMeta"
+                                    role="region"
+                                    aria-label="Slide information"
+                                    hidden
+                                  >
+                                    <div class="files-player-stage-meta-inner" id="filesPlayerStageMetaInner"></div>
+                                  </div>
+                                  <div
+                                    class="files-player-fs-hud"
+                                    id="filesPlayerFsHud"
+                                    role="toolbar"
+                                    aria-label="Fullscreen slideshow"
+                                    hidden
+                                  >
+                                    <button type="button" class="files-player-fs-hudbtn" id="filesPlayerFsPrev" aria-label="Previous slide" title="Previous">Prev</button>
+                                    <button type="button" class="files-player-fs-hudbtn" id="filesPlayerFsPause" aria-label="Pause or resume timed slideshow" title="Pause / resume timer">Pause</button>
+                                    <button type="button" class="files-player-fs-hudbtn" id="filesPlayerFsNext" aria-label="Next slide" title="Next">Next</button>
+                                    <button type="button" class="files-player-fs-hudbtn" id="filesPlayerFsOverlay" aria-label="Toggle info overlay" title="Info (I)">Info</button>
+                                    <button type="button" class="files-player-fs-hudbtn" id="filesPlayerFsExit" aria-label="Exit fullscreen" title="Exit fullscreen (Esc)">Exit</button>
+                                  </div>
+                                </div>
+                              </div>
+                              <p id="filesPlayerError" class="files-player-error" role="alert" hidden></p>
+                              <div
+                                class="files-player-toolbar files-player-toolbar--slideshow"
+                                role="toolbar"
+                                aria-label="Slideshow"
+                              >
+                                <label class="files-player-slideshow-field">
+                                  <input type="checkbox" id="filesPlayerSlideshowTimed" />
+                                  <span>Timed</span>
+                                </label>
+                                <label class="files-player-slideshow-field">
+                                  <span class="files-player-slideshow-label">Every</span>
+                                  <input
+                                    type="number"
+                                    id="filesPlayerSlideshowInterval"
+                                    class="files-player-slideshow-num"
+                                    min="1"
+                                    max="120"
+                                    step="1"
+                                    value="5"
+                                    aria-label="Slideshow interval seconds"
+                                  />
+                                  <span class="files-player-slideshow-label">s</span>
+                                </label>
+                                <label class="files-player-slideshow-field">
+                                  <span class="files-player-slideshow-label">Transition</span>
+                                  <select id="filesPlayerTransition" aria-label="Slide transition">
+                                    <option value="crossfade">Crossfade</option>
+                                    <option value="none">None</option>
+                                  </select>
+                                </label>
+                                <button type="button" class="files-player-iconbtn" id="filesPlayerFullscreen" aria-label="Fullscreen stage" title="Fullscreen slideshow stage (Esc to exit)">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                                </button>
+                                <button type="button" class="files-player-iconbtn" id="filesPlayerOverlayToggle" aria-label="Toggle slide info overlay" aria-pressed="true" title="Toggle filename, path, size, dimensions (I)">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                                </button>
+                              </div>
+                              <div
+                                class="files-player-toolbar files-player-toolbar--controls"
+                                role="toolbar"
+                                aria-label="Player and queue actions"
+                              >
+                                <button type="button" class="files-player-iconbtn" id="filesPlayerPlay" aria-label="Play or pause" title="Play selected / pause">
+                                  <svg class="files-player-ic files-player-ic--play" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 5v14l11-7L8 5z"/></svg>
+                                  <svg class="files-player-ic files-player-ic--pause" hidden width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></svg>
+                                </button>
+                                <button type="button" class="files-player-iconbtn" id="filesPlayerPrev" aria-label="Previous track" title="Previous track">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M7 6H5v12h2V6zm2.5 6l9 5.64V6.36L9.5 12z"/></svg>
+                                </button>
+                                <button type="button" class="files-player-iconbtn" id="filesPlayerNext" aria-label="Next track" title="Next track">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M7 6.36v11.28L16 12 7 6.36zM17 6v12h2V6h-2z"/></svg>
+                                </button>
+                                <button type="button" class="files-player-iconbtn" id="filesPlayerShuffle" aria-label="Shuffle queue" aria-pressed="false" title="Shuffle on: random order for the whole queue (Fisher–Yates once). Off: order items were added. Applies to video, audio, and images.">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M14 5h7v7h-1.5V7.41l-9.3 9.29-1.06-1.06L19.59 6H14V5zM4 7h4l2 2H4V7zm16 10.5V14h-1.5v2.09l-9.3-9.29-1.06 1.06L17.91 18H14v1.5h7v-7h-1.5zM4 17h3.09l1 1H4v-1z"/></svg>
+                                </button>
+                                <button type="button" class="files-player-iconbtn" id="filesPlayerLoop" aria-label="Loop entire playlist" aria-pressed="false" title="Loop: when on, after the last track playback continues from the first (whole queue only).">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                                </button>
+                                <button type="button" class="files-player-iconbtn" id="filesPlayerAddFile" aria-label="Add selected files to queue" title="Add selected video, audio, or slideshow images (jpg/png/gif/webp) to queue">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM11 17h2v-4h4v-2h-4V7h-2v4H7v2h4v4z"/></svg>
+                                </button>
+                                <button type="button" class="files-player-iconbtn" id="filesPlayerAddFolder" aria-label="Add folder to queue" title="Add video, audio, and slideshow images in this folder only (not subfolders)">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7 7v3h-2v-3H8v-2h3V8h2v3h3v2h-3z"/></svg>
+                                </button>
+                                <button type="button" class="files-player-iconbtn" id="filesPlayerRemove" aria-label="Remove selected track from queue" title="Remove highlighted queue row">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                </button>
+                                <button type="button" class="files-player-iconbtn files-player-iconbtn--danger" id="filesPlayerClear" aria-label="Clear queue" title="Clear entire queue">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                                </button>
+                              </div>
+                              <div class="files-player-now-band" aria-live="polite">
+                                <p class="files-player-now-line">
+                                  <strong class="files-player-line-label">Now:</strong>
+                                  <span class="files-player-line-body" id="filesPlayerNowText"></span>
+                                </p>
+                                <p class="files-player-next-line" id="filesPlayerNextWrap" hidden>
+                                  <strong class="files-player-line-label muted">Next:</strong>
+                                  <span class="files-player-line-body muted" id="filesPlayerNextText"></span>
+                                </p>
+                                <p
+                                  class="files-player-stats muted small"
+                                  id="filesPlayerStats"
+                                  aria-label="Current track details"
+                                ></p>
+                              </div>
+                              <p class="muted small" id="filesPlayerMsg" role="status"></p>
+                              <p class="muted small files-player-footnote">
+                                Playlist in <code>localStorage</code> (v3). <strong>Add folder</strong>: current directory only, cap 1000 files. <strong>Shuffle on</strong> reshuffles once (Fisher–Yates).
+                              </p>
+                              <div class="files-player-queue-scroll" id="filesPlayerQueueScroll">
+                                <ol class="files-player-queue" id="filesPlayerQueue" aria-label="Playlist"></ol>
+                              </div>
+              </section>
+
+              </div>
+              <div class="files-library-export-band" id="filesLibraryExportBand" hidden>
+                <div class="library-panel library-panel--export" id="libraryClipPanel" aria-label="Clip export">
+                  <h2 class="library-panel__title">Export clip</h2>
+                  <div class="library-panel__body">
+                                <p class="muted small">
+                                  <strong>Local archived files only</strong> — no streams or remote URLs. Configure <strong>ffmpeg</strong> under Settings (PATH or full path).
+                                  Prefer <strong>MP4</strong> or <strong>WebM</strong> for quality; <strong>GIF</strong> uses a palette (smaller colors, larger files for long clips).
+                                </p>
+                                <p class="muted small" id="libraryClipSourceLine"><strong>Source:</strong> <span id="libraryClipSourceText">—</span> (current track)</p>
+                                <div class="library-clip-grid">
+                                  <label class="field compact">
+                                    <span>Start (s)</span>
+                                    <input type="number" id="libraryClipStart" min="0" step="0.1" value="0" />
+                                  </label>
+                                  <label class="field compact">
+                                    <span>Duration (s)</span>
+                                    <input type="number" id="libraryClipDuration" min="0.1" step="0.1" value="30" />
+                                  </label>
+                                  <label class="field compact">
+                                    <span>Or end (s)</span>
+                                    <input type="number" id="libraryClipEnd" min="0" step="0.1" placeholder="optional" />
+                                  </label>
+                                  <label class="field compact">
+                                    <span>Format</span>
+                                    <select id="libraryClipFormat">
+                                      <option value="mp4">MP4 (H.264 + AAC)</option>
+                                      <option value="webm">WebM (VP9 + Opus)</option>
+                                      <option value="gif">GIF (palette)</option>
+                                    </select>
+                                  </label>
+                                  <label class="field compact library-clip-outdir">
+                                    <span>Output folder (rel.)</span>
+                                    <span class="field-inline-browse">
+                                      <input type="text" id="libraryClipOutDir" placeholder="playlists/clips" autocomplete="off" />
+                                      <button type="button" class="btn ghost small" id="libraryClipBrowseOut" aria-label="Choose output folder on this machine" title="Native folder picker on the console host">…</button>
+                                    </span>
+                                  </label>
+                                  <label class="field compact library-clip-basename">
+                                    <span>Basename (optional)</span>
+                                    <input type="text" id="libraryClipBasename" placeholder="auto from file + time" autocomplete="off" />
+                                  </label>
+                                </div>
+                                <p class="muted small" id="libraryClipPreview" aria-live="polite"><strong>Output:</strong> —</p>
+                                <div class="library-clip-actions">
+                                  <button type="button" class="btn ghost small" id="libraryClipSetStart" title="Use current playback time">Set start from playback</button>
+                                  <button type="button" class="btn primary small" id="libraryClipRun">Run export</button>
+                                </div>
+                                <p class="muted small" id="libraryClipMsg" role="status"></p>
+                                <p class="muted small" id="libraryClipResult" hidden>
+                                  <a class="link" id="libraryClipResultLink" target="_blank" rel="noopener" href="#">Open output</a>
+                                </p>
                   </div>
-                  <p class="muted small" id="libraryClipPreview" aria-live="polite"><strong>Output:</strong> —</p>
-                  <div class="library-clip-actions">
-                    <button type="button" class="btn ghost small" id="libraryClipSetStart" title="Use current playback time">Set start from playback</button>
-                    <button type="button" class="btn primary small" id="libraryClipRun">Run export</button>
-                  </div>
-                  <p class="muted small" id="libraryClipMsg" role="status"></p>
-                  <p class="muted small" id="libraryClipResult" hidden>
-                    <a class="link" id="libraryClipResultLink" target="_blank" rel="noopener" href="#">Open output</a>
-                  </p>
-                </div>
-                  </section>
                 </div>
               </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                class="files-workspace-resize-y"
-                id="filesWorkspaceResizeY"
-                aria-label="Resize files workspace height"
-                title="Drag up or down to show more or less of the file list and player together"
-              ></button>
-            </div>
-          </div>
-          <div class="files-layout-foot">
-            <p class="muted small files-list-hint" id="filesListHint">
-              <strong>Folders:</strong> click to select (only); double-click or <span class="files-list-hint-kbd">Enter</span> to open. <strong>Files:</strong> double-click / <span class="files-list-hint-kbd">Enter</span> = play now; Alt+double-click / Alt+<span class="files-list-hint-kbd">Enter</span> = add to queue only.
-              <strong>Multi-select:</strong> Ctrl+click or ⌘+click toggles; Shift+click selects a range (Explorer-style). <strong>Add folder (here)</strong> uses the first selected folder in list order if any, otherwise the current directory.
-            </p>
-            <div class="file-actions">
-              <button
-                type="button"
-                class="btn ghost"
-                id="btnExplorer"
-                disabled
-                aria-label="Open in Windows Explorer"
-              >
-                Open in Explorer
-              </button>
-              <p class="muted small file-actions-hint" id="fileExplorerHint">
-                Opens the <strong>current folder</strong> here, or <strong>reveals the selected file</strong> when one is highlighted.
-              </p>
-              <p class="muted small" id="fileExplorerMsg" role="status" aria-live="polite"></p>
             </div>
           </div>
         </div>
       </section>
+      <section class="view" id="view-czkawka" aria-label="Scan duplicates">
+        <header class="view-head">
+          <h1>Scan duplicates</h1>
+          <p class="lede">
+            Run the external <a class="link" href="https://github.com/qarmin/czkawka" target="_blank" rel="noopener noreferrer">Czkawka CLI</a> against <strong>any folder on this PC</strong> — not limited to archive allowlists.
+            Scans are non-destructive until you <strong>Apply removal</strong>. Duplicate mode supports quarantine or permanent delete (with confirmation).
+          </p>
+          <p class="muted small" id="czkToolStatus" role="status">Checking czkawka_cli…</p>
+        </header>
+        <div class="card">
+          <h2>Folders to scan</h2>
+          <p class="muted small">Pick directories with <strong>Browse…</strong> (native dialog on the machine running Archive Console) or paste absolute paths, one per line. <strong>Duplicates</strong> mode walks the whole tree recursively — there is no cap on how many files are scanned. Optional filters below only skip tiny files or limit extensions; leave extension boxes unchecked for all types.</p>
+          <div class="czk-path-toolbar">
+            <button type="button" class="btn ghost" id="btnCzkBrowse">Browse…</button>
+            <button type="button" class="btn ghost small" id="btnCzkClearDirs">Clear</button>
+          </div>
+          <label class="field">
+            <span>Scan directories (absolute paths)</span>
+            <textarea id="czkDirectories" rows="3" placeholder="E:\Downloads&#10;D:\Photos"></textarea>
+          </label>
+        </div>
+        <div class="card">
+          <h2>Exclude directories (optional)</h2>
+          <p class="muted small">Skip subtrees such as <code>.git</code>, <code>node_modules</code>, or cache folders — one absolute path per line.</p>
+          <div class="czk-path-toolbar">
+            <button type="button" class="btn ghost" id="btnCzkBrowseExclude">Browse…</button>
+            <button type="button" class="btn ghost small" id="btnCzkClearExclude">Clear</button>
+          </div>
+          <label class="field">
+            <span class="sr-only">Exclude directory paths</span>
+            <textarea id="czkExcludeDirs" rows="2" placeholder="E:\Downloads\.git&#10;E:\Photos\thumbnails"></textarea>
+          </label>
+        </div>
+        <div class="card">
+          <h2>Scan options</h2>
+          <div class="czk-options-grid">
+            <label class="field compact">
+              <span>Tool mode</span>
+              <select id="czkMode">
+                <option value="dup">Duplicates (hash)</option>
+                <option value="image">Similar images</option>
+                <option value="video">Similar videos</option>
+                <option value="big">Biggest files</option>
+                <option value="empty-folders">Empty folders</option>
+                <option value="empty-files">Empty files</option>
+              </select>
+            </label>
+            <label class="field compact czk-dup-only">
+              <span>Duplicate method</span>
+              <select id="czkDupMethod">
+                <option value="HASH">Hash (accurate)</option>
+                <option value="SIZE">Size only</option>
+                <option value="NAME">Name</option>
+              </select>
+            </label>
+            <label class="field compact czk-dup-only">
+              <span>Hash type</span>
+              <select id="czkHashType">
+                <option value="BLAKE3">BLAKE3</option>
+                <option value="CRC32">CRC32</option>
+                <option value="XXH3">XXH3</option>
+              </select>
+            </label>
+            <label class="field compact czk-dup-only">
+              <span>Min file size (KB, dup mode)</span>
+              <input type="number" id="czkMinKb" min="0" step="1" value="8" title="0 = czkawka default (8192 bytes). Files smaller than this are skipped." />
+            </label>
+            <label class="field compact czk-big-only" hidden>
+              <span>Number of files (big mode only)</span>
+              <input type="number" id="czkBigCount" min="1" max="10000" value="50" />
+            </label>
+          </div>
+          <p class="muted small czk-dup-only">Extension filters (optional — unchecked = all file types):</p>
+          <div class="czk-options-grid czk-dup-only">
+            <label class="chk"><input type="checkbox" id="czkExtVideo" /> VIDEO</label>
+            <label class="chk"><input type="checkbox" id="czkExtImage" /> IMAGE</label>
+            <label class="chk"><input type="checkbox" id="czkExtMusic" /> MUSIC</label>
+          </div>
+          <p class="czk-actions">
+            <button type="button" class="btn primary" id="btnCzkScan">Run scan</button>
+            <button type="button" class="btn danger" id="btnCzkStop" hidden>Stop scan</button>
+            <span class="muted small" id="czkScanProgress" role="status"></span>
+          </p>
+        </div>
+        <div class="card" id="czkResultsCard" hidden>
+          <h2>Results</h2>
+          <p class="muted small" id="czkResultsSummary" role="status"></p>
+          <p class="muted small" id="czkJsonPath" hidden></p>
+          <div id="czkDupApplySection" class="czk-dup-apply" hidden>
+            <p class="muted small">
+              Choose one file to <strong>keep</strong> per group; others marked <strong>Remove</strong> are candidates.
+              Preview runs a dry-run on the server. Apply requires typing <code>DELETE_CZKAWKA_DUPLICATES</code>.
+            </p>
+            <div class="library-duplicates__filters czk-dup-filters">
+              <label class="chk"><input type="radio" name="czkApplyMode" id="czkModeQuarantine" value="quarantine" checked /> Quarantine</label>
+              <label class="chk"><input type="radio" name="czkApplyMode" id="czkModeDelete" value="delete" /> Delete permanently</label>
+            </div>
+            <label class="field compact czk-quarantine-field">
+              <span>Quarantine folder (absolute; default from Settings → duplicates quarantine under archive root)</span>
+              <span class="field-inline-browse">
+                <input type="text" id="czkQuarantineDir" placeholder="<ARCHIVE_ROOT>logs\_duplicates_quarantine" autocomplete="off" spellcheck="false" />
+                <button type="button" class="btn ghost small btn-settings-browse" id="btnCzkBrowseQuarantine" data-settings-browse="directory" data-settings-target="czkQuarantineDir" data-settings-title="Choose quarantine folder" aria-label="Choose quarantine folder" title="Browse for folder on this machine">…</button>
+              </span>
+            </label>
+            <div id="czkDupResults" class="library-duplicates__results czk-dup-results"></div>
+            <pre class="library-duplicates__preview" id="czkApplyPreview" hidden></pre>
+            <p class="library-duplicates__apply muted small">
+              <button type="button" class="btn ghost" id="btnCzkPreviewRemove" disabled>Preview removal (dry-run)</button>
+              <button type="button" class="btn danger" id="btnCzkApplyRemove" disabled>Apply removal…</button>
+            </p>
+            <p class="muted small" id="czkApplyMsg" role="status"></p>
+          </div>
+          <div class="table-wrap" id="czkResultsTableWrap" hidden>
+            <p class="muted small">Summary table (non-duplicate modes or when interactive apply is unavailable).</p>
+            <table class="table" id="czkResultsTable" aria-label="Scan groups summary">
+              <thead>
+                <tr>
+                  <th>Group</th>
+                  <th>Size</th>
+                  <th>Files</th>
+                </tr>
+              </thead>
+              <tbody id="czkResultsTbody"></tbody>
+            </table>
+          </div>
+          <pre class="library-duplicates__preview" id="czkResultsRaw" hidden></pre>
+        </div>
+      </section>
       <section class="view" id="view-rename" aria-label="Rename">
         <header class="view-head">
-          <h1>Rename</h1>
+          <h1>Rename files</h1>
           <p class="lede">
-            Preview then apply safe renames under the allowlist. Combine <strong>ExifTool</strong> metadata templates (<code>exiftool -json -n</code>, read-only) and/or <strong>DeepL</strong> stem translation in a configurable order.
+            Preview then apply safe renames under your download output folders. Combine <strong>ExifTool</strong> metadata templates (<code>exiftool -json -n</code>, read-only) and/or <strong>DeepL</strong> stem translation in a configurable order.
             Configure ExifTool under <strong>Settings → General</strong> and DeepL under <strong>Settings → DeepL</strong>. Apply uses <code>Path.rename</code> on the server (computed names), not ExifTool for writing.
+          </p>
+          <p class="muted small">
+            <strong>ExifTool:</strong> only runs at <strong>preview</strong> to read tags; it never writes metadata or renames files. Token list, date fallbacks, and pipeline order are documented in
+            <a href="/docs/archive-console" target="_blank" rel="noopener noreferrer">ARCHIVE_CONSOLE.md</a> (Rename section).
           </p>
           <p class="muted small">
             <strong>DeepL heuristics:</strong> optional leading <code>YYYYMMDD</code>; “Preserve YouTube-style id” (<code>-</code> + 11 chars); <code>【】</code> not sent to DeepL. <strong>Collisions:</strong> numeric suffix before extension.
@@ -756,9 +1374,9 @@
         </header>
         <div class="card">
           <h2>Queue</h2>
-          <p class="muted small">Paths are server-relative under the archive root (same as Library). Use <strong>Queue for rename</strong> on the Library player toolbar, or <strong>Add from Library selection</strong> here.</p>
+          <p class="muted small">Paths are server-relative under the archive root (same as Library). Use <strong>Send to Rename queue</strong> in Library <strong>Selection</strong>, or <strong>Browse files…</strong> here to pick multiple files at once.</p>
           <p class="rename-toolbar">
-            <button type="button" class="btn ghost" id="btnRenameAddFromLibrary">Add from Library selection</button>
+            <button type="button" class="btn ghost" id="btnRenameBrowseFiles">Browse files…</button>
             <button type="button" class="btn ghost" id="btnRenameClearQueue">Clear queue</button>
           </p>
           <div class="table-wrap">
@@ -773,6 +1391,7 @@
             </table>
           </div>
           <p class="muted small" id="renameQueueEmpty" role="status">No files queued.</p>
+          <p class="muted small">Manual preview is capped at <strong>200 files</strong> per batch. For large folders, use <strong>Folder batch</strong> (after Pipeline settings).</p>
         </div>
         <div class="card">
           <h2>Pipeline</h2>
@@ -806,7 +1425,44 @@
           <label class="chk"><input type="checkbox" id="optRenameWholeBasename" /> Translate whole stem (skip date / YouTube / bracket heuristics)</label>
           <label class="chk"><input type="checkbox" id="optRenamePreserveYt" checked /> Preserve YouTube-style id at end of stem (<code>-</code> + 11 chars)</label>
           <label class="chk"><input type="checkbox" id="optRenamePreserveBrackets" checked /> Keep <code>【…】</code> segments untranslated</label>
+          <p class="muted small" id="renameDeeplQuotaLine" role="status"></p>
           <p class="muted small">Collision policy: numeric suffix before extension (shown in preview).</p>
+        </div>
+        <div class="card">
+          <h2>Folder batch</h2>
+          <p class="muted small">
+            Crawl every file in a folder (and subfolders), rename in batches of up to 200, and
+            <strong>skip files already renamed</strong> with the same pipeline settings (logged in
+            <code>state.json</code> as <code>rename_done_log</code>). Renamed files get a fresh
+            <strong>modified date</strong> (when enabled) so you can sort by date in Explorer to see
+            what is still pending.
+          </p>
+          <label class="field">
+            <span>Folder (relative to archive root)</span>
+            <span class="row-inline">
+              <input type="text" id="inpRenameFolderRel" placeholder="playlists/Watch Later Archived" autocomplete="off" spellcheck="false" />
+              <button type="button" class="btn ghost small btn-settings-browse" id="btnRenameBrowseFolder" data-settings-browse="archive_relative" data-settings-target="inpRenameFolderRel" data-settings-status="renameFolderStatus" data-settings-title="Choose folder to rename files in" aria-label="Browse for folder under archive root" title="Browse for folder on this machine">Browse folder…</button>
+            </span>
+          </label>
+          <p class="rename-toolbar">
+            <label class="chk"><input type="checkbox" id="optRenameFolderRecursive" checked /> Include subfolders</label>
+            <label class="chk"><input type="checkbox" id="optRenameFolderSkipDone" checked /> Skip already renamed (same pipeline)</label>
+            <label class="chk"><input type="checkbox" id="optRenameFolderTouchMtime" checked /> Touch modified date after rename</label>
+          </p>
+          <label class="field compact">
+            <span>Batch size (preview + apply per step)</span>
+            <select id="selRenameFolderBatchSize" aria-label="Folder batch size">
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="200" selected>200</option>
+            </select>
+          </label>
+          <p class="rename-toolbar">
+            <button type="button" class="btn ghost" id="btnRenameFolderScan">Scan folder</button>
+            <button type="button" class="btn primary" id="btnRenameFolderRun" disabled>Run folder batch…</button>
+            <button type="button" class="btn danger ghost" id="btnRenameFolderStop" hidden>Stop</button>
+          </p>
+          <p class="muted small" id="renameFolderStatus" role="status"></p>
         </div>
         <div class="card">
           <h2>Preview</h2>
@@ -833,12 +1489,34 @@
       </section>
       <section class="view" id="view-inputs" aria-label="Inputs and config">
         <header class="view-head">
-          <h1>Inputs &amp; config</h1>
-          <p class="lede"><span class="pill dim">P0.5</span> Edit allowlisted repo files only. Saves are blocked while a <strong>Run</strong> job is active. <strong>gallery-dl.conf</strong> (JSON for <strong>Galleries</strong>) lives under the sidebar <strong>gallery-dl.conf</strong> item — not here.</p>
+          <h1>Input lists</h1>
+          <p class="lede"><span class="pill dim">P0.5</span> Edit allowlisted repo files only. Saves are blocked while a batch download job is active. <strong>gallery-dl.conf</strong> (JSON for <strong>Gallery batch</strong>) lives under the sidebar <strong>Gallery options</strong> item — not here.</p>
+          <div class="callout" id="cookiesGuideCallout">
+            <h2 class="h3">Cookies: yt-dlp vs gallery-dl</h2>
+            <ul class="small muted">
+              <li><strong>yt-dlp</strong> — <code>cookies.txt</code> tab below (archive root), or <code>--cookies-from-browser</code> in <code>yt-dlp.conf</code> for YouTube-only runs without exporting.</li>
+              <li><strong>gallery-dl</strong> — drop Netscape files in <code>cookies/</code> named after the extractor (e.g. <code>instagram.txt</code> → <code>cookies/instagram.txt</code>). Auto-wired at run time; see <strong>Supported sites</strong> for names.</li>
+              <li><strong>Reddit</strong> — OAuth in gallery-dl.conf is preferred for user feeds; optional <code>cookies/reddit.txt</code> for edge cases.</li>
+            </ul>
+          </div>
+          <div class="card" id="siteCookiesPanel">
+            <h2>Site cookies folder (<code>cookies/</code>)</h2>
+            <p class="muted small">Files here are for <strong>gallery-dl</strong>. Name each export <code>cookies/&lt;extractor&gt;.txt</code> (see <strong>Supported sites</strong> for extractor ids). Present files are auto-wired when Galleries runs — no gallery-dl.conf entry needed unless you override. Locked until you unlock below.</p>
+            <ul class="file-list site-cookies-list" id="siteCookiesList" role="list"></ul>
+            <p class="muted small" id="siteCookiesEmpty" hidden>No site cookie files yet — add one or drop exports into <code>cookies/</code> on disk.</p>
+            <div class="site-cookies-add row-inline">
+              <label class="field inline-field"><span class="sr-only">New site cookie basename</span>
+                <input type="text" id="siteCookieNewName" placeholder="instagram → cookies/instagram.txt" autocomplete="off" spellcheck="false" />
+              </label>
+              <button type="button" class="btn ghost small" id="btnSiteCookieAdd">Add empty file</button>
+              <button type="button" class="btn ghost small" id="btnSiteCookiesRefresh">Refresh list</button>
+            </div>
+            <p class="muted small" id="siteCookiesMsg" role="status"></p>
+          </div>
         </header>
         <div class="card">
           <h2>Download output folders</h2>
-          <p class="muted small">Paths are <strong>relative to the archive root</strong> (no <code>..</code>). Leave blank to keep defaults: <code>playlists</code>, <code>channels</code>, <code>videos</code>, <code>oneoff</code>, and <code>galleries</code> for <strong>Galleries</strong>. Use <strong>…</strong> to pick a folder on <strong>this PC</strong> (the machine running Archive Console). On Windows the server opens a native folder dialog via <strong>PowerShell</strong> (falls back to tkinter if needed); an interactive desktop session is required. This only changes where those runs write media; it does not move <code>cookies.txt</code>, <code>yt-dlp.conf</code>, or input lists. Picked paths must match <strong>Settings → allowlisted paths</strong> (add a prefix first for new trees).</p>
+          <p class="muted small">Paths are <strong>relative to the archive root</strong> (no <code>..</code>). Leave blank to keep defaults: <code>playlists</code>, <code>channels</code>, <code>videos</code>, <code>oneoff</code>, and <code>galleries</code> for <strong>Galleries</strong>. Use <strong>…</strong> to pick a folder on <strong>this PC</strong> (the machine running Archive Console). On Windows the server opens a native folder dialog via <strong>PowerShell</strong> (falls back to tkinter if needed); an interactive desktop session is required. This only changes where those runs write media; it does not move <code>cookies.txt</code>, <code>yt-dlp.conf</code>, or input lists. <strong>Library</strong>, <strong>Rename</strong>, and related tools automatically include each output folder and all of its subfolders.</p>
           <label class="field download-dir-field">
             <span>Watch Later / monthly watch list → output root</span>
             <span class="field-inline-browse">
@@ -861,7 +1539,7 @@
             </span>
           </label>
           <label class="field download-dir-field">
-            <span>One-off (single URL) → output root</span>
+            <span>Single download → output root</span>
             <span class="field-inline-browse">
               <input type="text" id="dlDirOneoffInputs" placeholder="oneoff" autocomplete="off" />
               <button type="button" class="btn ghost small btn-dl-browse" data-dl-field="oneoff" aria-label="Choose folder for one-off output" title="Browse for folder on this machine">…</button>
@@ -903,7 +1581,7 @@
             <label class="chk small"><input type="checkbox" id="optConfSmoke" /> Soft syntax smoke after edit (non-fatal hints only)</label>
           </div>
           <div class="callout warn" id="cookiesCallout" hidden>
-            <p class="small"><strong>cookies.txt</strong> is sensitive. Content is hidden until you unlock. Avoid leaving this open where screen captures or shared logs could leak tokens.</p>
+            <p class="small" id="cookiesCalloutText"><strong>Cookie file</strong> is sensitive. Content is hidden until you unlock. Avoid leaving this open where screen captures or shared logs could leak tokens.</p>
             <label class="chk small"><input type="checkbox" id="optUnlockCookies" /> Unlock cookies (load &amp; save)</label>
           </div>
           <div class="editor-actions">
@@ -915,7 +1593,7 @@
       </section>
       <section class="view" id="view-ytdlp" aria-label="yt-dlp.conf">
         <header class="view-head">
-          <h1>yt-dlp.conf</h1>
+          <h1>Download options</h1>
           <p class="lede">Interactive <strong>download settings</strong> for the same on-disk file your <strong>monthly_*.bat</strong> jobs use — Tier A maps common flags from the <a class="link link--info" href="https://github.com/yt-dlp/yt-dlp/blob/master/README.md" target="_blank" rel="noopener">yt-dlp README</a>; Tier B round-trips extra options; Tier C shows the serialized conf.</p>
         </header>
         <div class="callout warn" id="ytdlpEmptyState" hidden>
@@ -957,36 +1635,89 @@
       </section>
       <section class="view" id="view-gallerydl" aria-label="gallery-dl.conf">
         <header class="view-head">
-          <h1>gallery-dl.conf</h1>
-          <p class="lede">JSON configuration for <strong>gallery-dl</strong> — the same on-disk file passed as <code>-c</code> when it exists (<strong>Galleries</strong> tab and preview API). Canonical path: <code>&lt;archive_root&gt;/gallery-dl.conf</code> (see <strong>Settings</strong> for your archive root). Upstream format: <a class="link link--info" href="https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst" target="_blank" rel="noopener">gallery-dl configuration</a>.</p>
-          <p class="muted small">Netscape-format <strong>cookies</strong> are shared with yt-dlp: edit <strong>Inputs &amp; config → cookies.txt</strong> (unlock there) — do not duplicate a second cookies editor here.</p>
+          <h1>Gallery options</h1>
+          <p class="lede">Interactive <strong>download settings</strong> for <strong>gallery-dl</strong> (JSON on disk) — the same file passed as <code>-c</code> when present (<strong>Galleries</strong> tab and preview). Canonical path: <code>&lt;archive_root&gt;/gallery-dl.conf</code>. Official reference: <a class="link link--info" href="https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst" target="_blank" rel="noopener">gallery-dl configuration</a> and <a class="link link--info" href="https://github.com/mikf/gallery-dl/blob/master/docs/options.md" target="_blank" rel="noopener">options</a> (versioned docs match your local install when possible).</p>
+          <p class="muted small"><strong>yt-dlp</strong> uses root <code>cookies.txt</code> (or <code>--cookies-from-browser</code> in <code>yt-dlp.conf</code>). <strong>gallery-dl</strong> uses <code>cookies/&lt;extractor&gt;.txt</code> on disk (auto-wired at run) — naming is in <strong>Supported sites</strong>. Reddit public feeds need no OAuth setup; expand <strong>Reddit OAuth (advanced)</strong> only for NSFW/private feeds.</p>
+          <p class="muted small">The file is read and written only at <code>&lt;archive_root&gt;/gallery-dl.conf</code> (same as Galleries <code>-c</code>). A <code>gallery-dl.conf</code> sitting only under your repo (e.g. next to <code>scripts/</code>) is <strong>ignored</strong> unless <strong>Settings → archive root</strong> points at that folder — copy or move it to the real archive root if needed.</p>
         </header>
-        <div class="callout warn" id="gallerydlEmptyState" hidden>
-          <p><strong>No gallery-dl.conf on disk yet.</strong> The editor starts empty — click <em>Save gallery-dl.conf</em> to create <code id="gallerydlEmptyPath"></code>. Omitting the file is fine; gallery-dl runs without <code>-c</code> until you add one.</p>
+        <div class="callout warn" id="gallerydlLoadError" hidden role="alert" aria-hidden="true">
+          <p><strong>Could not load gallery-dl settings from the server.</strong> This page needs <code>GET /api/gallery-dl/setup</code> to return JSON. A plain <code>404 Not Found</code> usually means the running Archive Console is older than this UI — restart after upgrading, or hard-refresh the tab.</p>
+          <p class="muted small" id="gallerydlLoadErrorDetail"></p>
         </div>
-        <div class="card editor-card">
-          <div class="editor-toolbar">
-            <div class="editor-meta muted small">
-              <span id="gallerydlRelLabel">gallery-dl.conf</span>
-              <span id="gallerydlMtime"></span>
-              <span id="gallerydlDirtyPill" class="pill warn" hidden>unsaved</span>
-            </div>
+        <div class="callout warn" id="gallerydlEmptyState" hidden>
+          <p><strong>No gallery-dl.conf on disk yet.</strong> Defaults load below — click <em>Save gallery-dl.conf</em> to create <code id="gallerydlEmptyPath"></code>. Omitting the file is fine; gallery-dl runs without <code>-c</code> until you add one.</p>
+        </div>
+        <div class="callout" id="gallerydlParseWarnings" hidden role="region" aria-label="Parse notes"></div>
+        <div class="card ytdlp-presets" id="gallerydlPresetBar">
+          <h2>Rate presets</h2>
+          <p class="muted small" id="gallerydlPresetBarNote">Request pacing only — OAuth, cookies, folders, and Reddit media filters are configured below or at Galleries run time.</p>
+          <p class="muted small" id="gallerydlPresetHint"></p>
+          <div class="editor-meta muted small gallerydl-preset-meta">
+            <span id="gallerydlRelLabel">gallery-dl.conf</span>
+            <span id="gallerydlMtime"></span>
+            <span id="gallerydlDirtyPill" class="pill warn" hidden>unsaved</span>
           </div>
-          <label class="field"><span class="sr-only">gallery-dl.conf editor</span>
-            <textarea id="gallerydlTextarea" class="editor-area" spellcheck="false" rows="22" autocomplete="off"></textarea>
-          </label>
-          <div class="editor-actions">
+          <div class="ytdlp-preset-cards" id="gallerydlPresetCards"></div>
+          <div class="ytdlp-actions">
             <button type="button" class="btn ghost" id="btnGallerydlReload">Reload from disk</button>
+            <button type="button" class="btn ghost" id="btnGallerydlCapture">Capture current as User preferences</button>
+            <label class="chk small"><input type="checkbox" id="gallerydlConfSmoke" checked /> Run config smoke on save (<code>gallery-dl --config-status</code>)</label>
             <button type="button" class="btn primary" id="btnGallerydlSave">Save gallery-dl.conf</button>
             <span class="muted small" id="gallerydlSaveHint" hidden>Saving disabled while a run is active.</span>
           </div>
           <p class="muted small" id="gallerydlMsg" role="status"></p>
         </div>
+        <div class="ytdlp-layout">
+          <div class="card ytdlp-controls" id="gallerydlControls"></div>
+          <div class="card ytdlp-side">
+            <h2>Effective CLI preview</h2>
+            <p class="muted small">Representative invocation (same pattern as Galleries preview: <code>-s -j</code>, sample URL).</p>
+            <pre class="ytdlp-preview" id="gallerydlCliPreview"></pre>
+            <h2>Serialized JSON mirror</h2>
+            <p class="muted small">Pretty-printed JSON the server will write on <em>Save</em> (unknown keys round-trip). For a file-only path, reload here after external edits.</p>
+            <pre class="ytdlp-raw" id="gallerydlJsonMirror"></pre>
+            <h2>Advanced — raw JSON</h2>
+            <p class="muted small">Paste or edit the full object for keys without form fields. <em>Apply raw JSON</em> merges into the live model (root must be a JSON object).</p>
+            <label class="field"><span class="sr-only">Raw gallery-dl JSON</span>
+              <textarea id="gallerydlRawJsonTa" class="editor-area" spellcheck="false" rows="10" autocomplete="off"></textarea>
+            </label>
+            <button type="button" class="btn ghost small" id="btnGallerydlApplyRaw">Apply raw JSON</button>
+          </div>
+        </div>
+      </section>
+      <section class="view" id="view-gifskyconf" aria-label="gifsky.conf">
+        <header class="view-head">
+          <h1>GIF options</h1>
+          <p class="lede">Presets for the <strong>Video to GIF</strong> tab — gifski quality/fps, ffmpeg downscale, and source filters. Saved to <code>&lt;archive_root&gt;/gifsky.conf</code>. <strong>Save</strong> after changing presets; re-run Video to GIF to apply (existing GIFs are skipped unless you remove them).</p>
+        </header>
+        <div class="callout warn" id="gifskyconfEmptyState" hidden>
+          <p><strong>No gifsky.conf on disk yet.</strong> Defaults load below — click <em>Save gifsky.conf</em> to create <code id="gifskyconfEmptyPath"></code>.</p>
+        </div>
+        <div class="card ytdlp-presets" id="gifskyconfPresetBar">
+          <h2>Presets</h2>
+          <p class="muted small" id="gifskyconfPresetHint"></p>
+          <div class="ytdlp-preset-cards" id="gifskyconfPresetCards"></div>
+          <div class="ytdlp-actions">
+            <button type="button" class="btn ghost" id="btnGifskyconfReload">Reload from disk</button>
+            <button type="button" class="btn ghost" id="btnGifskyconfCapture">Capture current as User preferences</button>
+            <button type="button" class="btn primary" id="btnGifskyconfSave">Save gifsky.conf</button>
+          </div>
+          <p class="muted small" id="gifskyconfMsg" role="status"></p>
+        </div>
+        <div class="ytdlp-layout">
+          <div class="card ytdlp-controls" id="gifskyconfControls"></div>
+          <div class="card ytdlp-side">
+            <h2>Summary</h2>
+            <pre class="ytdlp-preview" id="gifskyconfPreview"></pre>
+            <h2>Serialized JSON</h2>
+            <pre class="ytdlp-raw" id="gifskyconfJsonMirror"></pre>
+          </div>
+        </div>
       </section>
       <section class="view" id="view-supportedsites" aria-label="Supported sites">
         <header class="view-head">
           <h1>Supported sites</h1>
-          <p class="lede">Extractors and modules reported by <strong>your</strong> local <code>yt-dlp</code> and <code>gallery-dl</code> CLIs (<code>--list-extractors</code>). Archive Console is <strong>not affiliated</strong> with either project — links go to <strong>official</strong> documentation only.</p>
+          <p class="lede">Extractors and modules reported by <strong>your</strong> local <code>yt-dlp</code> and <code>gallery-dl</code> CLIs (<code>--list-extractors</code>). For <strong>gallery-dl</strong> login cookies, name files <code>cookies/&lt;extractor&gt;.txt</code> (column below). Archive Console is <strong>not affiliated</strong> with either project.</p>
         </header>
         <div class="card supportedsites-toolbar">
           <label class="field supportedsites-filter-field">
@@ -1009,43 +1740,129 @@
 
         <div class="card settings-section">
           <h2>General &amp; runtime</h2>
-          <p class="muted small">Binds to <strong>127.0.0.1</strong> only (not LAN). Changing the port requires restarting the console process.</p>
-          <p class="muted small" id="settingsArchiveRoot"></p>
+          <p class="muted small">Binds to <strong>127.0.0.1</strong> only (not LAN). Changing the port or archive root requires restarting the console process.</p>
+          <label class="field">
+            <span>Archive root (folder with <code>yt-dlp.conf</code>, <code>gallery-dl.conf</code>, download folders)</span>
+            <span class="field-inline-browse">
+              <input type="text" id="setArchiveRoot" placeholder="<ARCHIVE_ROOT>" autocomplete="off" spellcheck="false" />
+              <button type="button" class="btn ghost small btn-settings-browse" data-settings-browse="directory" data-settings-target="setArchiveRoot" data-settings-title="Choose archive root folder" aria-label="Choose archive root folder" title="Browse for folder on this machine">…</button>
+            </span>
+          </label>
+          <p class="muted small">Usually the repo you start with <code>start_archive_console.bat</code> (e.g. <code><ARCHIVE_ROOT></code>). Also set via <code>ARCHIVE_CONSOLE_ROOT</code> env before first launch if <code>state.json</code> is empty.</p>
+          <p class="muted small" id="setAllowSummary" role="status">
+            Accessible folders are set automatically from <strong>Download output folders</strong> (below), plus <code>logs/</code> and <code>cookies/</code>. Each output root includes all subfolders.
+          </p>
           <label class="field">
             <span>Port</span>
             <input type="number" id="setPort" min="1024" max="65535" />
-          </label>
-          <label class="field">
-            <span>Allowlisted path prefixes (comma-separated, under archive root)</span>
-            <input type="text" id="setAllow" placeholder="logs, playlists, channels, videos" />
           </label>
           <label class="field">
             <span>Editor file backup count (inputs / yt-dlp.conf overwrites)</span>
             <input type="number" id="setEditorBackupMax" min="1" max="100" />
           </label>
           <label class="field">
-            <span>FFmpeg executable (Library clip export; blank = <code>ffmpeg</code> on PATH)</span>
-            <input type="text" id="setFfmpegExe" placeholder="ffmpeg" autocomplete="off" />
+            <span>FFmpeg executable (Library clip export + Gifsky; blank = <code>ffmpeg</code> on PATH)</span>
+            <span class="field-inline-browse">
+              <input type="text" id="setFfmpegExe" placeholder="ffmpeg or full path to ffmpeg.exe" autocomplete="off" />
+              <button type="button" class="btn ghost small btn-settings-browse" data-settings-browse="file" data-settings-target="setFfmpegExe" data-settings-title="Choose FFmpeg executable" aria-label="Choose FFmpeg executable" title="Browse for executable on this machine">…</button>
+            </span>
           </label>
           <label class="field">
-            <span>MediaInfo executable (Library file details; blank = <code>mediainfo</code> on PATH)</span>
-            <input type="text" id="setMediainfoExe" placeholder="mediainfo" autocomplete="off" />
+            <span>Gifski executable (Gifsky batch; blank = <code>gifski</code> on PATH)</span>
+            <span class="field-inline-browse">
+              <input type="text" id="setGifskiExe" placeholder="gifski or full path to gifski.exe" autocomplete="off" />
+              <button type="button" class="btn ghost small btn-settings-browse" data-settings-browse="file" data-settings-target="setGifskiExe" data-settings-title="Choose Gifski executable" aria-label="Choose Gifski executable" title="Browse for executable on this machine">…</button>
+            </span>
+          </label>
+          <label class="field">
+            <span>Czkawka CLI executable (full path recommended; blank = search PATH for czkawka_cli / windows_czkawka_cli)</span>
+            <span class="field-inline-browse">
+              <input type="text" id="setCzkawkaExe" placeholder="C:\czkawka\windows_czkawka_cli.exe" autocomplete="off" />
+              <button type="button" class="btn ghost small btn-settings-browse" data-settings-browse="file" data-settings-target="setCzkawkaExe" data-settings-title="Choose Czkawka CLI executable" aria-label="Choose Czkawka CLI executable" title="Browse for executable on this machine">…</button>
+            </span>
+          </label>
+          <label class="field">
+            <span>MediaInfo CLI path (Library → Media details; blank = auto-resolve <code>mediainfo</code> / <code>MediaInfo</code> on PATH)</span>
+            <span class="field-inline-browse">
+              <input type="text" id="setMediainfoExe" placeholder="e.g. MediaInfo.exe or full path" autocomplete="off" />
+              <button type="button" class="btn ghost small btn-settings-browse" data-settings-browse="file" data-settings-target="setMediainfoExe" data-settings-title="Choose MediaInfo executable" aria-label="Choose MediaInfo executable" title="Browse for executable on this machine">…</button>
+            </span>
           </label>
           <label class="field">
             <span>ExifTool executable (Rename metadata templates; blank = <code>exiftool</code> on PATH)</span>
-            <input type="text" id="setExiftoolExe" placeholder="exiftool" autocomplete="off" />
+            <span class="field-inline-browse">
+              <input type="text" id="setExiftoolExe" placeholder="exiftool or full path to exiftool.exe" autocomplete="off" />
+              <button type="button" class="btn ghost small btn-settings-browse" data-settings-browse="file" data-settings-target="setExiftoolExe" data-settings-title="Choose ExifTool executable" aria-label="Choose ExifTool executable" title="Browse for executable on this machine">…</button>
+            </span>
           </label>
           <label class="field">
             <span>ExifTool timeout per file (seconds)</span>
             <input type="number" id="setExiftoolTimeoutSec" min="5" max="600" step="1" value="45" />
           </label>
           <label class="field">
-            <span>Duplicates quarantine folder (relative to archive root, must be allowlisted)</span>
-            <input type="text" id="setDuplicatesQuarantineRel" placeholder="logs/_duplicates_quarantine" autocomplete="off" />
+            <span>Duplicates quarantine folder (relative to archive root)</span>
+            <span class="field-inline-browse">
+              <input type="text" id="setDuplicatesQuarantineRel" placeholder="logs/_duplicates_quarantine" autocomplete="off" />
+              <button type="button" class="btn ghost small btn-settings-browse" data-settings-browse="archive_relative" data-settings-target="setDuplicatesQuarantineRel" data-settings-title="Choose duplicates quarantine folder" aria-label="Choose duplicates quarantine folder" title="Browse for folder under archive root">…</button>
+            </span>
           </label>
           <label class="chk"><input type="checkbox" id="setDuplicatesPreferQuarantine" checked /> Prefer moving duplicates to quarantine over delete</label>
+          <label class="chk"><input type="checkbox" id="setShowGettingStarted" checked /> Show <strong>Setup</strong> in the sidebar</label>
+          <p class="muted small">If hidden, open <strong>Settings</strong> here to bring the guide back.</p>
+          <label class="field">
+            <span>Default page when opening the console</span>
+            <select id="setDefaultLandingView" aria-label="Default landing page">
+              <option value="getting-started">Setup</option>
+              <option value="home">Dashboard</option>
+              <option value="run">YouTube batch</option>
+              <option value="oneoff">Single download</option>
+              <option value="galleries">Gallery batch</option>
+              <option value="gifsky">Video to GIF</option>
+              <option value="library">Browse library</option>
+              <option value="rename">Rename files</option>
+              <option value="czkawka">Scan duplicates</option>
+              <option value="history">History</option>
+              <option value="inputs">Input lists</option>
+              <option value="ytdlp">Download options</option>
+              <option value="gallerydl">Gallery options</option>
+              <option value="gifskyconf">GIF options</option>
+              <option value="supportedsites">Supported sites</option>
+              <option value="settings">Settings</option>
+            </select>
+          </label>
+          <p class="muted small">
+            Used when you open the console without a <code>?view=</code> link. The first time on a new install, <strong>Setup</strong> opens until you navigate to another section once.
+          </p>
           <button type="button" class="btn primary" id="btnSaveSettings">Save general</button>
           <p class="muted small" id="settingsMsg" role="status"></p>
+        </div>
+
+        <div class="card settings-section">
+          <h2>Home — weather</h2>
+          <p class="muted small">
+            Used by <strong>Home</strong> only. Values saved here override <code>ARCHIVE_CONSOLE_WEATHER_LAT</code>, <code>ARCHIVE_CONSOLE_WEATHER_LON</code>, and <code>OPENWEATHER_API_KEY</code> when set; leave latitude and longitude blank to use those environment variables.
+            The API key is stored in <code>state.json</code> (operator backups may include it). The server never returns the raw key to the browser.
+          </p>
+          <label class="chk">
+            <input type="checkbox" id="optHomeClock24" />
+            Use <strong>24-hour</strong> time on Home
+          </label>
+          <p class="muted small">Clock format is stored in this browser only (<code>localStorage</code>), same as Home bookmarks.</p>
+          <label class="field">
+            <span>Latitude (decimal degrees, −90–90)</span>
+            <input type="text" id="setWeatherLat" inputmode="decimal" placeholder="e.g. 40.7 or leave blank for env" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Longitude (decimal degrees, −180–180)</span>
+            <input type="text" id="setWeatherLon" inputmode="decimal" placeholder="e.g. −74.0 or leave blank for env" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>OpenWeather API key (optional)</span>
+            <input type="password" id="setOpenweatherApiKey" autocomplete="off" placeholder="" />
+          </label>
+          <label class="chk"><input type="checkbox" id="optOpenweatherKeyClear" /> Remove stored OpenWeather key (environment key still works if set)</label>
+          <button type="button" class="btn primary" id="btnSaveHomeWeather">Save weather settings</button>
+          <p class="muted small" id="homeWeatherSettingsMsg" role="status"></p>
         </div>
 
         <div class="card settings-section">
@@ -1083,7 +1900,7 @@
 
         <div class="card settings-section">
           <h2>Storage &amp; retention</h2>
-          <p class="muted small">Manual cleanup only—nothing deletes on server start. Eligible paths must sit under the archive root and allowlist. Run folders use <strong>directory mtime</strong>; operator ZIPs use <strong>file mtime</strong>. <code>logs/latest_run*.txt</code> targets are always kept (even if older than retention). A job <strong>must not</strong> be running. <code>cookies.txt</code>, <code>yt-dlp.conf</code>, and console <code>state.json</code> are never deleted. <strong>History</strong> may reference removed folders—the report link can 404 until you run again. Editor <code>.bak</code> files live under <code>archive_console/backups</code> (outside the archive tree) and are <strong>not</strong> pruned here.</p>
+          <p class="muted small">Manual cleanup only—nothing deletes on server start. Eligible paths must sit under the archive root and download output folders. Run folders use <strong>directory mtime</strong>; operator ZIPs use <strong>file mtime</strong>. <code>logs/latest_run*.txt</code> targets are always kept (even if older than retention). A job <strong>must not</strong> be running. <code>cookies.txt</code>, <code>yt-dlp.conf</code>, and console <code>state.json</code> are never deleted. <strong>History</strong> may reference removed folders—the report link can 404 until you run again. Editor <code>.bak</code> files live under <code>archive_console/backups</code> (outside the archive tree) and are <strong>not</strong> pruned here.</p>
           <p class="muted small"><strong>Not affiliated with yt-dlp.</strong></p>
           <label class="field">
             <span>Retention age (days)</span>
@@ -1111,7 +1928,7 @@
 
         <div class="card settings-section">
           <h2>Operator backups (ZIP)</h2>
-          <p class="muted small">Creates <code>archive_console_backup_*.zip</code> under a path you choose (must match an allowlisted prefix, e.g. <code>logs/…</code>). Includes optional copies of console <code>state.json</code> and <code>logs/</code>. Does not read <code>cookies.txt</code> unless you add that path under allowlist and include it manually (not recommended in shared backups).</p>
+          <p class="muted small">Creates <code>archive_console_backup_*.zip</code> under a path you choose (under the archive root, e.g. <code>logs/…</code>). Includes optional copies of console <code>state.json</code> and <code>logs/</code>. Does not read <code>cookies.txt</code> unless you include it manually (not recommended in shared backups).</p>
           <label class="field">
             <span>Destination (relative to archive root)</span>
             <input type="text" id="setBackupDest" placeholder="logs/archive_console_backups" />
@@ -1139,18 +1956,46 @@
         </div>
 
         <div class="card settings-section" id="p1SchedulerCard">
-          <h2>Scheduling (saved entries)</h2>
+          <h2>Automatic scheduling</h2>
           <p class="muted small" id="schedulerStatusLine"></p>
-          <p class="muted small">Day of month <strong>1–31</strong>: in short months the day is <strong>clamped</strong> to the last valid day (e.g. 31 → Feb 28/29). Next-run hints and the in-process scheduler use <strong>this machine’s local timezone</strong>. Enable <code>features.scheduler_enabled</code> in <code>state.json</code> and restart the server to run jobs here; missed minutes while the PC sleeps are not replayed.</p>
-          <div id="scheduleEditor" class="schedule-editor" aria-label="Schedule list"></div>
-          <button type="button" class="btn ghost" id="btnAddSchedule">Add schedule</button>
-          <button type="button" class="btn primary" id="btnSaveSchedules">Save schedules</button>
-          <p class="muted small" id="scheduleSaveMsg" role="status"></p>
+          <label class="chk"><input type="checkbox" id="optSchedulerEnabled" /> Enable in-process scheduler</label>
+          <p class="muted small">When enabled, saved schedules run at their set times on this PC (local timezone). <strong>Restart Archive Console</strong> after changing this toggle. Configure <strong>watch later / channels / videos</strong> times on <strong>YouTube batch</strong>. Configure <strong>gallery-dl saved-source crawls</strong> on <strong>Gallery batch → Saved sources</strong>. Missed minutes while the PC sleeps are not replayed.</p>
+          <button type="button" class="btn primary" id="btnSaveSchedulerGlobal">Save scheduler setting</button>
+          <p class="muted small" id="schedulerGlobalSaveMsg" role="status"></p>
+        </div>
+
+        <div class="card settings-section" id="p1GotifyCard">
+          <h2>Notifications (Gotify)</h2>
+          <p class="muted small">Push to a <strong>Gotify</strong> server on your network when batch jobs start or finish: YouTube (<code>watch_later</code>, <code>channels</code>, <code>videos</code>) and <strong>gallery-dl</strong> (<code>galleries</code>). Scheduled saved-source gallery crawls send <strong>one batch start</strong> and <strong>one summary</strong> (not per URL). Messages use Markdown with run stats; failures include cookie/auth hints when detected in the log. Application token is stored in <code>state.json</code> (operator backups may include it).</p>
+          <label class="chk"><input type="checkbox" id="optGotifyEnabled" /> Enable Gotify notifications</label>
+          <label class="field">
+            <span>Server URL</span>
+            <input type="url" id="setGotifyBaseUrl" placeholder="http://192.168.1.234:8070" autocomplete="off" />
+          </label>
+          <p class="muted small">Use the <strong>application token</strong> from Gotify → <strong>Apps</strong> (the app you created for Archive Console). That is not the server URL above, and not a <em>client</em> token from the Android app. Paste the token and click <strong>Save</strong>; leaving the token field empty keeps the previously saved token.</p>
+          <label class="field">
+            <span>Application token</span>
+            <input type="password" id="setGotifyAppToken" autocomplete="off" spellcheck="false" />
+          </label>
+          <label class="chk"><input type="checkbox" id="optGotifyNotifyStart" checked /> Notify when run <strong>starts</strong></label>
+          <label class="chk"><input type="checkbox" id="optGotifyNotifyComplete" checked /> Notify when run <strong>finishes</strong></label>
+          <label class="chk"><input type="checkbox" id="optGotifyNotifyScheduled" checked /> <strong>Scheduled</strong> batch runs</label>
+          <label class="chk"><input type="checkbox" id="optGotifyNotifyManual" /> <strong>Manual</strong> batch runs (Run tab)</label>
+          <label class="field">
+            <span>Priority (0–10)</span>
+            <input type="number" id="setGotifyPriority" min="0" max="10" value="5" />
+          </label>
+          <div class="settings-row-actions">
+            <button type="button" class="btn primary" id="btnSaveGotifySettings">Save Gotify settings</button>
+            <button type="button" class="btn ghost" id="btnGotifyTest">Send test message</button>
+          </div>
+          <p class="muted small" id="gotifySettingsMsg" role="status"></p>
+          <p class="muted small" id="gotifyFailureLine" hidden role="status"></p>
         </div>
 
         <div class="card settings-section">
           <h2>Cookie hygiene (reminders)</h2>
-          <p class="muted small">In-app reminders only — not a substitute for the <strong>Run</strong> pre-flight check when that is enabled. No browser automation or silent export. Use <strong>Inputs &amp; config → cookies.txt</strong> after you export from the browser yourself.</p>
+          <p class="muted small">In-app reminders only — not a substitute for the <strong>YouTube batch</strong> pre-flight check when that is enabled. No browser automation or silent export. Use <strong>Input lists → cookies.txt</strong> after you export from the browser yourself.</p>
           <label class="chk"><input type="checkbox" id="optRequireCookieConfirm" checked /> Require cookie confirmation before each <strong>manual</strong> run (server returns HTTP 428 until you confirm; scheduled runs are unchanged)</label>
           <label class="chk"><input type="checkbox" id="optTrayNotifySchedule" /> Windows tray balloon during the <strong>pre-run reminder window</strong> (start <code>tray_app.py</code>; listener on localhost only)</label>
           <label class="field">
@@ -1187,6 +2032,22 @@
     </main>
   </div>
   <!-- Modals under body (not inside .main) — avoids .main > .modal flex 0×0 breaking position:fixed stacking -->
+  <div id="homeBookmarkModal" class="modal modal-portal" hidden role="dialog" aria-modal="true" aria-labelledby="homeBookmarkModalTitle" aria-hidden="true">
+    <div class="modal-backdrop" id="homeBookmarkModalBackdrop" tabindex="-1"></div>
+    <div class="modal-card card">
+      <h2 id="homeBookmarkModalTitle">Add bookmark</h2>
+      <p class="small muted">Only <code>http</code> and <code>https</code> links. Opens in a new tab.</p>
+      <label class="field">
+        <span>URL</span>
+        <input type="url" id="inpHomeBookmarkUrl" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://example.com/docs" />
+      </label>
+      <p class="small muted" id="homeBookmarkUrlMsg" role="status"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="btnHomeBookmarkCancel">Cancel</button>
+        <button type="button" class="btn primary" id="btnHomeBookmarkSave" disabled>Save</button>
+      </div>
+    </div>
+  </div>
   <div id="shutdownGateModal" class="modal modal-portal" hidden role="dialog" aria-modal="true" aria-labelledby="shutdownGateTitle" aria-hidden="true">
     <div class="modal-backdrop" id="shutdownGateBackdrop" tabindex="-1"></div>
     <div class="modal-card card">
@@ -1219,7 +2080,10 @@
       </div>
     </div>
   </div>
-  <script src="/static/app.js" defer></script>
+  <script src="/static/app.js?v={{ static_v }}" defer></script>
   <script src="/static/ytdlp_setup.js" defer></script>
+  <script src="/static/gallerydl_setup.js" defer></script>
+  <script src="/static/gifski_setup.js" defer></script>
+  <script src="/static/czkawka.js" defer></script>
 </body>
 </html>

@@ -180,18 +180,33 @@ def merge_run_summary_into_history_entry(
 
 
 def enrich_history_entry_for_api(
-    archive_root: Path, entry: dict[str, Any]
+    archive_root: Path,
+    entry: dict[str, Any],
+    *,
+    allowed_prefixes: list[str],
 ) -> dict[str, Any]:
-    """Attach run_stats for GET /api/history (state row + disk backfill)."""
+    """Attach run_stats and console error rows for GET /api/history."""
+    from .run_error_record import read_errors_for_log_folder
+
     out = dict(entry)
     pub = public_run_stats(out.get("run_stats"))
     if pub is not None:
         out["run_stats"] = pub
-        return out
-    rel = out.get("log_folder_rel")
-    if not rel:
-        out["run_stats"] = None
-        return out
-    loaded = load_run_stats_for_log_folder(archive_root, rel)
-    out["run_stats"] = loaded
+    else:
+        rel = out.get("log_folder_rel")
+        if not rel:
+            out["run_stats"] = None
+        else:
+            loaded = load_run_stats_for_log_folder(archive_root, rel)
+            out["run_stats"] = loaded
+
+    rel_err = out.get("log_folder_rel")
+    if isinstance(rel_err, str) and rel_err.strip():
+        out["errors"] = read_errors_for_log_folder(
+            archive_root,
+            rel_err,
+            allowed_prefixes,
+        )
+    else:
+        out["errors"] = []
     return out

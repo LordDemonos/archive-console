@@ -257,6 +257,11 @@ p > .mono-ellipsis:last-child {
   border-color: var(--accent-border);
 }
 
+/* [hidden] must beat .nav-item { display: flex } or the Getting started nav stays visible. */
+.nav-item[hidden] {
+  display: none !important;
+}
+
 .sidebar-footer {
   margin-top: auto;
   padding-top: 1rem;
@@ -283,13 +288,20 @@ p > .mono-ellipsis:last-child {
   animation: view-fade 0.2s ease;
 }
 
-/* Library tab fills viewport below banners/padding (flex column); workspace height follows this, not raw 100vh. */
+/* Library: primary vertical scroll on .files-layout; R1–R3 flow in document order (no nested band scroll cages). */
+#view-library {
+  --library-file-list-max-rows: 25;
+  --library-file-list-row-height: 2.35rem;
+  --library-dup-results-max-rows: 24;
+  --library-dup-row-height: 1.65rem;
+}
+
 #view-library.is-active {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 #view-library.is-active > .view-head {
@@ -299,10 +311,38 @@ p > .mono-ellipsis:last-child {
 #view-library.is-active > .files-layout {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+}
+
+/* Library intro: less vertical dead space above the workspace card */
+#view-library .view-head .lede {
+  margin-bottom: 1rem;
+}
+
+/* Library-scoped toast (e.g. Rename queue) — below title, above workspace card; not over sidebar. */
+.library-view-toast {
+  flex-shrink: 0;
+  margin: 0 0 0.75rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.45;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  color: var(--text);
+  max-width: min(100%, 56rem);
+  position: relative;
+  z-index: 1;
+}
+
+.library-view-toast.is-error {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.4);
+  color: var(--danger, #f87171);
 }
 
 @keyframes view-fade {
@@ -496,6 +536,49 @@ p > .mono-ellipsis:last-child {
   background: rgba(255, 255, 255, 0.04);
 }
 
+/* Getting started — verify actions (readable vs ghost text links) */
+.btn.gs-verify {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: hsla(var(--accent-h) 55% 48% / 0.55);
+  font-weight: 650;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.btn.gs-verify:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: hsla(var(--accent-h) 60% 52% / 0.75);
+}
+.btn.gs-verify:focus-visible {
+  outline-color: var(--accent);
+}
+.btn.gs-verify[aria-busy="true"] {
+  cursor: wait;
+  opacity: 0.92;
+}
+.btn.gs-verify[aria-busy="true"]::after {
+  content: "";
+  display: inline-block;
+  width: 0.65em;
+  height: 0.65em;
+  margin-left: 0.4em;
+  vertical-align: -0.1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: gs-verify-spin 0.65s linear infinite;
+}
+@keyframes gs-verify-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn.gs-verify[aria-busy="true"]::after {
+    animation: none;
+    border-right-color: currentColor;
+    opacity: 0.55;
+  }
+}
+
 .btn.tiny {
   font-size: var(--fs-caption);
   padding: 0.2rem 0.45rem;
@@ -546,6 +629,55 @@ p > .mono-ellipsis:last-child {
   margin-bottom: 1rem;
 }
 
+#youtubeScheduleCard {
+  margin-bottom: 1rem;
+}
+
+#view-galleries .oneoff-config-card,
+#view-galleries .gallery-sources-card {
+  margin-bottom: 1rem;
+}
+
+#view-rename > .card {
+  margin-bottom: 1rem;
+}
+
+#view-czkawka > .card {
+  margin-bottom: 1rem;
+}
+
+#view-inputs > .card,
+#view-inputs #siteCookiesPanel {
+  margin-bottom: 1rem;
+}
+
+#view-ytdlp > .callout,
+#view-ytdlp > .card,
+#view-gallerydl > .callout,
+#view-gallerydl > .card,
+#view-gifskyconf > .callout,
+#view-gifskyconf > .card {
+  margin-bottom: 1rem;
+}
+
+#view-gallerydl .view-head > p.muted.small {
+  margin: 0 0 0.65rem;
+  max-width: 65ch;
+}
+
+.ytdlp-presets > p.muted.small {
+  margin: 0 0 0.45rem;
+}
+
+.ytdlp-presets > .editor-meta,
+.ytdlp-presets > .gallerydl-preset-meta {
+  margin: 0 0 0.75rem;
+}
+
+.ytdlp-presets > .ytdlp-preset-cards {
+  margin-top: 0;
+}
+
 .chk {
   display: flex;
   align-items: flex-start;
@@ -558,6 +690,20 @@ p > .mono-ellipsis:last-child {
   accent-color: var(--accent);
   margin-top: 0.2em;
   flex-shrink: 0;
+}
+
+.ytdlp-cookie-poll-row input[type="number"] {
+  width: 4.5rem;
+  flex-shrink: 0;
+}
+
+.ytdlp-cookie-poll-row.is-disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.ytdlp-cookie-poll-row.is-disabled input {
+  cursor: not-allowed;
 }
 
 .run-status-card {
@@ -1101,7 +1247,7 @@ td.hist-stat-wide {
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 
 .inline-field {
@@ -1113,10 +1259,14 @@ td.hist-stat-wide {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin: 0.75rem 0;
+  margin: 0 0 0.75rem;
 }
 
 .ytdlp-preset-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
   font: inherit;
   text-align: left;
   padding: 0.65rem 0.85rem;
@@ -1149,6 +1299,27 @@ td.hist-stat-wide {
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-line);
+}
+
+.ytdlp-details-advanced {
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border-line);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem 0.75rem;
+}
+
+.ytdlp-details-advanced__summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style-position: outside;
+}
+
+.ytdlp-group--nested {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  padding-top: 0.25rem;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .ytdlp-group h3 {
@@ -1277,6 +1448,69 @@ td.hist-stat-wide {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.gallery-preview-media-cell a {
+  word-break: break-all;
+}
+
+.gallery-sources-details > summary {
+  cursor: pointer;
+}
+
+.gallery-sources-scroll.is-scrollable {
+  max-height: calc(2.75rem + 10 * 2.75rem);
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-sm);
+}
+
+.gallery-sources-scroll.is-scrollable::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.gallery-sources-scroll.is-scrollable::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-sm);
+}
+
+.gallery-sources-scroll.is-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 5px;
+  border: 2px solid rgba(0, 0, 0, 0.45);
+}
+
+.gallery-sources-scroll.is-scrollable::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.gallery-sources-scroll.is-scrollable .table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-elev);
+  box-shadow: 0 1px 0 var(--border-line);
+}
+
+.gallery-sources-schedule {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.gallery-sources-schedule-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: flex-end;
+  margin-top: 0.35rem;
+}
+
+.gallery-sources-schedule-fields .field.compact[hidden] {
+  display: none !important;
+}
+
 .table th {
   color: var(--muted);
   font-weight: 600;
@@ -1293,6 +1527,10 @@ td.hist-stat-wide {
 .history-subsection h2 {
   margin-top: 0;
   margin-bottom: 0.45rem;
+}
+
+.rename-log-row-fail td {
+  color: var(--danger);
 }
 
 .exit-cell.exit-ok {
@@ -1324,78 +1562,64 @@ td.hist-stat-wide {
   gap: 0.85rem;
 }
 
-/* Full-width hints + Explorer actions below the two-column workspace (same card width). */
-.files-layout-foot {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  flex-shrink: 0;
-  margin-top: 0.1rem;
-  padding-top: 0.65rem;
-  border-top: 1px solid var(--border-subtle);
-}
-
-.files-layout-foot .files-list-hint {
-  line-height: 1.5;
-  text-wrap: balance;
-  max-width: none;
-}
-
-.files-layout-foot .file-actions {
-  width: 100%;
-  align-items: stretch;
-}
-
-.files-layout-foot .file-actions > .btn {
-  align-self: flex-start;
-}
-
-.files-layout-foot .file-actions-hint {
-  max-width: none;
-}
-
 /*
- * Outer #filesWorkspace: breadcrumb + body (shell + resize strip). Not content-sized from list rows:
- * #filesWorkspaceShell has an explicit pixel height from JS (localStorage + drag).
+ * Library #filesWorkspace: R1 = #filesWorkspaceShell (list | Selection | Duplicate). R2 = player. R3 = export.
+ * R1 row height follows Selection (middle), not #fileList max-content:
+ * - #filesSplit is a flex item (child of .files-workspace-split-wrap); min-height:0 + overflow:hidden there so
+ *   flex-basis:auto does not resolve to the list’s intrinsic height (DevTools: first “tall” ancestor was often this flex item).
+ * - Files grid cell: min-height:0 + overflow:hidden clips propagation; #fileList keeps overflow-y:auto.
+ * R1 columns size to their content (align-items: start). Files list and duplicate results scroll
+ * internally after ~30 / ~20 rows. Page scroll: .files-layout overflow-y auto.
  */
 .files-workspace {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
   flex: 0 0 auto;
-  min-height: 0;
+  min-width: 0;
   overflow: visible;
 }
 
 .files-workspace-body {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.75rem;
   flex-shrink: 0;
-  min-height: 0;
+  min-width: 0;
 }
 
-/* Single rectangle for both grid columns; --files-workspace-height set in JS. */
+.files-library-workspace-body {
+  gap: 0.75rem;
+}
+
+/* R1 row: content height + shared min-height for three columns (1280×800 friendly). */
 .files-workspace-shell {
-  /* Taller first paint before JS; JS replaces with measured max height for Library. */
-  --files-workspace-height: min(88vh, 900px);
   box-sizing: border-box;
-  height: var(--files-workspace-height);
-  min-height: var(--files-workspace-height);
-  max-height: var(--files-workspace-height);
-  overflow: hidden;
+  min-height: 300px;
+  height: auto;
+  max-height: none;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   border-radius: var(--radius-sm);
 }
 
+#view-library .files-workspace-shell {
+  min-height: 300px;
+}
+
 .files-workspace-shell .files-workspace-split-wrap {
-  flex: 1 1 auto;
-  min-height: 0;
-  height: 100%;
+  flex: 0 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* Library: flex item #filesSplit must not use min-height:auto (would equal full #fileList height). */
+#view-library .files-workspace-shell .files-workspace-split-wrap {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .files-workspace-split-wrap {
@@ -1403,35 +1627,6 @@ td.hist-stat-wide {
   min-height: 0;
   display: flex;
   flex-direction: column;
-}
-
-.files-workspace-resize-y {
-  display: block;
-  width: 100%;
-  height: 10px;
-  margin: 0;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  cursor: ns-resize;
-  flex-shrink: 0;
-  color: inherit;
-  font: inherit;
-  box-sizing: border-box;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.files-workspace-resize-y:hover,
-.files-workspace-resize-y:focus-visible {
-  background: var(--accent-dim);
-  border-color: var(--border-subtle);
-}
-
-.files-workspace-resize-y:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }
 
 .breadcrumb {
@@ -1475,12 +1670,232 @@ td.hist-stat-wide {
   min-height: 0;
 }
 
+/* Library R1: outer split = list | (metadata + dup). Inner .files-library-r1-right is a 2-col grid with align stretch. */
+#view-library .files-library-r1-split {
+  grid-template-columns: minmax(260px, 32%) 5px minmax(0, 1fr);
+  gap: 0 0.5rem;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  align-items: start;
+}
+
+#view-library .files-library-r1-right {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: stretch;
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+}
+
+@media (max-width: 1100px) {
+  #view-library .files-library-r1-right {
+    grid-template-columns: 1fr;
+  }
+}
+
+.library-panel {
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elev-deep);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  padding: 1rem 1.1rem;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.library-panel__title {
+  margin: 0 0 0.65rem;
+  font-size: var(--fs-section);
+  line-height: var(--lh-section);
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  flex-shrink: 0;
+}
+
+.library-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  margin-bottom: 0.5rem;
+}
+
+.library-panel__header--files {
+  align-items: center;
+}
+
+.library-panel__title--files {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.files-list-filter-field {
+  flex-shrink: 0;
+  margin: 0 0 0.5rem;
+  gap: 0;
+}
+
+.files-list-filter-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.35rem 0.55rem;
+  font-size: 14px;
+}
+
+.library-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.library-panel__body--list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.library-panel--list .library-panel__body--list {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.library-panel--export .library-panel__body {
+  overflow-y: visible;
+}
+
+/* Library: R1 row height from Selection (+ list min via .files-library-r1-split); Files/Dup stretch to that row, scroll inside. */
+/* Library: cap Files / Duplicate height; Selection keeps a comfortable min height. */
+#view-library .library-panel {
+  min-height: 280px;
+}
+
+#view-library .library-panel--list,
+#view-library .library-panel--dup {
+  min-height: 0;
+  height: auto;
+}
+
+#view-library .files-library-r1-right .library-panel {
+  height: auto;
+  min-height: 0;
+}
+
+/*
+ * Files column grid item: overflow hidden → grid/flex max-content for this cell is not the full list height
+ * (scroll stays on #fileList).
+ */
+#view-library .files-library-r1-split > .library-panel--list {
+  min-height: 0;
+  overflow: hidden;
+  align-self: stretch;
+}
+
+/* Inner grid: Duplicate does not set row min-height; stretches to Selection’s row, scrolls internally if taller. */
+#view-library .files-library-r1-right > .library-panel--dup {
+  min-height: 0;
+  align-self: start;
+}
+
+#view-library .library-panel--list {
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  align-self: start;
+}
+
+#view-library .library-panel--list .library-panel__body--list {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#view-library .library-panel--meta .library-panel__body,
+#view-library .library-panel--export .library-panel__body {
+  flex: 0 1 auto;
+  overflow-y: visible;
+  overflow-x: hidden;
+}
+
+#view-library .library-panel--dup .library-panel__body {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+.library-selection-help {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.library-selection-help__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-secondary);
+}
+
+.library-selection-help__actions {
+  margin-top: 0.5rem;
+}
+
+.library-selection-help__actions > .btn {
+  align-self: flex-start;
+}
+
+.library-duplicates__lede {
+  max-width: 42rem;
+}
+
 .files-pane-left {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
   min-width: 0;
   min-height: 0;
+}
+
+.files-pane-left--library {
+  min-height: 0;
+}
+
+.files-library-player-band {
+  flex: 0 0 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.files-library-export-band {
+  flex: 0 0 auto;
+  min-height: 240px;
+  min-width: 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+  overflow: visible;
+}
+
+.files-library-export-band .library-panel--export {
+  margin-top: 0;
 }
 
 .files-list-hint {
@@ -1601,14 +2016,23 @@ td.hist-stat-wide {
   background: var(--accent-dim);
 }
 
-.files-detail-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-width: 0;
+/* After .file-list li button so density var wins over default 13px. */
+#view-library #fileList.file-list,
+#view-library #fileList.file-list li button {
+  font-size: var(--library-file-list-font, 13px);
+}
+
+/* Library: ~30 visible file rows, then scroll inside the list. */
+#view-library .file-list--library-panel {
+  flex: 0 1 auto;
   min-height: 0;
-  overflow: hidden;
-  flex: 1;
+  max-height: calc(
+    var(--library-file-list-row-height) * var(--library-file-list-max-rows)
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-sm);
 }
 
 .file-detail {
@@ -1625,6 +2049,42 @@ td.hist-stat-wide {
   max-height: min(42vh, 420px);
   min-height: 0;
   overflow: auto;
+}
+
+/* Selection lives in .library-panel__body — scroll there, not a nested trap on .file-detail. */
+#view-library .library-panel--meta .file-detail {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+  max-height: none;
+  min-height: 0;
+  overflow: visible;
+  flex: 1 1 auto;
+}
+
+.file-detail-top-actions {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.file-detail-top-actions__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.file-detail-top-actions__buttons .btn {
+  flex: 1 1 10rem;
+  width: auto;
+  margin-bottom: 0;
+}
+
+.file-detail-top-actions .btn {
+  width: 100%;
+  margin-bottom: 0.35rem;
 }
 
 .file-detail-mediainfo {
@@ -1666,21 +2126,26 @@ td.hist-stat-wide {
   font-size: 13px;
 }
 
+/*
+ * Duplicate finder root is section.library-panel.library-duplicates — must not reset .library-panel
+ * border/background/box-shadow (same specificity as .library-duplicates later in the file used to win
+ * and strip chrome, leaving a stray light edge vs sibling div.library-panel columns).
+ */
 .library-duplicates {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.75rem 1rem 1rem;
-  background: var(--bg-elev-deep);
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-height: 0;
-  max-height: min(38vh, 360px);
-  overflow: auto;
+  max-height: none;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.library-duplicates__title {
-  margin: 0 0 0.35rem;
-  font-size: 1rem;
-  font-weight: 600;
+#view-library section.library-panel.library-duplicates {
+  flex: 1 1 auto;
+  min-height: 0;
+  /* Section is not focusable; avoid any UA focus ring ever wrapping the whole panel. */
+  outline: none;
 }
 
 .library-duplicates__roots {
@@ -1729,6 +2194,17 @@ td.hist-stat-wide {
   font-size: 12px;
 }
 
+/* Library: ~20 duplicate file rows visible, then scroll results only (controls stay put). */
+#view-library .library-duplicates__results {
+  max-height: calc(
+    var(--library-dup-row-height) * var(--library-dup-results-max-rows)
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+  padding-right: 0.15rem;
+}
+
 .dup-group {
   margin-bottom: 0.75rem;
   padding: 0.5rem 0.6rem;
@@ -1750,6 +2226,7 @@ td.hist-stat-wide {
   margin-bottom: 0.2rem;
   font-family: var(--font-mono);
   font-size: 11px;
+  min-height: var(--library-dup-row-height, 1.65rem);
 }
 
 .dup-group__path {
@@ -1774,9 +2251,15 @@ td.hist-stat-wide {
   flex-direction: column;
   flex: 1 1 0;
   min-height: 0;
-  /* Queue scrolls; do not scroll the whole player (keeps video + controls stable). */
   overflow-x: hidden;
   overflow-y: hidden;
+}
+
+/* Library: player card grows with queue; page scrolls — no inner player column scroll cage. */
+#view-library .files-library-player-band .files-player {
+  flex: 0 0 auto;
+  overflow-y: visible;
+  min-height: 0;
 }
 
 .files-player-toast {
@@ -1804,12 +2287,12 @@ td.hist-stat-wide {
 }
 
 .files-player-hint {
-  margin: 0 0 0.65rem;
+  margin: 0 0 0.45rem;
   max-width: 48rem;
   flex-shrink: 0;
 }
 
-/* Sized by JS on #filesVideoFrame (width × aspect); must not shrink below that height in flex layout. */
+/* Library R2: 16:9 stage is CSS-driven (see .files-library-player-band); other views may still use full width. */
 .files-player-video-frame {
   width: 100%;
   flex: 0 0 auto;
@@ -1818,6 +2301,69 @@ td.hist-stat-wide {
   background: #000;
   border-radius: var(--radius-sm);
   overflow: hidden;
+}
+
+.files-library-player-band .files-player-video-frame {
+  width: min(100%, 1920px);
+  max-width: 100%;
+  margin-inline: auto;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  /* 420px floor @ ~1280-wide 16:9; cap height on very tall viewports only. */
+  min-height: 420px;
+  max-height: min(85vh, 960px);
+}
+
+.files-player.is-image-mode .files-library-player-band .files-player-video-frame {
+  min-height: 240px;
+  max-height: min(60vh, 720px);
+  background: var(--bg-inset, #141414);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.files-player.is-image-mode .files-media-stage .files-player-video,
+.files-player-video[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.files-player.is-video-mode .files-media-stage .files-player-video:not([hidden]) {
+  display: block;
+}
+
+.files-player-video-only,
+.files-player-slideshow-only {
+  flex-shrink: 0;
+}
+
+.files-player-video-only {
+  display: none;
+}
+
+.files-player-slideshow-only {
+  display: none;
+}
+
+.files-player.is-video-mode .files-player-video-only {
+  display: block;
+}
+
+.files-player.is-image-mode .files-player-slideshow-only {
+  display: block;
+}
+
+.files-player-toolbar--slideshow {
+  display: none;
+}
+
+.files-player.is-image-mode .files-player-toolbar--slideshow {
+  display: flex;
+}
+
+#filesLibraryPlayerBand[hidden],
+#filesLibraryExportBand[hidden] {
+  display: none !important;
 }
 
 .files-media-stage {
@@ -2017,19 +2563,19 @@ td.hist-stat-wide {
   flex-shrink: 0;
 }
 
-/* Single transport row: horizontal scroll before wrap (narrow panes). */
+/* Multi-row transport on narrow viewports — all controls stay on-screen without horizontal hunt. */
 .files-player-toolbar--controls {
-  flex-wrap: nowrap;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.5rem;
   align-items: center;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
+  row-gap: 0.5rem;
 }
 
-.files-player-toolbar--controls:focus-within {
-  scrollbar-color: var(--border) transparent;
+@media (max-width: 1100px) {
+  .files-player-slideshow-field {
+    white-space: normal;
+    flex-wrap: wrap;
+  }
 }
 
 .files-player-iconbtn {
@@ -2070,7 +2616,8 @@ td.hist-stat-wide {
   cursor: not-allowed;
 }
 
-.files-player-iconbtn[aria-pressed="true"] {
+.files-player-iconbtn[aria-pressed="true"],
+.files-player-iconbtn.is-playing {
   background: var(--accent-dim-strong);
   border-color: var(--accent-border);
   color: var(--accent);
@@ -2132,24 +2679,29 @@ td.hist-stat-wide {
   margin: 0.35rem 0 0;
 }
 
-.library-clip-panel {
-  margin-top: 0.85rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
-  flex-shrink: 0;
-}
-
-.library-clip-heading {
-  margin: 0 0 0.35rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
 .library-clip-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
   gap: 0.5rem 0.75rem;
   margin-top: 0.5rem;
+}
+
+.library-clip-grid .field.compact {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.library-clip-grid .field.compact input,
+.library-clip-grid .field.compact select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Long paths / basename span full row so they don’t clip at ~1024px. */
+.library-clip-grid .library-clip-outdir,
+.library-clip-grid .library-clip-basename {
+  grid-column: 1 / -1;
 }
 
 .library-clip-outdir .field-inline-browse {
@@ -2175,16 +2727,27 @@ td.hist-stat-wide {
   flex-shrink: 0;
 }
 
+/* Scroll lives on .files-player-queue-scroll (Library); markers need overflow-x visible + padding for 10+. */
+.files-player-queue-scroll {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: min(50vh, 26rem);
+  margin-top: 0.5rem;
+  overflow-x: visible;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .files-player-queue {
   list-style: decimal;
-  margin: 0.5rem 0 0;
-  padding-left: 1.35rem;
-  flex: 1 1 0;
-  /* ~6+ visible rows at 12px × 1.45 line-height before scroll */
-  min-height: 10rem;
+  list-style-position: outside;
+  margin: 0;
+  padding-left: 3.25rem;
+  flex: none;
   min-width: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  min-height: min-content;
+  overflow-x: visible;
+  overflow-y: visible;
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.45;
@@ -2203,6 +2766,10 @@ td.hist-stat-wide {
 
 .files-player-queue li.is-sel {
   box-shadow: 0 0 0 1px var(--accent);
+}
+
+#view-library .files-library-player-band .files-player-queue-scroll {
+  max-height: min(50vh, 26rem);
 }
 
 .file-detail strong {
@@ -2312,7 +2879,8 @@ td.hist-stat-wide {
   min-width: 0;
 }
 
-.btn-dl-browse {
+.btn-dl-browse,
+.btn-settings-browse {
   flex: 0 0 auto;
   min-width: 2.25rem;
   padding-left: 0.65rem;
@@ -2486,6 +3054,11 @@ td.hist-stat-wide {
   margin-bottom: 0;
 }
 
+/* [hidden] must beat .field { display: flex } or day/weekday stay visible on Daily rows. */
+.schedule-row .field.compact[hidden] {
+  display: none !important;
+}
+
 .schedule-row .field.compact span {
   font-size: var(--fs-caption);
   color: var(--muted);
@@ -2517,12 +3090,6 @@ td.hist-stat-wide {
   gap: 0.5rem;
   align-items: center;
   margin: 0.5rem 0 0.75rem;
-}
-
-.files-player-toolbar .files-player-rename-queue {
-  margin-left: 0.25rem;
-  align-self: center;
-  white-space: nowrap;
 }
 
 .modal {
@@ -2679,4 +3246,357 @@ table.supportedsites-table th {
 table.supportedsites-table code {
   font-size: 0.92em;
   word-break: break-all;
+}
+
+/* Home — flat dashboard; accents follow Operator Noir (--accent gold, same as rest of app) */
+#view-home.home-flame {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.home-flame-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.home-flame-top__left {
+  min-width: min(100%, 16rem);
+  flex: 1 1 auto;
+}
+
+.home-flame-dateline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  margin-bottom: 0.35rem;
+}
+
+.home-flame-datetime {
+  font-size: var(--fs-overline);
+  line-height: var(--lh-overline);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.home-flame-greeting {
+  margin: 0;
+  font-size: clamp(1.65rem, 1.2rem + 2vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.home-flame-weather {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  text-align: right;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+
+.home-flame-weather__icon {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+  color: var(--accent);
+  margin-top: 0.1rem;
+}
+
+.home-flame-weather__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.home-flame-weather__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.home-flame-weather__line {
+  font-size: var(--fs-body);
+  line-height: 1.25;
+  color: var(--text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Muted until we have a live temperature (see .is-weather-primary in app.js). */
+.home-flame-weather__line--temp:not(.is-weather-primary) {
+  color: var(--text-secondary);
+}
+
+.home-flame-weather__line--temp.is-weather-primary {
+  color: var(--text);
+}
+
+.home-flame-weather__line--hum {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+}
+
+.home-flame-rule {
+  height: 1px;
+  background: var(--accent);
+  margin: 0.85rem 0 1.1rem;
+  opacity: 0.95;
+}
+
+.home-flame-apps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.home-flame-apps-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+}
+
+.home-flame-apps-title {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-section);
+  line-height: var(--lh-section);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.home-flame-apps-title:hover {
+  color: var(--accent);
+}
+
+.home-flame-apps-title:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+#homeFlameApps.is-edit .home-flame-apps-title {
+  color: var(--accent);
+}
+
+.home-flame-empty-hint {
+  margin: 0;
+}
+
+.home-flame-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+}
+
+@media (max-width: 1100px) {
+  .home-flame-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .home-flame-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .home-flame-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.home-bookmark-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.home-bookmark-row__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.home-bookmark-row__link {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  padding: 0.15rem 0;
+}
+
+.home-bookmark-row__link:hover {
+  background: var(--accent-dim);
+  border-radius: var(--radius-sm);
+}
+
+.home-bookmark-row__link:hover .home-bookmark-row__title {
+  color: var(--accent);
+}
+
+.home-bookmark-row__link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.home-bookmark-row__icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+  margin-top: 0.12rem;
+}
+
+.home-bookmark-row__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.home-bookmark-row__title {
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.home-bookmark-row__desc {
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--accent);
+  word-break: break-word;
+}
+
+.home-bookmark-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding-left: calc(32px + 0.55rem);
+}
+
+.home-bookmark-row__actions .btn {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.45rem;
+}
+
+#homeFlameApps:not(.is-edit) .home-bookmark-row__actions {
+  display: none;
+}
+
+#homeFlameApps:not(.is-edit) .home-flame-add {
+  display: none;
+}
+
+.site-cookies-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.site-cookies-list .site-cookie-row.is-selected {
+  font-weight: 600;
+}
+
+#cookiesGuideCallout {
+  margin-bottom: 1rem;
+}
+
+#cookiesGuideCallout .h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+#cookiesGuideCallout ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.czk-path-toolbar,
+.czk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.czk-options-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.czk-options-grid .field.compact {
+  min-width: 10rem;
+}
+
+.czk-dup-results {
+  max-height: min(52vh, 28rem);
+  overflow: auto;
+}
+
+.czk-dup-filters {
+  margin-bottom: 0.75rem;
+}
+
+.czk-quarantine-field {
+  margin-bottom: 0.75rem;
+}
+
+.czk-scan-active-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--warn);
+  border-radius: var(--radius-sm, 6px);
+  background: color-mix(in srgb, var(--warn) 12%, var(--bg-elev));
+  color: var(--text);
+  font-size: var(--fs-caption);
+}
+
+.czk-scan-active-banner[hidden] {
+  display: none !important;
 }

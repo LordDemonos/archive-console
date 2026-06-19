@@ -6,17 +6,20 @@ per-run logs under logs/archive_run_<UTC>/ (manifest, issues, summary, report).
 Spike / CLI notes (verify with your installed gallery-dl: gallery-dl --help):
 - Preview (no files on disk): gallery-dl -s -j <URL>  (-s/--simulate extracts metadata only;
   -j/--dump-json prints one JSON object per line to stdout). Still performs HTTP requests.
-- Run (download): gallery-dl -o <dest> <URL>  (omit -s). Optional: -c gallery-dl.conf,
+- Run (download): gallery-dl -d <dest> <URL>  (omit -s; ``-d`` is destination, not ``-o``). Optional: -c gallery-dl.conf,
   --cookies cookies.txt (Netscape, same file as yt-dlp often uses for Reddit NSFW/private).
 - Reddit user "all submissions": gallery-dl typically expects .../user/NAME/submitted/ ;
   bare /user/NAME/ may behave differently — normalize host to www.reddit.com in the console API.
 
 Env (set by Archive Console):
   ARCHIVE_GALLERY_URL          Target URL (normalized)
-  ARCHIVE_OUT_GALLERIES        Output root; files go under <root>/gallery_<log_stamp>/
+  ARCHIVE_OUT_GALLERIES        Galleries output root (stable); Reddit jobs use
+                               reddit_sub_* / reddit_user_* under this tree plus
+                               _gallery_dl_data/reddit_archive.sqlite3 for skips
   ARCHIVE_GALLERY_DL_EXE       gallery-dl executable (default: gallery-dl on PATH)
   ARCHIVE_GALLERY_PREVIEW_JSON Path to preview_snapshot.json (optional)
   ARCHIVE_GALLERY_VIDEO_FALLBACK  Set to 1 to run yt-dlp on v.redd.it URLs still missing files
+  ARCHIVE_GALLERY_MAX_RUN_SEC    Wall-clock cap per source (scheduled batch sets 7200); 0 = unlimited
   ARCHIVE_DRY_RUN              If set, gallery-dl runs with -s only (no media files written)
 """
 
@@ -25,9 +28,12 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import queue
 import re
 import subprocess
 import sys
+import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -37,8 +43,164 @@ from archive_run_console import emit_driver_start_banner, emit_final_summary, in
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
+def _short_log_path(abs_path: str) -> str:
+    """Archive-relative path for logs (basename if outside archive)."""
+    try:
+        rel = os.path.relpath(abs_path, SCRIPT_DIR)
+        if rel.startswith(".."):
+            return os.path.basename(abs_path)
+        return rel.replace("\\", "/")
+    except ValueError:
+        return os.path.basename(abs_path)
+
+
+_ARCHIVE_CONSOLE = os.path.join(SCRIPT_DIR, "archive_console")
+if os.path.isdir(_ARCHIVE_CONSOLE) and _ARCHIVE_CONSOLE not in sys.path:
+    sys.path.insert(0, _ARCHIVE_CONSOLE)
+
+from app.gallery_reddit import (  # noqa: E402
+    RUN_START_MTIME_SLACK_SEC,
+    build_effective_gallery_conf_for_galleries,
+    reddit_archive_db_path,
+    write_effective_gallery_conf_for_run,
+)
+from app.gallery_util import (  # noqa: E402
+    compact_gallery_dl_wall_message,
+    summarize_gallery_dl_parse_error_detail,
+)
+
+
 def _env_truthy(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _console_print(line: str) -> None:
+    """Write UTF-8 to stdout (pipe-safe on Windows; RunManager decodes as UTF-8)."""
+    try:
+        sys.stdout.buffer.write((line + "\n").encode("utf-8", errors="replace"))
+        sys.stdout.buffer.flush()
+    except (OSError, AttributeError, ValueError):
+        enc = getattr(sys.stdout, "encoding", None) or "utf-8"
+        try:
+            print(line.encode(enc, errors="replace").decode(enc, errors="replace"), flush=True)
+        except UnicodeEncodeError:
+            print(line.encode("ascii", errors="replace").decode("ascii"), flush=True)
+
+
+def _driver_log(reporter: RunReporter, line: str) -> None:
+    """Write to run.log; mirror to stdout when Archive Console streams the job (pipe, not TTY)."""
+    reporter.log_line(line)
+    if _env_truthy("ARCHIVE_CONSOLE_UNATTENDED"):
+        _console_print(line)
+
+
+def _sanitize_gallery_dl_line(line: str, *, max_len: int = 1200) -> str:
+    """Collapse Reddit HTML/CSS bot-wall errors to a short operator hint."""
+    stripped = line.rstrip("\r\n")
+    err_idx = stripped.find("][error]")
+    if err_idx != -1:
+        prefix = stripped[: err_idx + len("][error]")]
+        rest = stripped[err_idx + len("][error]") :].lstrip()
+        hit = compact_gallery_dl_wall_message(rest)
+        if hit is not None:
+            return f"{prefix} {hit}"
+        budget = max(80, max_len - len(prefix) - 1)
+        rest = summarize_gallery_dl_parse_error_detail(rest, max_len=budget)
+        return f"{prefix} {rest}"
+    if len(stripped) > max_len:
+        return stripped[: max_len - 1] + "…"
+    return stripped
+
+
+def _pump_subprocess_stdout(pipe, out_q: queue.Queue) -> None:
+    try:
+        for line in pipe:
+            out_q.put(line)
+    finally:
+        out_q.put(None)
+
+
+def _env_int(name: str, default: int = 0) -> int:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+GALLERY_DL_TIMEOUT_RC = 124
+
+
+def _terminate_gallery_proc(proc: subprocess.Popen[str]) -> None:
+    if proc.poll() is not None:
+        return
+    proc.terminate()
+    try:
+        proc.wait(timeout=15)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
+
+
+def _consume_gallery_dl_output(
+    proc: subprocess.Popen[str],
+    reporter: RunReporter,
+    *,
+    heartbeat_sec: float = 30.0,
+    max_run_sec: float = 0,
+) -> tuple[int, bool]:
+    """Read gallery-dl stdout; return (exit_code, timed_out)."""
+    assert proc.stdout is not None
+    out_q: queue.Queue = queue.Queue()
+    pump = threading.Thread(
+        target=_pump_subprocess_stdout,
+        args=(proc.stdout, out_q),
+        daemon=True,
+    )
+    pump.start()
+    skip_out = 0
+    started = time.monotonic()
+    timed_out = False
+    while True:
+        if max_run_sec > 0 and time.monotonic() - started >= max_run_sec:
+            timed_out = True
+            _driver_log(
+                reporter,
+                f"[archive_gallery_run] wall-clock limit reached ({int(max_run_sec)}s) — "
+                "stopping gallery-dl so the batch can continue other sources",
+            )
+            _terminate_gallery_proc(proc)
+            break
+        try:
+            line = out_q.get(timeout=heartbeat_sec)
+        except queue.Empty:
+            if proc.poll() is not None:
+                break
+            _driver_log(
+                reporter,
+                "[archive_gallery_run] gallery-dl still running (no new output yet)…",
+            )
+            continue
+        if line is None:
+            break
+        stripped = _sanitize_gallery_dl_line(line.rstrip("\r\n"))
+        _driver_log(reporter, stripped)
+        if stripped.startswith("# "):
+            skip_out += 1
+    pump.join(timeout=2.0)
+    if timed_out:
+        rc = GALLERY_DL_TIMEOUT_RC
+    else:
+        rc = proc.wait()
+    if skip_out:
+        _driver_log(
+            reporter,
+            f"[archive_gallery_run] summary: {skip_out} skipped download(s) "
+            f"(already in archive or on disk — see lines above)",
+        )
+    return rc, timed_out
 
 
 def _write_latest_gallery_pointer(log_dir: str) -> None:
@@ -55,11 +217,15 @@ def _gallery_dl_exe() -> str:
 
 
 def _cookies_path() -> str | None:
+    ck = os.environ.get("ARCHIVE_COOKIE_FILE")
+    if ck and os.path.isfile(ck):
+        return ck
     p = os.path.join(SCRIPT_DIR, "cookies.txt")
     return p if os.path.isfile(p) else None
 
 
 def _conf_path() -> str | None:
+    """Legacy: on-disk operator config (merged into effective conf for each run)."""
     p = os.path.join(SCRIPT_DIR, "gallery-dl.conf")
     return p if os.path.isfile(p) else None
 
@@ -221,27 +387,53 @@ def main() -> int:
         )
         return 1
 
-    dest_dir = os.path.join(out_root, f"gallery_{log_stamp}")
+    dest_dir = os.path.normpath(out_root)
     os.makedirs(dest_dir, exist_ok=True)
+    galleries_root = Path(dest_dir)
+    archive_db = reddit_archive_db_path(galleries_root)
+    try:
+        archive_db.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+
+    eff_conf = build_effective_gallery_conf_for_galleries(
+        Path(SCRIPT_DIR).resolve(),
+        galleries_root,
+    )
+    eff_conf_path = write_effective_gallery_conf_for_run(eff_conf, Path(log_dir))
 
     exe = _gallery_dl_exe()
-    cmd: list[str] = [exe]
-    cp = _conf_path()
-    if cp:
-        cmd.extend(["-c", cp])
+    cmd: list[str] = [exe, "-c", str(eff_conf_path)]
     ck = _cookies_path()
     if ck:
         cmd.extend(["--cookies", ck])
-    cmd.extend(["-o", dest_dir])
+    cmd.extend(["-d", dest_dir])
     if dry:
         cmd.append("-s")
     cmd.append(url)
 
-    reporter.log_line(f"[archive_gallery_run] cmd: {subprocess.list2cmdline(cmd)}")
-    reporter.log_line(f"[archive_gallery_run] URL: {url}")
-    reporter.log_line(f"[archive_gallery_run] destination: {dest_dir}")
+    _driver_log(reporter, f"[archive_gallery_run] cmd: {subprocess.list2cmdline(cmd)}")
+    _driver_log(reporter, f"[archive_gallery_run] URL: {url}")
+    _driver_log(
+        reporter,
+        f"[archive_gallery_run] destination: {dest_dir} "
+        f"(stable galleries root; Reddit -> reddit_sub_* / reddit_user_*; "
+        f"archive: {_short_log_path(str(archive_db))})",
+    )
+    _driver_log(
+        reporter,
+        "[archive_gallery_run] gallery-dl started (large feeds may take minutes before the first line)…",
+    )
 
     rc = 1
+    run_started = time.time()
+    timed_out = False
+    max_run_sec = float(_env_int("ARCHIVE_GALLERY_MAX_RUN_SEC", 0))
+    if max_run_sec > 0:
+        _driver_log(
+            reporter,
+            f"[archive_gallery_run] per-source wall limit: {int(max_run_sec)}s",
+        )
     try:
         proc = subprocess.Popen(
             cmd,
@@ -253,10 +445,11 @@ def main() -> int:
             errors="replace",
             env={**os.environ, "PYTHONUNBUFFERED": "1"},
         )
-        assert proc.stdout is not None
-        for line in proc.stdout:
-            reporter.log_line(line.rstrip("\r\n"))
-        rc = proc.wait()
+        rc, timed_out = _consume_gallery_dl_output(
+            proc,
+            reporter,
+            max_run_sec=max_run_sec,
+        )
     except FileNotFoundError:
         reporter.record_issue(
             "fatal",
@@ -271,7 +464,20 @@ def main() -> int:
         reporter.record_issue("fatal", "", "", "", repr(e), url)
         rc = 1
 
-    if rc != 0:
+    if timed_out:
+        reporter.record_issue(
+            "warning",
+            "",
+            "",
+            "",
+            (
+                f"gallery-dl stopped after {int(max_run_sec)}s wall limit "
+                "(Twitter/rate-limit crawl); partial progress kept — rerun next schedule "
+                "skips archived items. Check run.log for 'Use -o cursor=' to resume sooner."
+            ),
+            url,
+        )
+    elif rc != 0:
         reporter.record_issue(
             "failed",
             "",
@@ -288,14 +494,18 @@ def main() -> int:
         vurls = _v_reddit_urls_from_preview(preview_rows)
         pending = [u for u in vurls if not _file_maybe_for_vreddit(paths_after, u)]
         if pending:
-            reporter.log_line(
+            _driver_log(
+                reporter,
                 f"[archive_gallery_run] yt-dlp fallback for {len(pending)} v.redd.it URL(s)"
             )
             fb_info = _run_ytdlp_fallback(pending, dest_dir, reporter.run_log_path)
 
     paths_final = _walk_files(dest_dir)
+    mtime_floor = run_started - RUN_START_MTIME_SLACK_SEC
     for fp in paths_final:
         try:
+            if os.path.getmtime(fp) < mtime_floor:
+                continue
             sz = int(os.path.getsize(fp))
         except OSError:
             continue
@@ -342,7 +552,9 @@ def main() -> int:
     _write_latest_gallery_pointer(log_dir)
 
     final_rc = 0 if rc == 0 else rc
-    if final_rc == 0 and not paths_final and not dry:
+    if timed_out:
+        final_rc = 0
+    if final_rc == 0 and not paths_final and not dry and not timed_out:
         final_rc = 1
 
     emit_final_summary(

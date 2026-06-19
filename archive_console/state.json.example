@@ -13,6 +13,15 @@
     "require_cookie_confirm_manual": true,
     "tray_notify_before_schedule": false
   },
+  "ytdlp_batch_run": {
+    "pause_on_cookie_error": false,
+    "cookie_auth_poll_sec": 15,
+    "preflight_via_extension": true,
+    "preflight_wait_sec": 120
+  },
+  "gallery_batch_run": {
+    "scheduled_max_run_sec": 7200
+  },
   "schedules": [],
   "operator_backup": {
     "destination_rel": "logs/archive_console_backups",
@@ -54,6 +63,22 @@
   "deepl_target_lang": "EN-US",
   "rename_runs": [],
   "rename_runs_max": 50,
+  "show_getting_started": true,
+  "getting_started_seen": false,
+  "default_landing_view": "run",
+  "weather_latitude": "",
+  "weather_longitude": "",
+  "openweather_api_key": "",
+  "gotify_enabled": false,
+  "gotify_base_url": "http://192.168.1.234:8070",
+  "gotify_app_token": "",
+  "gotify_notify_on_start": true,
+  "gotify_notify_on_complete": true,
+  "gotify_notify_scheduled": true,
+  "gotify_notify_manual": false,
+  "gotify_priority": 5,
+  "gotify_last_failure_unix": 0.0,
+  "gotify_last_failure_message": "",
   "run_history": [],
   "run_history_max": 50,
   "editor_backup_max": 10,

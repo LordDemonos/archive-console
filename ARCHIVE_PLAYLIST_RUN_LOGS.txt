@@ -178,6 +178,10 @@ SKIP_YTDLP_UPDATE=1). Legacy name archive_playlists_advanced.bat still works (de
 Before a run:
   1) If playlists_input.txt uses Watch Later (list=WL): refresh cookies.txt or switch
      to --cookies-from-browser in yt-dlp.conf (see comments there and in playlists_input.txt).
+     Drivers copy cookies.txt → cookies.run.txt before yt-dlp; yt-dlp write-back cannot
+     overwrite your export (edit cookies.txt under Input lists / archive root only).
+     Before each video, the driver re-checks cookies.txt mtime and reloads if you saved
+     a newer export mid-run (set ARCHIVE_COOKIES_NO_PER_VIDEO_SYNC=1 to disable).
   2) Confirm Node.js 20+ is installed and on PATH (for EJS / “n” challenge). The batch file
      runs: pip install -U "yt-dlp[default]" so yt-dlp-ejs stays matched to yt-dlp.
   3) Skim yt-dlp.conf for format / player_client / --js-runtimes if YouTube changed behavior.

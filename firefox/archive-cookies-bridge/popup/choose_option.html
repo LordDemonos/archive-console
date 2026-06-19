@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="choose_option.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div id="popup-content">
+      <div id="all" class="option-row">
+        <p class="option-text" data-i18n="popupSitesAll"></p>
+        <div class="action-buttons">
+          <button class="copy action-btn" data-i18n="copyBtn"></button>
+          <span class="separator">|</span>
+          <button class="download action-btn" data-i18n="downloadBtn"></button>
+        </div>
+      </div>
+      <div id="current" class="option-row">
+        <p class="option-text" data-i18n="popupSitesCurrent"></p>
+        <div class="action-buttons">
+          <button class="copy action-btn" data-i18n="copyBtn"></button>
+          <span class="separator">|</span>
+          <button class="download action-btn" data-i18n="downloadBtn"></button>
+        </div>
+      </div>
+      <div id="container-all" class="option-row">
+        <p class="option-text" data-i18n="popupSitesContainerAll"></p>
+        <div class="action-buttons">
+          <button class="copy action-btn" data-i18n="copyBtn"></button>
+          <span class="separator">|</span>
+          <button class="download action-btn" data-i18n="downloadBtn"></button>
+        </div>
+      </div>
+      <div id="container-current" class="option-row">
+        <p class="option-text" data-i18n="popupSitesContainerCurrent"></p>
+        <div class="action-buttons">
+          <button class="copy action-btn" data-i18n="copyBtn"></button>
+          <span class="separator">|</span>
+          <button class="download action-btn" data-i18n="downloadBtn"></button>
+        </div>
+      </div>
+      <div id="archive-youtube" class="option-row archive-section">
+        <p class="option-text" data-i18n="popupArchiveYoutube"></p>
+        <div class="action-buttons">
+          <button type="button" id="btnYoutubeDownload" class="action-btn" data-i18n="downloadBtn"></button>
+          <span class="separator">|</span>
+          <button type="button" id="btnConsoleExport" class="action-btn" data-i18n="popupArchiveConsoleBtn"></button>
+        </div>
+        <p id="consoleExportStatus" class="console-status" hidden role="status"></p>
+      </div>
+    </div>
+    <script src="choose_option.js"></script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "extDescription": {
+    "message": "Exports cookies for yt-dlp Archive Console: manual Netscape export plus auto-refresh to cookies.txt during batch runs.",
+    "description": "Short description of the extension"
+  },
+  "buttonDescription": {
+    "message": "Export cookies / Archive Console",
+    "description": "Tooltip of the browser toolbar icon."
+  },
+  "copyBtn": {
+    "message": "Copy",
+    "description": "Copy button that appears next to all titles listed below"
+  },
+  "downloadBtn": {
+    "message": "Download",
+    "description": "Download button that appears next to all titles listed below"
+  },
+  "popupSitesAll": {
+    "message": "ALL",
+    "description": "Popup option text for exporting all cookies"
+  },
+  "popupSitesCurrent": {
+    "message": "Current Site",
+    "description": "Popup option text for exporting cookies only from the current site"
+  },
+  "popupSitesContainerAll": {
+    "message": "Current Container",
+    "description": "Popup option text for exporting all cookies from the current container"
+  },
+  "popupSitesContainerCurrent": {
+    "message": "Current Container and Site",
+    "description": "Popup option text for exporting cookies only from the current site and current container"
+  },
+  "popupArchiveYoutube": {
+    "message": "YouTube + Google (yt-dlp)",
+    "description": "Popup row for YouTube-only export and Console PUT"
+  },
+  "popupArchiveConsoleBtn": {
+    "message": "Send to Console",
+    "description": "Push cookies.txt to Archive Console via localhost API"
+  }
+}

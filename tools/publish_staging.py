@@ -35,7 +35,16 @@ REDACT_SUFFIXES = {
 }
 
 SKIP_DIR_NAMES = frozenset(
-    {".git", ".venv", "__pycache__", ".pytest_cache", "node_modules", ".mypy_cache", ".idea"}
+    {
+        ".git",
+        ".venv",
+        "__pycache__",
+        ".pytest_cache",
+        "node_modules",
+        ".mypy_cache",
+        ".idea",
+        ".cursor",
+    }
 )
 
 # Top-level dirs that are operator data / heavy artifacts
@@ -45,6 +54,9 @@ SKIP_TOP_LEVEL_DIRS = frozenset(
         "playlists",
         "channels",
         "videos",
+        "galleries",
+        "oneoff",
+        "cookies",
         "canvas",
         "test",
         # Local-only bundles / scratch (not part of core console + monthly drivers)
@@ -59,7 +71,9 @@ EXCLUDE_ROOT_NAMES = frozenset(
     {
         "credentials.json",
         "remove_wl_token.json",
+        "temp_oauth.json",
         "test_input.txt",
+        "cookies.run.txt",
         "yt-dlp.exe",
         "yt-dlp_x86.exe",
     }
@@ -424,7 +438,7 @@ def _write_extra_staging(dest_root: Path, source_root: Path, buckets: dict[str, 
         "### Excluded — entire directory classes",
         "",
         "- `logs/` — run outputs",
-        "- `playlists/`, `channels/`, `videos/`, top-level `test/` — download trees / scratch",
+        "- `playlists/`, `channels/`, `videos/`, `galleries/`, `oneoff/`, `cookies/`, top-level `test/` — download trees / scratch / session exports",
         "- `Archivist Scripts/`, `Audio-Only Scripts/`, `Watch Scripts/` — local bundles not in core publish set",
         "- Root `credentials.json`, `remove_wl_token.json`, `yt-dlp.exe`, `yt-dlp_x86.exe`, `test_input.txt`",
         "- `.venv/`, `__pycache__/`, `.pytest_cache/` — environments",

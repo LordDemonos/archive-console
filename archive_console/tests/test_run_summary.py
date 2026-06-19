@@ -96,6 +96,7 @@ def test_enrich_from_json_roundtrip(tmp_path: Path):
     row = enrich_history_entry_for_api(
         tmp_path,
         {"log_folder_rel": "logs/archive_run_x"},
+        allowed_prefixes=["logs"],
     )
     assert row["run_stats"] == {"tried": 5, "ok": 3, "fail": 2, "saved": 2}
 
@@ -107,6 +108,7 @@ def test_enrich_backfills_summary_txt(tmp_path: Path):
     row = enrich_history_entry_for_api(
         tmp_path,
         {"log_folder_rel": "logs/archive_run_y"},
+        allowed_prefixes=["logs"],
     )
     assert row["run_stats"]["tried"] == 3
 

@@ -1,0 +1,52 @@
+.option-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 3% auto;
+    padding: 4px;
+}
+
+.option-text {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.75em;
+}
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.action-btn {
+    border: none;
+    padding: 2px 6px;
+    background: none;
+    font-size: 0.7em;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background-color: khaki;
+}
+
+.separator {
+    font-size: 0.7em;
+    color: #666;
+}
+
+.archive-section {
+    border-top: 1px solid #ccc;
+    padding-top: 8px;
+    flex-wrap: wrap;
+}
+
+.console-status {
+    flex-basis: 100%;
+    font-size: 0.7em;
+    color: #444;
+    margin: 4px 0 0;
+}

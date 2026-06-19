@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 import yt_dlp
 
 import archive_oneoff_rolling as rolling
+from archive_cookies import append_ytdlp_staged_cookies_argv
 from archive_playlist_run import (
     SCRIPT_DIR,
     ManifestYoutubeDL,
@@ -178,7 +179,11 @@ def main() -> int:
 
     reporter.log_line(f"[archive_oneoff_run] URL: {url}")
 
-    argv = list(_build_argv_oneoff(SCRIPT_DIR))
+    argv = append_ytdlp_staged_cookies_argv(
+        _build_argv_oneoff(SCRIPT_DIR),
+        SCRIPT_DIR,
+        log=reporter.log_line,
+    )
     if _env_truthy("ARCHIVE_DRY_RUN"):
         argv.append("--simulate")
         reporter.log_line("[archive_oneoff_run] ARCHIVE_DRY_RUN=1: passing --simulate to yt-dlp.")

@@ -26,8 +26,9 @@ from pydantic import BaseModel, Field
 from .deepl_translate import (
     DeepLClientError,
     effective_deepl_api_key,
+    fetch_usage,
     resolve_deepl_base_url,
-    translate_texts,
+    translate_texts_batched,
 )
 from .exif_rename_template import forbid_path_seps, render_exif_template
 from .exiftool_read import resolve_exiftool_bin, run_exiftool_json
@@ -41,7 +42,8 @@ MAX_FILES_HARD = 200
 
 _WIN_INVALID = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 _DATE_PREFIX = re.compile(r"^(\d{8})(.+)$")
-_YT_STEM_SUFFIX = re.compile(r"^(.+)-([A-Za-z0-9_-]{11})$")
+_YT_STEM_SUFFIX = re.compile(r"^(.+)-([A-Za-z0-9_-]{11})(\s*-\s*\d+)?$")
+_YT_STEM_TAIL_SPACE = re.compile(r"^(.+)\s+([A-Za-z0-9_-]{11})(\s*-\s*\d+)?$")
 _BRACKET_SEG = re.compile(r"【[^】]*】")
 
 OperationKind = Literal["translate_stem_deepl", "apply_exif_template"]
@@ -113,6 +115,21 @@ def unshield_brackets(translated: str, originals: list[str]) -> str:
     return out
 
 
+def _youtube_tail_split(rest: str) -> tuple[str, str] | None:
+    """
+    If ``rest`` ends with a YouTube-style 11-char id, return (stem_without_id, tail).
+    ``tail`` includes the leading separator (``-id`` or `` id``) and optional `` - N`` suffix.
+    Hyphen form is tried first so titles with hyphens split correctly.
+    """
+    m = _YT_STEM_SUFFIX.match(rest)
+    if m:
+        return m.group(1), "-" + m.group(2) + (m.group(3) or "")
+    m = _YT_STEM_TAIL_SPACE.match(rest)
+    if m:
+        return m.group(1), " " + m.group(2) + (m.group(3) or "")
+    return None
+
+
 def prepare_deepl_input(
     stem: str,
     *,
@@ -132,10 +149,16 @@ def prepare_deepl_input(
             date_prefix, rest = m.group(1), m.group(2)
     yt_suffix = ""
     mid = rest
-    if preserve_youtube_id and not whole_basename:
-        ym = _YT_STEM_SUFFIX.match(rest)
-        if ym:
-            mid, yt_suffix = ym.group(1), "-" + ym.group(2)
+    tail = _youtube_tail_split(rest)
+    if tail is not None:
+        stem_wo, yt_tail = tail
+        if preserve_youtube_id:
+            if not whole_basename:
+                mid, yt_suffix = stem_wo, yt_tail
+            # whole_basename + preserve: keep full rest in DeepL input (id not split out).
+        else:
+            # Strip id from DeepL input; do not reattach (whether or not whole_basename).
+            mid, yt_suffix = stem_wo, ""
     bracket_parts: list[str] = []
     to_translate = mid
     if preserve_brackets:
@@ -281,6 +304,22 @@ def _pipeline_operation_label(steps: list[str]) -> str:
     return "+".join(m[s] for s in steps) if steps else "rename"
 
 
+def preview_operation_label_from_options(opt: RenamePreviewOptions) -> str:
+    """Stable operation label for ledger rows (same step order as build_rename_preview)."""
+    order_seq = (
+        ["exif", "deepl"]
+        if opt.pipeline_order == "exif_then_deepl"
+        else ["deepl", "exif"]
+    )
+    steps: list[str] = []
+    for s in order_seq:
+        if s == "exif" and opt.use_exif:
+            steps.append("exif")
+        elif s == "deepl" and opt.use_deepl:
+            steps.append("deepl")
+    return _pipeline_operation_label(steps)
+
+
 def build_rename_preview(
     *,
     archive_root: Path,
@@ -295,9 +334,17 @@ def build_rename_preview(
     exiftool_exe: str = "",
     exiftool_timeout_sec: float = 45.0,
 ) -> dict[str, Any]:
+    source_lang = "" if source_lang is None else str(source_lang)
+    target_lang = str(target_lang or "EN-US")
+    endpoint_mode = str(endpoint_mode or "auto")
+
     rels_clean = [normalize_rel(r) for r in rels if (r or "").strip()]
     rels_clean = [r for r in rels_clean if r]
-    cap = max(1, min(max_files, MAX_FILES_HARD))
+    try:
+        mf = int(max_files)  # belt-and-suspenders: callers/tests may pass non-int
+    except (TypeError, ValueError):
+        mf = MAX_FILES_DEFAULT
+    cap = max(1, min(mf, MAX_FILES_HARD))
     if len(rels_clean) > cap:
         raise ValueError(f"Too many files (max {cap} per preview).")
 
@@ -399,7 +446,7 @@ def build_rename_preview(
                 w.tag_line = _tag_summary_line(tags)
         works.append(w)
 
-    stems = [w.stem0 for w in works]
+    stems = ["" if w.stem0 is None else str(w.stem0) for w in works]
     usage: dict[str, Any] = {}
 
     for step in steps:
@@ -416,7 +463,7 @@ def build_rename_preview(
                     pipeline_stem=stems[i],
                     used_tags=used,
                 )
-                rendered = forbid_path_seps(rendered).strip()
+                rendered = forbid_path_seps(str(rendered or "")).strip()
                 if not rendered:
                     if opt.exif_missing_policy == "skip":
                         w.row_abort = (
@@ -428,7 +475,13 @@ def build_rename_preview(
                     new_stems.append(stems[i])
                 else:
                     new_stems.append(rendered)
-                    extra = json.dumps(used, ensure_ascii=False)[:180]
+                    try:
+                        extra = json.dumps(
+                            {str(k): str(v) for k, v in used.items()},
+                            ensure_ascii=False,
+                        )[:180]
+                    except (TypeError, ValueError):
+                        extra = "{}"
                     w.tag_line = (w.tag_line + " | " + extra)[:400]
                 for x in rw:
                     w.tag_line = (w.tag_line + "; " + x)[:400]
@@ -453,17 +506,54 @@ def build_rename_preview(
             if batch_mid:
                 api_key = effective_deepl_api_key(stored_api_key)
                 base = resolve_deepl_base_url(api_key, endpoint_mode)
-                translated, usage = translate_texts(
+                estimated_chars = sum(len(t) for t in batch_mid)
+                try:
+                    plan = fetch_usage(api_key=api_key, endpoint_base=base)
+                except DeepLClientError as e:
+                    logger.info("DeepL usage lookup skipped: %s", e.code)
+                    plan = {}
+                char_limit = int(plan.get("character_limit") or 0)
+                char_used = int(plan.get("character_count") or 0)
+                if char_limit > 0 and char_used + estimated_chars > char_limit:
+                    remaining = max(0, char_limit - char_used)
+                    raise ValueError(
+                        f"DeepL quota: ~{estimated_chars:,} characters needed for this "
+                        f"preview but only {remaining:,} remain in the current billing "
+                        f"period ({char_used:,} / {char_limit:,} used). Reduce the queue "
+                        f"or upgrade your DeepL plan."
+                    )
+                raw_tr, raw_usage = translate_texts_batched(
                     batch_mid,
                     api_key=api_key,
                     source_lang=source_lang,
                     target_lang=target_lang,
                     endpoint_base=base,
                 )
+                if not isinstance(raw_tr, list):
+                    logger.warning(
+                        "DeepL translate_texts returned non-list translations (%s)",
+                        type(raw_tr).__name__,
+                    )
+                    raise DeepLClientError(
+                        "deepl_bad_response",
+                        "DeepL returned an invalid translation payload. Check server logs.",
+                    )
+                translated = ["" if x is None else str(x) for x in raw_tr]
+                if isinstance(raw_usage, dict):
+                    usage = dict(raw_usage)
+                    if plan:
+                        usage["character_count_before"] = char_used
+                        if char_limit > 0:
+                            usage["character_limit"] = char_limit
+                        usage["character_count_estimated"] = estimated_chars
+            if len(translated) != len(batch_map):
+                raise ValueError(
+                    "Rename preview: DeepL translation count mismatch (try preview again)."
+                )
             new_stems = list(stems)
             for bi, (i, pr, _mid, suf, br) in enumerate(batch_map):
-                new_mid = unshield_brackets(translated[bi], br)
-                new_stems[i] = pr + new_mid + suf
+                new_mid = unshield_brackets(str(translated[bi]), br)
+                new_stems[i] = str(pr) + new_mid + str(suf)
             stems = new_stems
 
     rows_out: list[dict[str, Any]] = []
@@ -516,7 +606,7 @@ def build_rename_preview(
             )
             continue
 
-        stem_final = stems[i]
+        stem_final = str(stems[i]) if stems[i] is not None else ""
         if opt.use_deepl:
             _pr, mid_check, _suf, _br = prepare_deepl_input(
                 stem_final,
@@ -631,6 +721,7 @@ def apply_rename_preview(
     archive_root: Path,
     allowed_prefixes: list[str],
     preview_id: str,
+    touch_mtime: bool = False,
 ) -> tuple[dict[str, Any], str]:
     """
     Apply a prior preview: re-validate allowlisted paths, then Path.rename (atomic per file).
@@ -640,6 +731,7 @@ def apply_rename_preview(
     if not popped:
         raise ValueError("Unknown or expired preview. Run preview again.")
     rows, pipeline_operation = popped
+    root_r = archive_root.resolve()
 
     items: list[dict[str, Any]] = []
     ok = skip = fail = 0
@@ -657,6 +749,7 @@ def apply_rename_preview(
                     "rel": rel,
                     "old_basename": orig_base,
                     "new_basename": proposed_base,
+                    "new_rel": rel,
                     "status": "fail",
                     "reason": str(e),
                 }
@@ -669,6 +762,7 @@ def apply_rename_preview(
                     "rel": rel,
                     "old_basename": orig_base,
                     "new_basename": proposed_base,
+                    "new_rel": rel,
                     "status": "fail",
                     "reason": "source missing",
                 }
@@ -681,6 +775,7 @@ def apply_rename_preview(
                     "rel": rel,
                     "old_basename": orig_base,
                     "new_basename": proposed_base,
+                    "new_rel": rel,
                     "status": "fail",
                     "reason": "basename changed since preview",
                 }
@@ -693,6 +788,7 @@ def apply_rename_preview(
                     "rel": rel,
                     "old_basename": orig_base,
                     "new_basename": proposed_base,
+                    "new_rel": rel,
                     "status": "skip",
                     "reason": "no change",
                 }
@@ -707,6 +803,7 @@ def apply_rename_preview(
                     "rel": rel,
                     "old_basename": orig_base,
                     "new_basename": proposed_base,
+                    "new_rel": proposed_rel,
                     "status": "fail",
                     "reason": f"target not allowed: {e}",
                 }
@@ -720,6 +817,7 @@ def apply_rename_preview(
                     "rel": rel,
                     "old_basename": orig_base,
                     "new_basename": proposed_base,
+                    "new_rel": proposed_rel,
                     "status": "fail",
                     "reason": "target exists",
                 }
@@ -727,6 +825,12 @@ def apply_rename_preview(
             continue
         try:
             src.rename(dst)
+            if touch_mtime:
+                try:
+                    now = time.time()
+                    os.utime(dst, (now, now))
+                except OSError:
+                    pass
         except OSError as e:
             fail += 1
             items.append(
@@ -734,17 +838,23 @@ def apply_rename_preview(
                     "rel": rel,
                     "old_basename": orig_base,
                     "new_basename": proposed_base,
+                    "new_rel": proposed_rel,
                     "status": "fail",
                     "reason": str(e),
                 }
             )
             continue
         ok += 1
+        try:
+            new_rel = dst.resolve().relative_to(root_r).as_posix()
+        except ValueError:
+            new_rel = proposed_rel
         items.append(
             {
                 "rel": rel,
                 "old_basename": orig_base,
                 "new_basename": proposed_base,
+                "new_rel": new_rel,
                 "status": "ok",
                 "reason": "",
             }

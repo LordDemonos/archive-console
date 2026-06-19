@@ -47,3 +47,44 @@ def test_gallery_dl_exe_invocable_bare_name_without_which(
 ) -> None:
     monkeypatch.setattr("app.gallery_cli.shutil.which", lambda _x: None)
     assert gallery_dl_exe_invocable("gallery-dl") is False
+
+
+def test_run_gallery_dl_pip_update_success(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.gallery_cli import run_gallery_dl_pip_update
+
+    py = tmp_path / "python.exe"
+    py.write_text("", encoding="utf-8")
+    calls: list[list[str]] = []
+
+    def fake_run(cmd, **kwargs):  # noqa: ANN003
+        calls.append(list(cmd))
+        return subprocess.CompletedProcess(cmd, 0, stdout="ok\n", stderr="")
+
+    import subprocess
+
+    monkeypatch.setattr("app.gallery_cli.subprocess.run", fake_run)
+    rc, lines = run_gallery_dl_pip_update(py)
+    assert rc == 0
+    assert "ok" in lines
+    assert calls[0][-1] == "gallery-dl"
+
+
+def test_run_gallery_dl_pip_update_failure_continues(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.gallery_cli import run_gallery_dl_pip_update
+
+    py = tmp_path / "python.exe"
+    py.write_text("", encoding="utf-8")
+
+    def fake_run(cmd, **kwargs):  # noqa: ANN003
+        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="network error")
+
+    import subprocess
+
+    monkeypatch.setattr("app.gallery_cli.subprocess.run", fake_run)
+    rc, lines = run_gallery_dl_pip_update(py)
+    assert rc == 1
+    assert any("network" in ln for ln in lines)

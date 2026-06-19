@@ -20,6 +20,7 @@ def test_parse_editor_filename_ok():
     assert parse_editor_filename("playlists_input.txt") == "playlists_input.txt"
     assert parse_editor_filename("yt-dlp.conf") == "yt-dlp.conf"
     assert parse_editor_filename("gallery-dl.conf") == "gallery-dl.conf"
+    assert parse_editor_filename("cookies/instagram.txt") == "cookies/instagram.txt"
 
 
 def test_parse_editor_rejects():

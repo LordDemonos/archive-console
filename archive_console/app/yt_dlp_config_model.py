@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 # --- Tier A: curated options (serialize order defined in yt_dlp_conf_io) ---
 
@@ -59,7 +59,6 @@ class YtdlpUiModel(BaseModel):
     no_warnings: bool = False
     quiet: bool = False
     no_progress: bool = False
-    concurrent_downloads: int | None = None
     buffer_size: str | None = None
     http_chunk_size: str | None = None
 
@@ -71,9 +70,22 @@ class YtdlpUiModel(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    @model_validator(mode="after")
+    def _normalize_max_sleep_interval(self) -> "YtdlpUiModel":
+        mx = self.max_sleep_interval
+        if mx is None or mx <= 0:
+            object.__setattr__(self, "max_sleep_interval", None)
+            return self
+        mn = self.sleep_interval
+        if mn is not None and mx < mn:
+            object.__setattr__(self, "max_sleep_interval", None)
+        return self
+
 
 def model_from_dict(data: dict[str, Any]) -> YtdlpUiModel:
-    return YtdlpUiModel.model_validate(data)
+    allowed = set(YtdlpUiModel.model_fields.keys())
+    filtered = {k: v for k, v in data.items() if k in allowed}
+    return YtdlpUiModel.model_validate(filtered)
 
 
 DOC_ROOT = "https://github.com/yt-dlp/yt-dlp/blob/master/README.md"
@@ -235,7 +247,7 @@ TIER_A_GROUPS: list[dict[str, Any]] = [
                 "min": 0,
                 "max": 120,
                 "step": 1,
-                "help": "Upper cap when yt-dlp applies adaptive sleep.",
+                "help": "Upper cap when yt-dlp randomizes sleep (omit when ≤ sleep-interval; 0 = unset).",
                 "doc_url": f"{DOC_ROOT}#download-options",
             },
         ],
@@ -283,16 +295,6 @@ TIER_A_GROUPS: list[dict[str, Any]] = [
                 "max": 32,
                 "step": 1,
                 "help": "Parallel fragment downloads per file (higher = faster, more aggressive).",
-                "doc_url": f"{DOC_ROOT}#download-options",
-            },
-            {
-                "key": "concurrent_downloads",
-                "label": "concurrent-downloads",
-                "widget": "range",
-                "min": 1,
-                "max": 8,
-                "step": 1,
-                "help": "How many media files can download at once.",
                 "doc_url": f"{DOC_ROOT}#download-options",
             },
             {
@@ -561,7 +563,7 @@ TIER_A_GROUPS: list[dict[str, Any]] = [
             },
             {
                 "key": "noplaylist",
-                "label": "noplaylist",
+                "label": "no-playlist",
                 "widget": "toggle",
                 "help": "Download only the single video when URL is both video and playlist.",
                 "doc_url": f"{DOC_ROOT}#video-selection",

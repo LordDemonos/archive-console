@@ -22,9 +22,11 @@ SHORT_OPTION_TO_CLI: dict[str, str] = {
     "c": "continue",
 }
 
-# --continue maps to continue_dl
+# --continue maps to continue_dl; --no-playlist is CLI name (dest noplaylist in yt-dlp).
 CLI_TO_ATTR: dict[str, str] = {
     "continue": "continue_dl",
+    "no-playlist": "noplaylist",
+    "noplaylist": "noplaylist",  # legacy bad serialize — parse only, never emit
 }
 
 
@@ -116,14 +118,13 @@ SERIALIZE_ORDER: list[tuple[str, str, str]] = [
     ("write_comments", "write-comments", "bool"),
     ("external_downloader", "external-downloader", "str"),
     ("concurrent_fragments", "concurrent-fragments", "int"),
-    ("concurrent_downloads", "concurrent-downloads", "int"),
     ("buffer_size", "buffer-size", "str"),
     ("http_chunk_size", "http-chunk-size", "str"),
     ("match_filter", "match-filter", "str"),
     ("extractor_args", "extractor-args", "str"),
     ("js_runtimes", "js-runtimes", "str"),
     ("remote_components", "remote-components", "str"),
-    ("noplaylist", "noplaylist", "bool"),
+    ("noplaylist", "no-playlist", "bool"),
     ("restrict_filenames", "restrict-filenames", "bool"),
     ("no_overwrites", "no-overwrites", "bool"),
     ("continue_dl", "continue", "bool"),
@@ -238,6 +239,42 @@ def parse_conf(text: str) -> YtdlpUiModel:
     return m
 
 
+def _rest_unquoted(rest: str) -> str:
+    if rest.startswith('"') and rest.endswith('"'):
+        return rest[1:-1].replace('\\"', '"').replace("\\\\", "\\")
+    if rest.startswith("'") and rest.endswith("'"):
+        return rest[1:-1]
+    return rest
+
+
+def _should_omit_managed_scalar(model: YtdlpUiModel, attr: str, val: Any) -> bool:
+    if val is None or val == "":
+        return True
+    if attr == "max_sleep_interval":
+        fval = float(val)
+        if fval <= 0:
+            return True
+        if model.sleep_interval is not None and fval < float(model.sleep_interval):
+            return True
+    return False
+
+
+def _conf_option_lines_to_argv(content: str) -> list[str]:
+    argv: list[str] = []
+    for line in content.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("--") or stripped.startswith("#"):
+            continue
+        parsed = _try_parse_option_line(line)
+        if parsed is None:
+            continue
+        opt, rest = parsed
+        argv.append(f"--{opt}")
+        if rest:
+            argv.append(_rest_unquoted(rest))
+    return argv
+
+
 def serialize_conf(
     model: YtdlpUiModel,
     *,
@@ -262,7 +299,7 @@ def serialize_conf(
             if val:
                 lines.append(f"--{cli}")
             continue
-        if val is None or val == "":
+        if _should_omit_managed_scalar(model, attr, val):
             continue
         if kind == "int":
             lines.append(f"--{cli} {int(val)}")
@@ -291,7 +328,7 @@ def preview_cli(model: YtdlpUiModel, *, max_len: int = 12000) -> str:
             if val:
                 chunks.append(f"--{cli}")
             continue
-        if val is None or val == "":
+        if _should_omit_managed_scalar(model, attr, val):
             continue
         if kind in ("int", "float"):
             chunks.append(f"--{cli}")
@@ -308,6 +345,75 @@ def preview_cli(model: YtdlpUiModel, *, max_len: int = 12000) -> str:
     if len(s) > max_len:
         return s[: max_len - 1] + "…"
     return s
+
+
+_PROBE_URL = "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+
+
+def _probe_ytdlp_cli_argv(argv: list[str]) -> str | None:
+    """Return a short error if yt-dlp rejects argv (full option validation), else None."""
+    try:
+        from yt_dlp import parse_options
+
+        parse_options(argv + [_PROBE_URL])
+        return None
+    except Exception as ex:
+        msg = str(ex).strip()
+        if not msg:
+            return type(ex).__name__
+        for line in reversed(msg.splitlines()):
+            stripped = line.strip()
+            if stripped and not stripped.startswith("Usage:"):
+                return stripped
+        return msg.splitlines()[-1].strip() if msg.splitlines() else msg
+
+
+def _probe_unknown_ytdlp_option(argv: list[str]) -> str | None:
+    """Line-level check for unrecognized long options."""
+    try:
+        from yt_dlp.options import parseOpts
+
+        parseOpts(argv + [_PROBE_URL])
+        return None
+    except Exception as ex:
+        msg = str(ex).lower()
+        if "no such option" in msg:
+            tail = str(ex).strip().splitlines()
+            return tail[-1] if tail else str(ex)
+        return None
+
+
+def rejected_ytdlp_cli_options(content: str) -> list[str]:
+    """
+    Validate managed ``--long-opt`` lines against yt-dlp (unknown flags and
+    cross-option rules such as max-sleep-interval vs sleep-interval).
+    """
+    argv = _conf_option_lines_to_argv(content)
+    if argv:
+        err = _probe_ytdlp_cli_argv(argv)
+        if err:
+            return [f"yt-dlp.conf: {err}"]
+    bad: list[str] = []
+    for lineno, line in enumerate(content.splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped.startswith("--") or stripped.startswith("#"):
+            continue
+        parsed = _try_parse_option_line(line)
+        if parsed is None:
+            continue
+        opt, rest = parsed
+        opt_argv = [f"--{opt}"]
+        if rest:
+            opt_argv.append(_rest_unquoted(rest))
+        err = _probe_unknown_ytdlp_option(opt_argv)
+        if err:
+            bad.append(f"Line {lineno}: --{opt} — {err}")
+    return bad
+
+
+def rejected_ytdlp_model_cli_options(model: YtdlpUiModel) -> list[str]:
+    """Validate serialized Tier A + Tier B options from a model."""
+    return rejected_ytdlp_cli_options(serialize_conf(model, preset_id="validate"))
 
 
 def extract_generated_banner_info(text: str) -> tuple[bool, str | None]:

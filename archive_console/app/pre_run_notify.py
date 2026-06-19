@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 from typing import Any
 
-from .schedule_times import fire_occurrence_key, next_monthly_fire_local
+from .schedule_times import fire_occurrence_key, next_fire_local
 from .settings import ConsoleState, ScheduleEntry
 
 
@@ -40,7 +40,7 @@ def pre_run_reminder_banner(
     for s in st.schedules:
         if not s.enabled:
             continue
-        nf = next_monthly_fire_local(s, now=now_local)
+        nf = next_fire_local(s, now=now_local)
         if nf is None:
             continue
         if best is None or nf < best[1]:

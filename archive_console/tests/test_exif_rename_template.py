@@ -55,6 +55,17 @@ def test_normalize_image_size() -> None:
     assert normalize_image_size("4032 3024") == "4032x3024"
 
 
+def test_render_exif_template_coerces_none_pipeline_stem() -> None:
+    """Regression: re.sub repl must return str; None stem used to raise TypeError."""
+    out, _warns = render_exif_template("{Stem}_x", {}, pipeline_stem=None)
+    assert out == "_x"
+
+
+def test_render_exif_template_coerces_int_pipeline_stem() -> None:
+    out, _warns = render_exif_template("a{Stem}b", {}, pipeline_stem=20230101)
+    assert out == "a20230101b"
+
+
 def test_build_rename_exif_only(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -103,3 +114,52 @@ def test_build_rename_exif_only(
     assert rows[0]["status"] in ("ok", "warn")
     assert rows[0]["proposed_basename"] == "20230715_TestCam.jpg"
     assert "TestCam" in (rows[0].get("tags_preview") or "")
+
+
+def test_build_rename_exif_string_timeout_no_typeerror(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression: str exiftool_timeout_sec + real run_exiftool_json must not TypeError in subprocess."""
+    from app.rename_pipeline import RenamePreviewOptions, build_rename_preview
+
+    root = tmp_path
+    (root / "photos").mkdir()
+    jpg = root / "photos" / "old.jpg"
+    jpg.write_bytes(b"\xff\xd8\xff")
+
+    def fake_run(*_a, **kw):  # noqa: ANN002
+        assert isinstance(kw.get("timeout"), (int, float))
+        assert kw["timeout"] == 30.0
+
+        class R:
+            returncode = 0
+            stderr = ""
+            stdout = (
+                '[{"EXIF:DateTimeOriginal": "2023:07:15 08:00:00", "Model": "TestCam"}]'
+            )
+
+        return R()
+
+    monkeypatch.setattr("app.exiftool_read.subprocess.run", fake_run)
+
+    opt = RenamePreviewOptions(
+        use_deepl=False,
+        use_exif=True,
+        exif_template="{DateTimeOriginal:%Y%m%d}_{Model}",
+        exif_missing_policy="skip",
+    )
+    result = build_rename_preview(
+        archive_root=root,
+        allowed_prefixes=["photos"],
+        rels=["photos/old.jpg"],
+        opt=opt,
+        stored_api_key="",
+        endpoint_mode="auto",
+        source_lang="",
+        target_lang="EN-US",
+        max_files=50,
+        exiftool_exe="exiftool",
+        exiftool_timeout_sec="30",
+    )
+    assert result["rows"][0]["proposed_basename"] == "20230715_TestCam.jpg"
+

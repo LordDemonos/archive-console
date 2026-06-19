@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import time
 import uuid
@@ -12,7 +13,9 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .duplicate_scan import DuplicateGroup, find_duplicate_groups
+from .download_output import state_allowed_prefixes
 from .paths import PathNotAllowedError, assert_allowed_path, normalize_rel
+from .run_error_record import make_error_record, record_to_sidecar_or_global
 from .settings import ConsoleState
 
 logger = logging.getLogger(__name__)
@@ -39,6 +42,7 @@ class DupScanState:
 @dataclass
 class DuplicateScanManager:
     get_state: Callable[[], ConsoleState]
+    persist_state: Callable[[ConsoleState], None]
     _lock: asyncio.Lock = field(default_factory=asyncio.Lock)
     _current: DupScanState | None = None
     _task: asyncio.Task[None] | None = None
@@ -46,7 +50,7 @@ class DuplicateScanManager:
         default_factory=lambda: {"files_scanned": 0, "files_hashed": 0, "groups_found": 0}
     )
 
-    def status(self) -> dict[str, Any]:
+    def status(self, *, include_groups: bool = False) -> dict[str, Any]:
         c = self._current
         prog = dict(self._progress)
         if c is None:
@@ -55,18 +59,66 @@ class DuplicateScanManager:
                 "scan": None,
                 "progress": prog,
             }
+        scan: dict[str, Any] = {
+            "scan_id": c.scan_id,
+            "started_unix": c.started_unix,
+            "ended_unix": c.ended_unix,
+            "error": c.error,
+            "stats": c.stats,
+        }
+        if include_groups:
+            scan["groups"] = c.groups
+        else:
+            scan["group_count"] = len(c.groups) if c.groups else 0
         return {
             "phase": c.phase.value,
             "progress": prog,
-            "scan": {
-                "scan_id": c.scan_id,
-                "started_unix": c.started_unix,
-                "ended_unix": c.ended_unix,
-                "error": c.error,
-                "stats": c.stats,
-                "groups": c.groups,
-            },
+            "scan": scan,
         }
+
+    def results(self) -> dict[str, Any]:
+        c = self._current
+        if c is None or c.phase != DupScanPhase.success:
+            return {"scan_id": None, "stats": None, "groups": []}
+        return {
+            "scan_id": c.scan_id,
+            "stats": c.stats,
+            "groups": c.groups or [],
+        }
+
+    def clear_results_if_idle(self) -> bool:
+        """Drop stored duplicate groups when no scan is running (e.g. after apply)."""
+        if self._current is not None and self._current.phase == DupScanPhase.running:
+            return False
+        self._current = None
+        self._progress = {
+            "files_scanned": 0,
+            "files_hashed": 0,
+            "groups_found": 0,
+        }
+        return True
+
+    async def force_reset_running(self, reason: str = "force-reset") -> bool:
+        """Clear a stuck running scan so the operator can start a new one."""
+        async with self._lock:
+            if self._current is None or self._current.phase != DupScanPhase.running:
+                return False
+            scan_id = self._current.scan_id
+            task = self._task
+        if task and not task.done():
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError, asyncio.TimeoutError):
+                await asyncio.wait_for(task, timeout=3.0)
+        async with self._lock:
+            if (
+                self._current
+                and self._current.scan_id == scan_id
+                and self._current.phase == DupScanPhase.running
+            ):
+                self._current.phase = DupScanPhase.failed
+                self._current.ended_unix = time.time()
+                self._current.error = reason[:500]
+        return True
 
     async def start_scan(
         self,
@@ -81,7 +133,7 @@ class DuplicateScanManager:
 
             st = self.get_state()
             root = Path(st.archive_root).expanduser().resolve()
-            prefixes = st.allowlisted_rel_prefixes
+            prefixes = state_allowed_prefixes(st)
 
             if not include_video and not include_images:
                 raise ValueError("enable at least one of video or images")
@@ -155,6 +207,9 @@ class DuplicateScanManager:
         t0 = time.time()
         try:
             groups, stats = await loop.run_in_executor(None, work)
+        except asyncio.CancelledError:
+            logger.info("duplicate scan %s canceled", scan_id)
+            raise
         except Exception as e:
             logger.warning("duplicate scan %s failed: %s", scan_id, e)
             async with self._lock:
@@ -162,6 +217,32 @@ class DuplicateScanManager:
                     self._current.phase = DupScanPhase.failed
                     self._current.ended_unix = time.time()
                     self._current.error = str(e)
+            try:
+                st = self.get_state()
+                root = Path(st.archive_root).expanduser().resolve()
+                rec = make_error_record(
+                    stage="duplicates",
+                    operation="find_duplicate_groups",
+                    message=str(e),
+                    severity="error",
+                    job_id=scan_id,
+                    technical={"exception_class": type(e).__name__},
+                    retryable=True,
+                )
+                st2 = record_to_sidecar_or_global(
+                    archive_root=root,
+                    allowed_prefixes=state_allowed_prefixes(st),
+                    log_folder_rel=None,
+                    record=rec,
+                    state=st,
+                )
+                self.persist_state(st2)
+            except Exception as persist_exc:
+                logger.warning(
+                    "duplicate scan %s: could not persist error ledger: %s",
+                    scan_id,
+                    persist_exc,
+                )
             return
 
         elapsed = time.time() - t0
@@ -184,11 +265,14 @@ class DuplicateScanManager:
         )
 
         async with self._lock:
-            if self._current and self._current.scan_id == scan_id:
-                self._current.phase = DupScanPhase.success
-                self._current.ended_unix = time.time()
-                self._current.stats = stats
-                self._current.groups = gdicts
-                self._progress["files_scanned"] = stats.get("files_scanned", 0)
-                self._progress["files_hashed"] = stats.get("files_hashed", 0)
-                self._progress["groups_found"] = stats.get("duplicate_groups", 0)
+            if not self._current or self._current.scan_id != scan_id:
+                return
+            if self._current.phase != DupScanPhase.running:
+                return
+            self._current.phase = DupScanPhase.success
+            self._current.ended_unix = time.time()
+            self._current.stats = stats
+            self._current.groups = gdicts
+            self._progress["files_scanned"] = stats.get("files_scanned", 0)
+            self._progress["files_hashed"] = stats.get("files_hashed", 0)
+            self._progress["groups_found"] = stats.get("duplicate_groups", 0)

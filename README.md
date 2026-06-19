@@ -64,7 +64,7 @@ Follow **`logs\latest_run.txt`**, **`latest_run_channel.txt`**, or **`latest_run
 
 Local web app: **`start_archive_console.bat`** (from this root) creates **`archive_console\.venv`**, installs **`archive_console/requirements.txt`** (**`yt-dlp[default]`** + **`gallery-dl`**), and opens **`http://127.0.0.1:<port>/`** (default **8756**, persisted in **`archive_console/state.json`**). **Python 3.10+** required on PATH.
 
-**Sidebar (typical):** **Run** · **One-off** · **Galleries** (gallery-dl) · **History & reports** · **Library** (browse, player, duplicates, clip export) · **Rename** · **Inputs & config** (lists, **`cookies.txt`**, output-folder roots) · **yt-dlp.conf** (Tier A/B/C editor) · **gallery-dl.conf** (JSON, **`-c`** when present—[upstream config](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst)) · **Supported sites** (local **`--list-extractors`** for yt-dlp + gallery-dl) · **Settings**.
+**Sidebar (typical):** **Setup** · **Dashboard** · **Scheduled batch** (yt-dlp · batch drivers) · **Single download** · **Gallery batch** (gallery-dl) · **Video to GIF** · **Browse library** · **Rename files** · **Scan duplicates** (Czkawka) · **History** · **Input lists** · **Download options** (`yt-dlp.conf`) · **Gallery options** · **GIF options** · **Supported sites** · **Settings**.
 
 Full behavior, **SHUTDOWN** stop, optional **`ARCHIVE_SHUTDOWN_TOKEN`**, and security boundaries: **`archive_console/ARCHIVE_CONSOLE.md`**.
 
@@ -91,14 +91,14 @@ Dark UI, **1280×800** captures. Replace for a public fork if paths or editor co
 
 | View | Role |
 |------|------|
-| Run | **`monthly_*`** + log |
-| One-off | Single URL + rolling report |
-| Galleries | gallery-dl preview / run |
-| History & reports | Ledger, **`report.html`** links |
-| Library | Browse, player, duplicates, clips |
-| Rename | DeepL / ExifTool preview |
-| Inputs & config | Output roots + tabbed files |
-| yt-dlp.conf / gallery-dl.conf | Editors |
+| Scheduled batch | **`monthly_*`** + log (manual or scheduler) |
+| Single download | One URL + rolling report |
+| Gallery batch | gallery-dl preview / run |
+| History | Ledger, **`report.html`** links |
+| Browse library | Player, duplicates, clips |
+| Rename files | DeepL / ExifTool preview |
+| Input lists | Output roots + tabbed files |
+| Download / Gallery / GIF options | Config editors |
 | Supported sites | Extractor lists |
 | Settings | Port (loopback), allowlist, scheduler, retention |
 
@@ -147,3 +147,4 @@ Redacts typical machine paths, excludes **`cookies.txt`**, **`state.json`**, dow
 - See **`CONTRIBUTING.md`**, **`PUBLISH_MANIFEST.md`**, and **`cookies.txt.example`**.
 
 **Third-party / disclaimer:** this project is **not affiliated with YouTube, Google LLC, or yt-dlp**. You supply yt-dlp and obey site terms of service.
+

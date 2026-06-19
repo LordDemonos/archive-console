@@ -54,6 +54,52 @@ def resolve_under_root(archive_root: Path, rel: str) -> Path:
     return target
 
 
+def _prefix_matches_rel(rel_lower: str, pl: str) -> bool:
+    """True when rel matches allowlist prefix at root or as a nested folder segment."""
+    if not pl:
+        return False
+    if rel_lower == pl:
+        return True
+    if rel_lower.startswith(pl + "/"):
+        return True
+    # Bare folder names (no slash) also match nested paths, e.g. prefix "WL" →
+    # "playlists/WL/file.mp4", or "Watch Later Archived" under playlists/.
+    bounded = "/" + rel_lower + "/"
+    if ("/" + pl + "/") in bounded:
+        return True
+    return rel_lower.endswith("/" + pl)
+
+
+def expand_allowlist_prefix(archive_root: Path, prefix: str) -> str:
+    """
+    Normalize a Settings allowlist entry. Bare folder names that exist only
+    nested under archive_root expand to their relative path when unique
+    (e.g. "Watch Later Archived" → "playlists/Watch Later Archived").
+    """
+    if not (prefix or "").strip():
+        return ""
+    rel = normalize_rel(prefix)
+    if not rel or "/" in rel:
+        return rel
+    root = archive_root.resolve()
+    if (root / rel).is_dir():
+        return rel
+    matches: list[str] = []
+    try:
+        for p in root.rglob(rel):
+            if not p.is_dir() or p.name.lower() != rel.lower():
+                continue
+            try:
+                matches.append(p.relative_to(root).as_posix())
+            except ValueError:
+                continue
+    except OSError:
+        return rel
+    if len(matches) == 1:
+        return matches[0]
+    return rel
+
+
 def is_allowed(
     archive_root: Path,
     full: Path,
@@ -77,7 +123,7 @@ def is_allowed(
         if pref == "":
             continue
         pl = pref.strip("/").replace("\\", "/").lower()
-        if rel_lower == pl or rel_lower.startswith(pl + "/"):
+        if _prefix_matches_rel(rel_lower, pl):
             return True
     return False
 

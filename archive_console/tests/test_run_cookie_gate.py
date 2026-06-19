@@ -33,6 +33,12 @@ def gate_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
                     "require_cookie_confirm_manual": True,
                     "tray_notify_before_schedule": False,
                 },
+                "ytdlp_batch_run": {
+                    "preflight_via_extension": False,
+                    "preflight_wait_sec": 120,
+                    "pause_on_cookie_error": False,
+                    "cookie_auth_poll_sec": 15,
+                },
                 "schedules": [],
                 "run_history": [],
             }
@@ -112,6 +118,9 @@ def test_run_start_gate_disabled_in_state(tmp_path: Path, monkeypatch) -> None:
                     "notifications_stub": False,
                     "require_cookie_confirm_manual": False,
                     "tray_notify_before_schedule": False,
+                },
+                "ytdlp_batch_run": {
+                    "preflight_via_extension": False,
                 },
                 "schedules": [],
                 "run_history": [],

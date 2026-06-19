@@ -29,6 +29,7 @@ from datetime import datetime, timezone
 
 import yt_dlp
 
+from archive_cookies import append_ytdlp_staged_cookies_argv
 from archive_playlist_run import (
     SCRIPT_DIR,
     ManifestYoutubeDL,
@@ -188,7 +189,11 @@ def main() -> int:
         f"{len(urls)} URL(s) for yt-dlp."
     )
 
-    argv = list(_build_argv_video(SCRIPT_DIR))
+    argv = append_ytdlp_staged_cookies_argv(
+        _build_argv_video(SCRIPT_DIR),
+        SCRIPT_DIR,
+        log=reporter.log_line,
+    )
     if _env_truthy("ARCHIVE_DRY_RUN"):
         argv.append("--simulate")
         reporter.log_line(

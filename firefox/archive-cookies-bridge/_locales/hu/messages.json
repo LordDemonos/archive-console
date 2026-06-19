@@ -1,0 +1,34 @@
+{
+  "extDescription": {
+    "message": "Az összes sütit exportálja egy Netscape HTTP Cookie Fájlba, amit olyan programok használnak, mint a curl, wget, youtube-dl és hasonlók.",
+    "description": "Short description of the extension to be displayed in the UI and on AMO"
+  },
+  "buttonDescription": {
+    "message": "Sütik exportálása",
+    "description": "Tooltip of the browser toolbar icon."
+  },
+  "copyBtn": {
+    "message": "Másolás",
+    "description": "Copy button that appears next to all titles listed below"
+  },
+  "downloadBtn": {
+    "message": "Letöltés",
+    "description": "Download button that appears next to all titles listed below"
+  },
+  "popupSitesAll": {
+    "message": "Összes",
+    "description": "Popup option text for exporting all cookies"
+  },
+  "popupSitesCurrent": {
+    "message": "Jelenlegi oldal",
+    "description": "Popup option text for exporting cookies only from the current site"
+  },
+  "popupSitesContainerAll": {
+    "message": "Jelenlegi tároló",
+    "description": "Popup option text for exporting all cookies from the current container"
+  },
+  "popupSitesContainerCurrent": {
+    "message": "Jelenlegi tároló és oldal",
+    "description": "Popup option text for exporting cookies only from the current site and current container"
+  }
+}
