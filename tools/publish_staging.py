@@ -101,6 +101,12 @@ def _exclude_file(rel: Path) -> tuple[bool, str]:
         return True, "local UI state paths/history (use state.example.json)"
     if name == "yt_dlp_ui_state.json":
         return True, "local editor UI state"
+    if name in {"gallery_dl_ui_state.json", "gifsky_ui_state.json"}:
+        return True, "local editor UI state (use *.example.json)"
+    if rel.parts[:1] == ("archive_console",) and (
+        name.startswith("_gdl_") or name in {"gdl_out.txt", "gdl_err.txt"}
+    ):
+        return True, "local gallery-dl debug output"
     if name == ".env":
         return True, "may contain secrets (use .env.example if needed)"
     if name.endswith("_downloaded.txt"):
@@ -448,7 +454,8 @@ def _write_extra_staging(dest_root: Path, source_root: Path, buckets: dict[str, 
         "",
         "- `logs/archive_run_*`, `latest_run*.txt`, `run_summary.json`, etc.",
         "- `*_downloaded.txt`, `*_backup.txt`",
-        "- `archive_console/state.json`, `archive_console/yt_dlp_ui_state.json`",
+        "- `archive_console/state.json`, `archive_console/yt_dlp_ui_state.json`, `archive_console/gallery_dl_ui_state.json`, `archive_console/gifsky_ui_state.json`",
+        "- `archive_console/_gdl_*.txt`, `archive_console/gdl_*.txt` — gallery-dl debug captures",
         "- `cookies.txt`",
         "",
         "## Reproduce this staging folder",

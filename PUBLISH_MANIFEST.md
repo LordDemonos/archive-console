@@ -39,6 +39,12 @@ This project is **not affiliated with YouTube, Google LLC, or the yt-dlp project
 
 ## Excluded (why)
 
+- `archive_console/_gdl_test_err.txt — local gallery-dl debug output`
+- `archive_console/_gdl_test_out.txt — local gallery-dl debug output`
+- `archive_console/gallery_dl_ui_state.json — local editor UI state (use *.example.json)`
+- `archive_console/gdl_err.txt — local gallery-dl debug output`
+- `archive_console/gdl_out.txt — local gallery-dl debug output`
+- `archive_console/gifsky_ui_state.json — local editor UI state (use *.example.json)`
 - `archive_console/state.json — local UI state paths/history (use state.example.json)`
 - `archive_console/yt_dlp_ui_state.json — local editor UI state`
 - `channels_downloaded.txt — operator download-archive state`
@@ -72,7 +78,8 @@ This project is **not affiliated with YouTube, Google LLC, or the yt-dlp project
 
 - `logs/archive_run_*`, `latest_run*.txt`, `run_summary.json`, etc.
 - `*_downloaded.txt`, `*_backup.txt`
-- `archive_console/state.json`, `archive_console/yt_dlp_ui_state.json`
+- `archive_console/state.json`, `archive_console/yt_dlp_ui_state.json`, `archive_console/gallery_dl_ui_state.json`, `archive_console/gifsky_ui_state.json`
+- `archive_console/_gdl_*.txt`, `archive_console/gdl_*.txt` — gallery-dl debug captures
 - `cookies.txt`
 
 ## Reproduce this staging folder
