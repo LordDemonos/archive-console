@@ -19,6 +19,8 @@ ARCHIVE_BASELINE: dict[str, Any] = {
     "retries": 10,
     "fragment_retries": 10,
     "file_access_retries": 10,
+    "socket_timeout": 30.0,
+    "skip_unavailable_fragments": True,
     "force_ipv4": True,
     "ignore_errors": True,
     "no_check_formats": True,

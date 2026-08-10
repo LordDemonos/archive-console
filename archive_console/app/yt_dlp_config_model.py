@@ -21,6 +21,7 @@ class YtdlpUiModel(BaseModel):
     sleep_requests: float | None = None
     sleep_interval: float | None = None
     max_sleep_interval: float | None = None
+    socket_timeout: float | None = 30.0
     retries: int | None = None
     fragment_retries: int | None = None
     file_access_retries: int | None = None
@@ -55,7 +56,7 @@ class YtdlpUiModel(BaseModel):
     restrict_filenames: bool = False
     no_overwrites: bool = False
     continue_dl: bool = False
-    skip_unavailable_fragments: bool = False
+    skip_unavailable_fragments: bool = True
     no_warnings: bool = False
     quiet: bool = False
     no_progress: bool = False
@@ -286,6 +287,16 @@ TIER_A_GROUPS: list[dict[str, Any]] = [
                 "step": 1,
                 "help": "Retries when the file is temporarily locked on disk.",
                 "doc_url": f"{DOC_ROOT}#download-options",
+            },
+            {
+                "key": "socket_timeout",
+                "label": "socket-timeout",
+                "widget": "range",
+                "min": 5,
+                "max": 600,
+                "step": 5,
+                "help": "Seconds before giving up on an unresponsive HTTP read (prevents infinite hangs).",
+                "doc_url": f"{DOC_ROOT}#network-options",
             },
             {
                 "key": "concurrent_fragments",

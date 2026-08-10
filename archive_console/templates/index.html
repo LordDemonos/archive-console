@@ -85,7 +85,7 @@
           <span class="nav-item__label">Input lists</span>
           <span class="nav-item__sub">URLs · cookies · raw</span>
         </button>
-        <button type="button" class="nav-item" data-view="ytdlp" title="Tier A/B editor and presets — writes the same yt-dlp.conf as your batches">
+        <button type="button" class="nav-item" data-view="ytdlp" title="Tier A/B editor and presets — writes yt-dlp.conf for monthly batch jobs">
           <span class="nav-item__label">Download options</span>
           <span class="nav-item__sub">yt-dlp.conf</span>
         </button>
@@ -214,7 +214,7 @@
         <div class="card" id="youtubeScheduleCard">
           <h2>Schedule</h2>
           <p class="muted small" id="youtubeSchedulerHint" role="status"></p>
-          <p class="muted small">Each entry repeats <strong>daily</strong>, <strong>weekly</strong> (weekday + time), or <strong>monthly</strong> (day 1–31 + time; clamped in short months). Next-run hints use <strong>this machine’s local timezone</strong>. Turn on the scheduler globally under <strong>Settings → Automatic scheduling</strong> and restart the server. Gallery-dl saved-source crawls are scheduled on <strong>Gallery batch → Saved sources</strong>.</p>
+          <p class="muted small">Each entry repeats <strong>daily</strong>, <strong>weekly</strong> (weekday + time), <strong>monthly</strong> (day 1–31 + time; clamped in short months), or <strong>every N hours</strong> (Hour/Min = phase anchor, e.g. 3:00 every 4h → 3:00, 7:00, 11:00…). Next-run hints use <strong>this machine’s local timezone</strong>. Turn on the scheduler globally under <strong>Settings → Automatic scheduling</strong> and restart the server. Gallery-dl saved-source crawls are scheduled on <strong>Gallery batch → Saved sources</strong>.</p>
           <div id="scheduleEditor" class="schedule-editor" aria-label="YouTube batch schedule list"></div>
           <button type="button" class="btn ghost" id="btnAddSchedule">Add schedule</button>
           <button type="button" class="btn primary" id="btnSaveSchedules">Save schedules</button>
@@ -478,7 +478,7 @@
       <section class="view" id="view-oneoff" aria-label="Single download">
         <header class="view-head">
           <h1>Single download</h1>
-          <p class="lede">Download a <strong>single</strong> YouTube URL with the same Python stack as monthly drivers — live output below. Only one job (monthly or one-off) runs at a time.</p>
+          <p class="lede">Download a <strong>single</strong> YouTube URL — uses <code>yt-dlp.conf</code> plus a separate <code>yt-dlp-oneoff.conf</code> overlay (merge with audio by default). Monthly batch jobs use <code>yt-dlp.conf</code> only. Only one job (monthly or one-off) runs at a time.</p>
           <p class="muted small" id="oneoffCookieGateHint" hidden>Manual runs require confirming <code>cookies.txt</code> before start (see <strong>Settings → Cookie hygiene</strong>). <strong>Dry-run</strong> skips this gate.</p>
         </header>
         <div id="oneoffCookieBanner" class="cookie-reminder-banner cookie-reminder-banner--with-actions" hidden role="region" aria-label="Cookie hygiene reminder for one-off downloads">
@@ -501,25 +501,36 @@
           <div class="field oneoff-url-input-field">
             <input type="text" id="oneoffUrlInput" placeholder="https://www.youtube.com/watch?v=…" autocomplete="off" />
           </div>
-          <label class="field download-dir-field">
-            <span>Output root (relative to archive; blank = default <code>oneoff</code>)</span>
-            <span class="field-inline-browse">
-              <input type="text" id="dlDirOneoffPanel" placeholder="oneoff" autocomplete="off" />
-              <button type="button" class="btn ghost small btn-dl-browse" data-dl-field="oneoff" aria-label="Choose one-off output folder on this machine" title="Browse for folder on this machine">…</button>
-            </span>
-          </label>
-          <p class="muted small oneoff-browse-feedback" id="oneoffBrowseMsg" role="status" aria-live="polite"></p>
-          <p class="muted small oneoff-output-effective" id="oneoffOutputEffective" aria-live="polite"></p>
-          <p class="oneoff-save-output-row">
-            <button type="button" class="btn ghost small" id="btnOneoffSaveOutput">Save output location</button>
-            <span class="muted small">Writes to settings — same as <strong>Inputs &amp; config → Save output folders</strong>; survives restart.</span>
-          </p>
           <div class="toggles oneoff-inline-toggles">
             <label class="chk"><input type="checkbox" id="optOneoffDryRun" /> ARCHIVE_DRY_RUN=1</label>
             <label class="chk"><input type="checkbox" id="optOneoffSkipPip" checked /> SKIP_PIP_UPDATE=1 <span class="muted small">(skip <code>pip</code> self-upgrade)</span></label>
             <label class="chk"><input type="checkbox" id="optOneoffSkipYtdlp" /> SKIP_YTDLP_UPDATE=1 <span class="muted small">(skip <code>yt-dlp[default]</code> install)</span></label>
           </div>
           <p class="muted small" id="oneoffStartMsg" role="status"></p>
+        </div>
+        <div class="card ytdlp-presets oneoff-format-card">
+          <h2>Format &amp; presets</h2>
+          <p class="muted small">Controls <code>yt-dlp-oneoff.conf</code> only — batch Watch Later uses <strong>Download options</strong> → <code>yt-dlp.conf</code>.</p>
+          <div id="oneoffYtdlpSetupMount" class="oneoff-ytdlp-setup-mount" aria-label="Single-download yt-dlp overlay"></div>
+        </div>
+        <div class="card oneoff-output-card">
+          <h2>Output location</h2>
+          <p class="muted small">Saved in settings — changing the field below does <strong>not</strong> affect the next run until you click <strong>Save output location</strong>.</p>
+          <label class="field download-dir-field">
+            <span>Folder under archive root</span>
+            <span class="field-inline-browse">
+              <input type="text" id="dlDirOneoffPanel" placeholder="(default: oneoff)" autocomplete="off" />
+              <button type="button" class="btn ghost small btn-dl-browse" data-dl-field="oneoff" aria-label="Choose one-off output folder on this machine" title="Browse for folder on this machine">…</button>
+            </span>
+          </label>
+          <p class="muted small oneoff-browse-feedback" id="oneoffBrowseMsg" role="status" aria-live="polite"></p>
+          <div class="oneoff-output-box" id="oneoffOutputBox" aria-live="polite">
+            <p class="muted small">Loading output paths…</p>
+          </div>
+          <p class="oneoff-save-output-row">
+            <button type="button" class="btn ghost small" id="btnOneoffSaveOutput">Save output location</button>
+            <span class="muted small">Same as <strong>Inputs &amp; config → Download output folders → Single download</strong>.</span>
+          </p>
         </div>
         <div class="card">
           <h2>Rolling one-off report</h2>
@@ -659,7 +670,12 @@
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
+                    <option value="interval">Every N hours</option>
                   </select>
+                </label>
+                <label class="field compact" id="gallerySourcesScheduleIntervalWrap" hidden>
+                  <span>Every (hours)</span>
+                  <input type="number" id="gallerySourcesScheduleIntervalHours" min="1" max="168" value="4" />
                 </label>
                 <label class="field compact" id="gallerySourcesScheduleDowWrap">
                   <span>Weekday</span>
@@ -1560,7 +1576,8 @@
           <button type="button" class="tab is-active" role="tab" data-file="playlists_input.txt" aria-selected="true">Watch Later</button>
           <button type="button" class="tab" role="tab" data-file="channels_input.txt" aria-selected="false">Channels</button>
           <button type="button" class="tab" role="tab" data-file="videos_input.txt" aria-selected="false">Videos</button>
-          <button type="button" class="tab" role="tab" data-file="yt-dlp.conf" aria-selected="false">yt-dlp.conf</button>
+          <button type="button" class="tab" role="tab" data-file="yt-dlp.conf" aria-selected="false">yt-dlp.conf (batch)</button>
+          <button type="button" class="tab" role="tab" data-file="yt-dlp-oneoff.conf" aria-selected="false">yt-dlp-oneoff.conf</button>
           <button type="button" class="tab" role="tab" data-file="cookies.txt" aria-selected="false">cookies.txt</button>
         </div>
         <div class="card editor-card">
@@ -1594,14 +1611,15 @@
       <section class="view" id="view-ytdlp" aria-label="yt-dlp.conf">
         <header class="view-head">
           <h1>Download options</h1>
-          <p class="lede">Interactive <strong>download settings</strong> for the same on-disk file your <strong>monthly_*.bat</strong> jobs use — Tier A maps common flags from the <a class="link link--info" href="https://github.com/yt-dlp/yt-dlp/blob/master/README.md" target="_blank" rel="noopener">yt-dlp README</a>; Tier B round-trips extra options; Tier C shows the serialized conf.</p>
+          <p class="lede">Interactive <strong>download settings</strong> for <strong>monthly batch</strong> jobs (<code>monthly_*.bat</code>) — writes <code>yt-dlp.conf</code> only. <strong>Single download</strong> uses a separate overlay (<code>yt-dlp-oneoff.conf</code>) on the Single download tab. Tier A maps common flags from the <a class="link link--info" href="https://github.com/yt-dlp/yt-dlp/blob/master/README.md" target="_blank" rel="noopener">yt-dlp README</a>.</p>
         </header>
         <div class="callout warn" id="ytdlpEmptyState" hidden>
           <p><strong>No yt-dlp.conf on disk yet.</strong> Defaults load below — click <em>Save yt-dlp.conf</em> to create <code id="ytdlpEmptyPath"></code>.</p>
         </div>
         <div class="callout" id="ytdlpParseWarnings" hidden role="region" aria-label="Parse notes"></div>
         <div class="card ytdlp-presets" id="ytdlpPresetBar">
-          <h2>Presets</h2>
+          <h2>Batch presets</h2>
+          <p class="muted small">Writes <code>yt-dlp.conf</code> — used by Watch Later, channels, and videos batch runs.</p>
           <p class="muted small" id="ytdlpPresetHint"></p>
           <div class="ytdlp-preset-cards" id="ytdlpPresetCards"></div>
           <div class="ytdlp-actions">
@@ -1614,6 +1632,11 @@
             <button type="button" class="btn primary" id="btnYtdlpSave">Save yt-dlp.conf</button>
           </div>
           <p class="muted small" id="ytdlpMsg" role="status"></p>
+        </div>
+        <div class="card ytdlp-presets" id="ytdlpOneoffPresetBar">
+          <h2>Single download overlay</h2>
+          <p class="muted small">Writes <code>yt-dlp-oneoff.conf</code> — layered after <code>yt-dlp.conf</code> for the <strong>Single download</strong> tab only (merge with audio by default).</p>
+          <div id="ytdlpOneoffSetupMount" class="oneoff-ytdlp-setup-mount" aria-label="Single-download yt-dlp overlay"></div>
         </div>
         <div class="ytdlp-layout">
           <div class="card ytdlp-controls" id="ytdlpControls"></div>
@@ -1959,7 +1982,7 @@
           <h2>Automatic scheduling</h2>
           <p class="muted small" id="schedulerStatusLine"></p>
           <label class="chk"><input type="checkbox" id="optSchedulerEnabled" /> Enable in-process scheduler</label>
-          <p class="muted small">When enabled, saved schedules run at their set times on this PC (local timezone). <strong>Restart Archive Console</strong> after changing this toggle. Configure <strong>watch later / channels / videos</strong> times on <strong>YouTube batch</strong>. Configure <strong>gallery-dl saved-source crawls</strong> on <strong>Gallery batch → Saved sources</strong>. Missed minutes while the PC sleeps are not replayed.</p>
+          <p class="muted small">When enabled, saved schedules run at their set times on this PC (local timezone). <strong>Restart Archive Console</strong> after changing this toggle. Configure <strong>watch later / channels / videos</strong> times on <strong>YouTube batch</strong>. Configure <strong>gallery-dl saved-source crawls</strong> on <strong>Gallery batch → Saved sources</strong>. Missed ticks (sleep, busy job, cookie preflight timeout) are retried later in that occurrence’s window with backoff.</p>
           <button type="button" class="btn primary" id="btnSaveSchedulerGlobal">Save scheduler setting</button>
           <p class="muted small" id="schedulerGlobalSaveMsg" role="status"></p>
         </div>
@@ -2082,6 +2105,7 @@
   </div>
   <script src="/static/app.js?v={{ static_v }}" defer></script>
   <script src="/static/ytdlp_setup.js" defer></script>
+  <script src="/static/ytdlp_oneoff_setup.js?v={{ static_v }}" defer></script>
   <script src="/static/gallerydl_setup.js" defer></script>
   <script src="/static/gifski_setup.js" defer></script>
   <script src="/static/czkawka.js" defer></script>

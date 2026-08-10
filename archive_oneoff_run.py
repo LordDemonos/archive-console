@@ -5,7 +5,10 @@ RunReporter, ManifestYoutubeDL, deferred archive sync, per-run logs under
 logs/archive_run_<UTC>/.
 
 Input: URL from env ARCHIVE_ONEOFF_URL (YouTube watch / shorts / youtu.be or
-youtube VIDEO_ID). Output root: ARCHIVE_OUT_ONEOFF (set by console).
+youtube VIDEO_ID). Output root: ARCHIVE_OUT_ONEOFF (set by console from settings).
+
+Config: yt-dlp.conf (shared base) + yt-dlp-oneoff.conf (single-download overlay;
+format presets independent of batch yt-dlp.conf).
 
 Rolling summary: logs/oneoff_report/ (see archive_oneoff_rolling.py).
 Archive file: oneoff_downloaded.txt (isolated from monthly list archives).
@@ -69,11 +72,37 @@ def _oneoff_output_base(script_dir: str) -> str:
     return os.path.join(script_dir, "oneoff")
 
 
+def _batch_conf_path(script_dir: str) -> str:
+    return os.path.join(script_dir, "yt-dlp.conf")
+
+
+def _oneoff_conf_path(script_dir: str) -> str:
+    return os.path.join(script_dir, "yt-dlp-oneoff.conf")
+
+
+def _path_under_dir(path: str, base_dir: str) -> bool:
+    if not path or not base_dir:
+        return False
+    try:
+        return os.path.commonpath(
+            [os.path.normcase(os.path.abspath(path)), os.path.normcase(os.path.abspath(base_dir))]
+        ) == os.path.normcase(os.path.abspath(base_dir))
+    except ValueError:
+        return False
+
+
 def _build_argv_oneoff(script_dir: str) -> list[str]:
-    """Same argv shape as video batch but archive + output for one-off."""
+    """Batch base + oneoff overlay. Each config path needs its own --config-locations flag.
+
+    yt-dlp treats extra positional args after --config-locations as URLs; listing two
+    paths under one flag makes the overlay file a bogus download target. Config merge
+    order: list oneoff first, batch second so overlay flags win over batch defaults.
+    """
     return [
         "--config-locations",
-        os.path.join(script_dir, "yt-dlp.conf"),
+        _oneoff_conf_path(script_dir),
+        "--config-locations",
+        _batch_conf_path(script_dir),
         "--download-archive",
         oneoff_downloaded_path(),
         "-o",
@@ -177,7 +206,13 @@ def main() -> int:
         )
         return 1
 
+    out_base = _oneoff_output_base(SCRIPT_DIR)
     reporter.log_line(f"[archive_oneoff_run] URL: {url}")
+    reporter.log_line(f"[archive_oneoff_run] Output root: {out_base}")
+    reporter.log_line(
+        "[archive_oneoff_run] Config: yt-dlp.conf + yt-dlp-oneoff.conf "
+        "(single-download overlay; batch jobs use yt-dlp.conf only)"
+    )
 
     argv = append_ytdlp_staged_cookies_argv(
         _build_argv_oneoff(SCRIPT_DIR),
@@ -212,6 +247,17 @@ def main() -> int:
         return rc_pe
 
     ydl_opts = dict(po.ydl_opts)
+    eff_fmt = ydl_opts.get("format") or "(default)"
+    reporter.log_line(f"[archive_oneoff_run] Effective format: {eff_fmt}")
+    if "bestaudio" not in str(eff_fmt) and "+bestaudio" not in str(eff_fmt):
+        reporter.log_line(
+            "[archive_oneoff_run] WARNING: format chain has no bestaudio merge — "
+            "check yt-dlp-oneoff.conf (Balanced preset) and restart the console after upgrades."
+        )
+        print_role(
+            "[archive_oneoff_run] WARNING: download may be video-only (no audio in format chain).",
+            "warn",
+        )
 
     def progress_hook(d: dict):
         if d.get("status") != "finished":
@@ -302,8 +348,24 @@ def main() -> int:
     )
     err = _first_issue_reason(os.path.join(log_dir, "issues.csv"))
     outcome = "fail"
+    misplaced = ""
+    media_path = (best or {}).get("filepath", "") if best else ""
     if rc == 0 and best and (best.get("file_verified_ok") or "") == "yes":
-        outcome = "ok"
+        if media_path and not _path_under_dir(media_path, out_base):
+            misplaced = (
+                f"Download verified but file is outside output root ({out_base}): {media_path}"
+            )
+            reporter.record_issue(
+                "misplaced_output",
+                (best or {}).get("video_id", ""),
+                (best or {}).get("title", ""),
+                media_path,
+                misplaced,
+                url,
+            )
+            outcome = "fail"
+        else:
+            outcome = "ok"
     elif rc == 0 and best:
         outcome = "ok"
     entry = {
@@ -312,8 +374,8 @@ def main() -> int:
         "outcome": outcome,
         "exit_code": rc,
         "bytes": best.get("file_size_bytes", "") if best else "",
-        "media_path": best.get("filepath", "") if best else "",
-        "error_snippet": (err[:500] if err else ""),
+        "media_path": media_path,
+        "error_snippet": (misplaced or err)[:500] if (misplaced or err) else "",
         "log_folder": log_rel,
         "video_id": (best or {}).get("video_id", ""),
     }

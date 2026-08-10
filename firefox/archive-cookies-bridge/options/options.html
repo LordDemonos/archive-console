@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Archive cookies bridge — options</title>
+    <title>Archive Console Cookies — options</title>
     <style>
       body {
         font: 14px/1.4 system-ui, sans-serif;
@@ -14,7 +14,8 @@
         margin: 0.75rem 0 0.25rem;
       }
       input[type="text"],
-      input[type="number"] {
+      input[type="number"],
+      select {
         width: 100%;
         box-sizing: border-box;
         padding: 0.35rem 0.5rem;
@@ -38,9 +39,9 @@
     </style>
   </head>
   <body>
-    <h1>Archive cookies bridge</h1>
+    <h1>Archive Console Cookies</h1>
     <p class="hint">
-      Polls Archive Console while a yt-dlp batch run is paused on cookie/auth errors,
+      Companion for Archive Console: polls while a yt-dlp batch run needs fresh cookies,
       exports YouTube + Google cookies, and PUTs <code>cookies.txt</code> via the Console API.
     </p>
 
@@ -50,6 +51,24 @@
         Auto-poll when refresh is needed
       </label>
     </div>
+
+    <div class="row">
+      <label>
+        <input type="checkbox" id="reloadBeforeExport" checked />
+        Reload YouTube tab(s) before cookie export
+      </label>
+      <p class="hint">
+        Helps when yt-dlp reports <code>The page needs to be reloaded</code>
+        (or other session challenges). Reloads first, waits for load, then exports cookies.
+      </p>
+    </div>
+
+    <label for="reloadMode">Which tabs to reload</label>
+    <select id="reloadMode">
+      <option value="export_tab">Export tab only (Watch Later → active → Subscriptions)</option>
+      <option value="all">All open YouTube tabs</option>
+    </select>
+    <p class="hint">Default reloads only the tab used for cookie export — less disruptive.</p>
 
     <label for="baseUrl">Archive Console base URL</label>
     <input type="text" id="baseUrl" placeholder="http://127.0.0.1:8756" />
@@ -62,9 +81,10 @@
     <label for="cookieStoreId">Cookie store ID (optional override)</label>
     <input type="text" id="cookieStoreId" placeholder="firefox-default" />
     <p class="hint">
-      Leave blank: auto-export uses an open YouTube tab (prefers Subscriptions) —
-      same as popup <strong>Site + container</strong>. Only set this if you use
-      Firefox Multi-Account Containers and YouTube is not in the default store.
+      Leave blank: auto-export uses an open YouTube tab (Watch Later → active →
+      Subscriptions → any) — same as popup <strong>Site + container</strong>.
+      Only set this if you use Firefox Multi-Account Containers and YouTube is
+      not in the default store.
     </p>
 
     <button type="button" id="save">Save</button>

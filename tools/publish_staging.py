@@ -76,6 +76,10 @@ EXCLUDE_ROOT_NAMES = frozenset(
         "cookies.run.txt",
         "yt-dlp.exe",
         "yt-dlp_x86.exe",
+        # Local agent / planning scratch (never publish)
+        "findings.md",
+        "progress.md",
+        "task_plan.md",
     }
 )
 
@@ -101,8 +105,14 @@ def _exclude_file(rel: Path) -> tuple[bool, str]:
         return True, "local UI state paths/history (use state.example.json)"
     if name == "yt_dlp_ui_state.json":
         return True, "local editor UI state"
-    if name in {"gallery_dl_ui_state.json", "gifsky_ui_state.json"}:
+    if name in {
+        "gallery_dl_ui_state.json",
+        "gifsky_ui_state.json",
+        "yt_dlp_oneoff_ui_state.json",
+    }:
         return True, "local editor UI state (use *.example.json)"
+    if "web-ext-artifacts" in rel.parts:
+        return True, "Firefox web-ext build output (local signing artifacts)"
     if rel.parts[:1] == ("archive_console",) and (
         name.startswith("_gdl_") or name in {"gdl_out.txt", "gdl_err.txt"}
     ):
@@ -280,7 +290,7 @@ cookies, or download trees. Upstream: https://github.com/LordDemonos/archive-con
    `*.sample.txt` files (one URL or `youtube id` per line; see comments in samples).
 4. Copy `cookies.txt.example` to `cookies.txt` and add real Netscape-format cookies,
    or adjust `yt-dlp.conf` to use `--cookies-from-browser` (see yt-dlp docs).
-   Optional: load the Firefox extension under `firefox/archive-cookies-bridge/` to export cookies via Archive Console (see that folder’s README).
+   Optional: load the Firefox extension **Archive Console Cookies** under `firefox/archive-cookies-bridge/` to export cookies via Archive Console (see that folder’s README).
 5. Install Python 3.10+ on PATH. For **Archive Console**:
    - Run `start_archive_console.bat` once (creates `archive_console\\.venv` and installs requirements).
    - Optional: copy `archive_console/state.json.example` to `archive_console/state.json` or let the UI create state on first run.
@@ -371,7 +381,13 @@ python tools\\publish_staging.py --dest <STAGING_DEST>
 
 Replace `<STAGING_DEST>` with a clean folder outside your private download trees.
 
-2. Open a git clone of **archive-console** (or init one). Replace all files **except** `.git` with the staging folder contents.
+2. Prefer publishing **into** an existing git clone of **archive-console** so `.git` is preserved:
+
+```bat
+python tools\\publish_staging.py --dest <path-to-archive-console-clone>
+```
+
+`publish_staging.py` clears DEST contents but **keeps `.git`**. Alternatively publish to a temp folder and copy over a clone while leaving `.git` alone.
 
 3. Review `git status`. Confirm none of these appear as new/changed tracked files:
 
@@ -486,7 +502,7 @@ def _write_extra_staging(dest_root: Path, source_root: Path, buckets: dict[str, 
         "- Root drivers: `archive_*_run.py`, `archive_run_console.py`, `archive_print_role.py`, `archive_cookies.py`, `regenerate_report.py`, `repair_playlist_download_archive.py`, `yt-dlp.conf`, `gallery-dl.conf`, `gifsky.conf`",
         "- Batch entrypoints and stubs (see table)",
         "- Docs: `README.md`, `BAT_FILES.md`, `BAT_AUDIT.md`, `CLEANUP_PR.md`, `GITHUB_PUBLISH.md`, `ARCHIVE_PLAYLIST_RUN_LOGS.txt`, `archive_console/ARCHIVE_CONSOLE.md`, `docs/screenshots/`",
-        "- Firefox cookie bridge: `firefox/archive-cookies-bridge/`",
+        "- Firefox extension (Archive Console Cookies): `firefox/archive-cookies-bridge/`",
         "- Archive Console app: `archive_console/app/`, `templates/`, `static/`, `tests/`, `requirements.txt`, `print_bind.py`, tray sources, `state.example.json` / `state.json.example`, `*.example.json`, `*.ps1`",
         "- Root tests: `tests/`",
         "- Tooling: `tools/publish_staging.py` (regenerate staging from a full tree)",
@@ -583,8 +599,21 @@ def main() -> None:
     dry = args.dry_run
     if not dry:
         if dest_root.exists():
-            shutil.rmtree(dest_root)
-        dest_root.mkdir(parents=True, exist_ok=True)
+            # Preserve an existing git clone at DEST (public push workflow).
+            git_dir = dest_root / ".git"
+            if git_dir.exists():
+                for child in list(dest_root.iterdir()):
+                    if child.name == ".git":
+                        continue
+                    if child.is_dir():
+                        shutil.rmtree(child)
+                    else:
+                        child.unlink(missing_ok=True)
+            else:
+                shutil.rmtree(dest_root)
+                dest_root.mkdir(parents=True, exist_ok=True)
+        else:
+            dest_root.mkdir(parents=True, exist_ok=True)
 
     buckets = _publish(source_root, dest_root, dry_run=dry)
     if dry:

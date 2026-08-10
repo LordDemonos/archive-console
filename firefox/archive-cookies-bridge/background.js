@@ -1,16 +1,17 @@
-/* Fork of https://github.com/hrdl-github/cookies-txt — Archive Console mid-run cookie refresh. */
+/* Archive Console Cookies — fork of https://github.com/hrdl-github/cookies-txt */
 var browser = browser || chrome;
 
 const DEFAULT_BASE = "http://127.0.0.1:8756";
 const ALARM_NAME = "archiveCookiePoll";
-const YOUTUBE_EXPORT_URLS = ["https://www.youtube.com", "https://google.com"];
-/** Extra Google origins merged when exporting from a live YouTube tab (same cookie store). */
+const YOUTUBE_EXPORT_URLS = ["https://www.youtube.com"];
+/** Same cookie store only — avoids pulling www.google.com from a different Google account. */
 const GOOGLE_SUPPLEMENT_URLS = [
   "https://accounts.google.com/",
-  "https://www.google.com/",
 ];
 const YOUTUBE_TAB_URL_RE =
   /^https?:\/\/([a-z0-9-]+\.)?(youtube\.com|music\.youtube\.com)\//i;
+const WATCH_LATER_TAB_URL_RE =
+  /(?:[?&]list=WL\b|\/feed\/watch_later(?:\/|$|\?))/i;
 
 const NETSCAPE_HEADER = [
   "# Netscape HTTP Cookie File\n",
@@ -39,7 +40,88 @@ async function getOptions() {
     baseUrl: DEFAULT_BASE,
     pollMinutes: 0.167,
     cookieStoreId: "",
+    reloadBeforeExport: true,
+    /** "export_tab" = Watch Later / active / Subscriptions pick; "all" = every YouTube tab */
+    reloadMode: "export_tab",
   });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Reload a tab and wait until status is complete (or timeout).
+ * @param {number} tabId
+ * @param {number} [timeoutMs]
+ * @returns {Promise<boolean>}
+ */
+async function reloadTabAndWait(tabId, timeoutMs = 45000) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (ok) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      try {
+        browser.tabs.onUpdated.removeListener(onUpdated);
+      } catch (_e) {
+        /* ignore */
+      }
+      clearTimeout(timer);
+      resolve(ok);
+    };
+    const onUpdated = (id, info) => {
+      if (id === tabId && info.status === "complete") {
+        finish(true);
+      }
+    };
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    browser.tabs.onUpdated.addListener(onUpdated);
+    Promise.resolve(browser.tabs.reload(tabId)).catch(() => finish(false));
+  });
+}
+
+/**
+ * Before cookie export: reload YouTube tab(s) so Firefox picks up a fresh player/session.
+ * Prefer the same tab used for export (Watch Later → active → Subscriptions → any).
+ * @param {{ reloadBeforeExport?: boolean, reloadMode?: string }} opts
+ */
+async function reloadYoutubeTabsBeforeExport(opts) {
+  if (!opts.reloadBeforeExport) {
+    return { reloaded: 0, mode: "off" };
+  }
+  const mode = opts.reloadMode === "all" ? "all" : "export_tab";
+  const tabs = await browser.tabs.query({});
+  const ytTabs = tabs.filter((t) => t.url && isYoutubeTabUrl(t.url));
+  if (!ytTabs.length) {
+    return { reloaded: 0, mode, reason: "no_youtube_tabs" };
+  }
+
+  let targets;
+  if (mode === "all") {
+    targets = ytTabs;
+  } else {
+    const pick = await findYoutubeTabForExport();
+    targets = pick ? [pick] : [];
+  }
+
+  let reloaded = 0;
+  for (const tab of targets) {
+    if (!tab.id) {
+      continue;
+    }
+    const ok = await reloadTabAndWait(tab.id);
+    if (ok) {
+      reloaded += 1;
+    }
+  }
+  // Allow Set-Cookie / jar settle after navigation before cookies.getAll
+  if (reloaded > 0) {
+    await sleep(1500);
+  }
+  return { reloaded, mode, attempted: targets.length };
 }
 
 async function getTargetStores(cookieStoreId) {
@@ -72,7 +154,7 @@ function isYoutubeTabUrl(url) {
 
 /**
  * Pick a YouTube tab for cookie export (same idea as popup "site + container").
- * Prefers /feed/subscriptions, then any active YouTube tab, then any YouTube tab.
+ * Prefers Watch Later, then the active YouTube tab, then Subscriptions, then any YouTube tab.
  */
 async function findYoutubeTabForExport() {
   const tabs = await browser.tabs.query({});
@@ -80,14 +162,18 @@ async function findYoutubeTabForExport() {
   if (!ytTabs.length) {
     return null;
   }
-  const subs = ytTabs.filter((t) => /\/feed\/subscriptions/i.test(t.url));
-  if (subs.length) {
-    const activeSubs = subs.find((t) => t.active);
-    return activeSubs || subs[0];
+  const watchLater = ytTabs.filter((t) => WATCH_LATER_TAB_URL_RE.test(t.url));
+  if (watchLater.length) {
+    const activeWl = watchLater.find((t) => t.active);
+    return activeWl || watchLater[0];
   }
   const active = ytTabs.find((t) => t.active);
   if (active) {
     return active;
+  }
+  const subs = ytTabs.filter((t) => /\/feed\/subscriptions/i.test(t.url));
+  if (subs.length) {
+    return subs[0];
   }
   return ytTabs[0];
 }
@@ -317,6 +403,9 @@ async function exportToArchiveConsole({ force = false } = {}) {
     }
   }
 
+  // yt-dlp "The page needs to be reloaded" / stale session: refresh tab(s) first
+  const reloadInfo = await reloadYoutubeTabsBeforeExport(opts);
+
   const exported = await exportNetscapeForArchiveAuto(opts);
   const result = await putCookies(baseUrl, exported.text);
   return {
@@ -325,6 +414,7 @@ async function exportToArchiveConsole({ force = false } = {}) {
     source: exported.source,
     tabUrl: exported.tabUrl,
     cookieStoreId: exported.cookieStoreId,
+    reload: reloadInfo,
   };
 }
 
@@ -345,7 +435,7 @@ browser.alarms.onAlarm.addListener(async (alarm) => {
   try {
     await exportToArchiveConsole({ force: false });
   } catch (e) {
-    console.warn("[archive-cookies-bridge]", e);
+    console.warn("[archive-console-cookies]", e);
   }
 });
 

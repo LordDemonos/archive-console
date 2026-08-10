@@ -1,10 +1,10 @@
 {
   "extDescription": {
-    "message": "Exports cookies for yt-dlp Archive Console: manual Netscape export plus auto-refresh to cookies.txt during batch runs.",
+    "message": "Archive Console companion: export YouTube cookies and auto-refresh cookies.txt for yt-dlp batch runs.",
     "description": "Short description of the extension"
   },
   "buttonDescription": {
-    "message": "Export cookies / Archive Console",
+    "message": "Archive Console Cookies",
     "description": "Tooltip of the browser toolbar icon."
   },
   "copyBtn": {

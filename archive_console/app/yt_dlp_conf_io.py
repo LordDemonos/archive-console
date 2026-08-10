@@ -86,6 +86,7 @@ SERIALIZE_ORDER: list[tuple[str, str, str]] = [
     ("sleep_requests", "sleep-requests", "float"),
     ("sleep_interval", "sleep-interval", "float"),
     ("max_sleep_interval", "max-sleep-interval", "float"),
+    ("socket_timeout", "socket-timeout", "float"),
     ("retries", "retries", "int"),
     ("fragment_retries", "fragment-retries", "int"),
     ("file_access_retries", "file-access-retries", "int"),

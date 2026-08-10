@@ -425,6 +425,14 @@ class RunManager:
             except Exception:
                 logger.exception("stop: waiting for run task run_id=%s", rid)
                 await self._abort_running_task(rid, task)
+        async with self._lock:
+            still_running = (
+                self.state is not None
+                and self.state.run_id == rid
+                and self.state.phase == RunPhase.running
+            )
+        if still_running:
+            await self._force_canceled(rid, reason="stop")
 
     async def force_reset_running(self, reason: str = "force-reset") -> bool:
         """Emergency recovery when stop/stream desync leaves phase=running."""
@@ -507,6 +515,90 @@ class RunManager:
                 }
             )
 
+    async def _pump_stdout_lines(self, proc: asyncio.subprocess.Process) -> None:
+        assert proc.stdout is not None
+        while True:
+            line_b = await proc.stdout.readline()
+            if not line_b:
+                break
+            text = _format_stream_line(line_b.decode("utf-8", errors="replace"))
+            await self.broadcaster.publish({"type": "line", "text": text})
+
+    async def _await_process_and_stream(
+        self, proc: asyncio.subprocess.Process
+    ) -> int:
+        """Wait for process exit without blocking forever on a stuck stdout pipe.
+
+        On Windows, a child (ffmpeg/node/etc.) can keep the pipe write-end open
+        after the tracked PID exits; readline() alone then never finishes and the
+        UI stays phase=running forever even though the download already succeeded.
+        """
+        assert proc.stdout is not None
+        pump = asyncio.create_task(self._pump_stdout_lines(proc))
+        try:
+            exit_code = await proc.wait()
+        except asyncio.CancelledError:
+            if not pump.done():
+                pump.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await pump
+            raise
+        if not pump.done():
+            try:
+                await asyncio.wait_for(pump, timeout=2.0)
+            except asyncio.TimeoutError:
+                pump.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await pump
+                await self.broadcaster.publish(
+                    {
+                        "type": "line",
+                        "text": (
+                            "[console] Warning: log stream stalled after process "
+                            "exit; finalizing run anyway."
+                        ),
+                    }
+                )
+            except asyncio.CancelledError:
+                pump.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await pump
+                raise
+            except Exception:
+                logger.warning(
+                    "stdout pump failed after process exit", exc_info=True
+                )
+        else:
+            with contextlib.suppress(asyncio.CancelledError):
+                exc = pump.exception()
+                if exc is not None:
+                    logger.warning("stdout pump failed: %s", exc)
+        return exit_code
+
+    async def _supervise_subprocess(
+        self,
+        run_id: str,
+        job: JobName,
+        proc: asyncio.subprocess.Process,
+        on_complete,
+    ) -> None:
+        try:
+            exit_code = await self._await_process_and_stream(proc)
+            await self._finish_run_task(run_id, job, exit_code, on_complete)
+        except asyncio.CancelledError:
+            with contextlib.suppress(ProcessLookupError, OSError):
+                proc.kill()
+            await self._finish_run_task(run_id, job, -1, on_complete)
+            raise
+        except Exception as e:
+            logger.exception("run task crashed job=%s run_id=%s", job, run_id)
+            with contextlib.suppress(ProcessLookupError, OSError):
+                proc.kill()
+            async with self._lock:
+                if self.state and self.state.run_id == run_id:
+                    self.state.failure_detail = f"Run monitor crashed: {e}"[:500]
+            await self._finish_run_task(run_id, job, -1, on_complete)
+
     async def _run_python(
         self,
         run_id: str,
@@ -564,22 +656,7 @@ class RunManager:
             if self.state and self.state.run_id == run_id:
                 self.state.pid = proc.pid
 
-        assert proc.stdout is not None
-        try:
-            while True:
-                line_b = await proc.stdout.readline()
-                if not line_b:
-                    break
-                text = _format_stream_line(
-                    line_b.decode("utf-8", errors="replace")
-                )
-                await self.broadcaster.publish({"type": "line", "text": text})
-            exit_code = await proc.wait()
-            await self._finish_run_task(run_id, job, exit_code, on_complete)
-        except asyncio.CancelledError:
-            with contextlib.suppress(ProcessLookupError, OSError):
-                proc.kill()
-            raise
+        await self._supervise_subprocess(run_id, job, proc, on_complete)
 
     async def _finish_run_task(
         self,
@@ -675,19 +752,4 @@ class RunManager:
             if self.state and self.state.run_id == run_id:
                 self.state.pid = proc.pid
 
-        assert proc.stdout is not None
-        try:
-            while True:
-                line_b = await proc.stdout.readline()
-                if not line_b:
-                    break
-                text = _format_stream_line(
-                    line_b.decode("utf-8", errors="replace")
-                )
-                await self.broadcaster.publish({"type": "line", "text": text})
-            exit_code = await proc.wait()
-            await self._finish_run_task(run_id, job, exit_code, on_complete)
-        except asyncio.CancelledError:
-            with contextlib.suppress(ProcessLookupError, OSError):
-                proc.kill()
-            raise
+        await self._supervise_subprocess(run_id, job, proc, on_complete)

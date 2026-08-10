@@ -1,5 +1,6 @@
 @echo off
 cd /d "%~dp0"
+call "%~dp0_archive_python_env.bat"
 echo ========================================
 echo  Monthly channel archive
 echo ========================================
@@ -50,27 +51,27 @@ if defined ARCHIVE_OUT_CHANNEL (
 
 if not defined SKIP_PIP_UPDATE set "SKIP_PIP_UPDATE=1"
 if /i "%SKIP_PIP_UPDATE%"=="1" (
-    python "%~dp0archive_print_role.py" skip "[archive] Skipping pip self-upgrade (SKIP_PIP_UPDATE=1)"
+    "%ARCHIVE_PY%" "%~dp0archive_print_role.py" skip "[archive] Skipping pip self-upgrade (SKIP_PIP_UPDATE=1)"
 ) else (
     echo [archive] Upgrading pip ^(python -m pip install --upgrade pip^)...
-    python -m pip install %ARCHIVE_PIP_QUIET% --upgrade pip --disable-pip-version-check
+    "%ARCHIVE_PY%" -m pip install %ARCHIVE_PIP_QUIET% --upgrade pip --disable-pip-version-check
     if errorlevel 1 (
-        python "%~dp0archive_print_role.py" warn "WARNING: [archive] pip self-upgrade failed; continuing with existing pip."
+        "%ARCHIVE_PY%" "%~dp0archive_print_role.py" warn "WARNING: [archive] pip self-upgrade failed; continuing with existing pip."
     ) else (
-        python "%~dp0archive_print_role.py" ok "[archive] pip self-upgrade finished OK."
+        "%ARCHIVE_PY%" "%~dp0archive_print_role.py" ok "[archive] pip self-upgrade finished OK."
     )
     echo.
 )
 
 if /i "%SKIP_YTDLP_UPDATE%"=="1" (
-    python "%~dp0archive_print_role.py" skip "Skipping yt-dlp update (SKIP_YTDLP_UPDATE=1)"
+    "%ARCHIVE_PY%" "%~dp0archive_print_role.py" skip "Skipping yt-dlp update (SKIP_YTDLP_UPDATE=1)"
 ) else (
     echo Updating yt-dlp via pip ^(includes yt-dlp-ejs for YouTube challenges^)...
-    python -m pip install %ARCHIVE_PIP_QUIET% -U --disable-pip-version-check "yt-dlp[default]"
+    "%ARCHIVE_PY%" -m pip install %ARCHIVE_PIP_QUIET% -U --disable-pip-version-check "yt-dlp[default]"
     if errorlevel 1 (
-        python "%~dp0archive_print_role.py" warn "WARNING: pip could not update yt-dlp; continuing with the already-installed version."
+        "%ARCHIVE_PY%" "%~dp0archive_print_role.py" warn "WARNING: pip could not update yt-dlp; continuing with the already-installed version."
     ) else (
-        python "%~dp0archive_print_role.py" ok "[archive] yt-dlp pip update finished OK."
+        "%ARCHIVE_PY%" "%~dp0archive_print_role.py" ok "[archive] yt-dlp pip update finished OK."
     )
     echo.
 )
@@ -86,7 +87,7 @@ echo Playlist pointer ^(Watch Later^): logs\latest_run.txt
 echo Checklist / failure families: ARCHIVE_PLAYLIST_RUN_LOGS.txt
 echo.
 
-python "%~dp0archive_channel_run.py"
+"%ARCHIVE_PY%" "%~dp0archive_channel_run.py"
 set "YTDLP_RC=%ERRORLEVEL%"
 
 set "LOGDIR="

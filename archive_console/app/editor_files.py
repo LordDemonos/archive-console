@@ -14,6 +14,7 @@ EDITABLE_FILENAMES: frozenset[str] = frozenset(
         "channels_input.txt",
         "videos_input.txt",
         "yt-dlp.conf",
+        "yt-dlp-oneoff.conf",
         "gallery-dl.conf",
         COOKIES_TXT,
     }

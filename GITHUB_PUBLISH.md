@@ -9,12 +9,18 @@ This tree is an **anonymized snapshot**. Rebuild it from the operator’s full w
 1. From the private scripts root (the tree with real cookies and downloads):
 
 ```bat
-python tools\publish_staging.py --dest <STAGING_DEST>
+python tools\\publish_staging.py --dest <STAGING_DEST>
 ```
 
 Replace `<STAGING_DEST>` with a clean folder outside your private download trees.
 
-2. Open a git clone of **archive-console** (or init one). Replace all files **except** `.git` with the staging folder contents.
+2. Prefer publishing **into** an existing git clone of **archive-console** so `.git` is preserved:
+
+```bat
+python tools\\publish_staging.py --dest <path-to-archive-console-clone>
+```
+
+`publish_staging.py` clears DEST contents but **keeps `.git`**. Alternatively publish to a temp folder and copy over a clone while leaving `.git` alone.
 
 3. Review `git status`. Confirm none of these appear as new/changed tracked files:
 

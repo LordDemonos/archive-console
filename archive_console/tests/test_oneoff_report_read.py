@@ -10,6 +10,7 @@ from app.oneoff_report_read import (
     last_ok_media_rel,
     oneoff_rolling_payload,
 )
+from app.settings import DownloadDirsSettings
 
 
 def _write_jsonl(root: Path, lines: list[dict]) -> None:
@@ -113,14 +114,37 @@ def test_manifest_prefers_video_over_audio(tmp_path: Path) -> None:
     assert rel == "oneoff/a.mp4"
 
 
+def test_last_ok_skips_outside_oneoff_output_root(tmp_path: Path) -> None:
+    root = tmp_path
+    wl = root / "playlists" / "WL" / "ch" / "v.mp4"
+    wl.parent.mkdir(parents=True)
+    wl.write_bytes(b"x")
+    oneoff = root / "oneoff" / "good.mp4"
+    oneoff.parent.mkdir(parents=True)
+    oneoff.write_bytes(b"y")
+    dd = DownloadDirsSettings()
+    out_root = root / "oneoff"
+    _write_jsonl(
+        root,
+        [
+            {"outcome": "ok", "media_path": str(wl), "log_folder": ""},
+            {"outcome": "ok", "media_path": str(oneoff), "log_folder": ""},
+        ],
+    )
+    entries = _load_entries(root)
+    rel = last_ok_media_rel(root, entries, ["oneoff", "playlists"], out_root)
+    assert rel == "oneoff/good.mp4"
+
+
 def test_oneoff_rolling_payload_includes_last_media_rel(tmp_path: Path) -> None:
     root = tmp_path
-    media = root / "videos" / "z.webm"
+    media = root / "oneoff" / "z.webm"
     media.parent.mkdir(parents=True)
     media.write_bytes(b"z")
     _write_jsonl(
         root,
         [{"outcome": "ok", "media_path": str(media), "log_folder": ""}],
     )
-    payload = oneoff_rolling_payload(root, ["videos"])
-    assert payload["stats"]["last_media_rel"] == "videos/z.webm"
+    dd = DownloadDirsSettings()
+    payload = oneoff_rolling_payload(root, ["oneoff"], dd)
+    assert payload["stats"]["last_media_rel"] == "oneoff/z.webm"

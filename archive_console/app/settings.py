@@ -41,11 +41,11 @@ DEFAULT_LANDING_VIEWS: frozenset[str] = frozenset(
 )
 
 
-ScheduleFrequency = Literal["daily", "weekly", "monthly"]
+ScheduleFrequency = Literal["daily", "weekly", "monthly", "interval"]
 
 
 class ScheduleEntry(BaseModel):
-    """Repeating schedule: daily, weekly (weekday), or monthly (day-of-month clamped)."""
+    """Repeating schedule: daily, weekly, monthly, or every N hours (interval)."""
 
     id: str = ""
     job: str = "watch_later"
@@ -54,14 +54,16 @@ class ScheduleEntry(BaseModel):
     day_of_week: int = Field(0, ge=0, le=6)  # Mon=0 … Sun=6 (datetime.weekday())
     hour: int = Field(3, ge=0, le=23)
     minute: int = Field(0, ge=0, le=59)
+    # Used when frequency == "interval"; hour/minute are the phase anchor.
+    interval_hours: int = Field(4, ge=1, le=168)
     enabled: bool = False
 
     @field_validator("frequency")
     @classmethod
     def _frequency_allowed(cls, v: str) -> str:
         s = (v or "monthly").strip().lower()
-        if s not in ("daily", "weekly", "monthly"):
-            raise ValueError("frequency must be daily, weekly, or monthly")
+        if s not in ("daily", "weekly", "monthly", "interval"):
+            raise ValueError("frequency must be daily, weekly, monthly, or interval")
         return s
 
 

@@ -186,6 +186,18 @@ from .run_error_record import make_error_record, record_to_sidecar_or_global
 from .run_summary import enrich_history_entry_for_api, merge_run_summary_into_history_entry
 from .oneoff_report_read import oneoff_rolling_payload
 from .oneoff_url import normalize_oneoff_youtube_url
+from .yt_dlp_oneoff_conf import (
+    ONEOFF_CONF_FILENAME,
+    ONEOFF_PRESET_META,
+    apply_oneoff_builtin_preset,
+    ensure_oneoff_conf,
+    extract_oneoff_banner_preset,
+    merged_oneoff_preset,
+    oneoff_conf_cli_preview,
+    parse_oneoff_conf,
+    serialize_oneoff_conf,
+)
+from .yt_dlp_oneoff_ui_state import load_oneoff_ui_state, save_oneoff_ui_state
 from .bookmark_utils import (
     MAX_BOOKMARK_URLS_PER_LABELS_REQUEST,
     assert_safe_http_url_for_ssrf,
@@ -1017,8 +1029,9 @@ def api_settings() -> dict[str, Any]:
         "scheduler_backend_active": sched_on,
         "scheduler_note": (
             "In-process scheduler is active: saved schedules on YouTube batch and Gallery batch "
-            "run daily, weekly, or monthly at the set hour/minute (local machine time). "
-            "Missed ticks while the PC sleeps are not replayed."
+            "run daily, weekly, monthly, or every N hours at the set time (local machine time). "
+            "If a tick is missed (sleep, busy run, cookie preflight timeout), the same "
+            "occurrence is retried later in its window (with backoff)."
             if sched_on
             else "Scheduler is off. Enable it below, save, and restart the server. "
             "Configure job times on YouTube batch and Gallery batch → Saved sources."
@@ -2420,27 +2433,12 @@ async def oneoff_start(body: OneoffStartBody) -> Any:
         "ARCHIVE_ONEOFF_URL": url_norm,
         "ARCHIVE_ONEOFF_RETENTION_DAYS": str(st0.oneoff_report_retention_days),
     }
-    if body.output_rel.strip():
-        try:
-            rel = normalize_rel(body.output_rel.strip())
-        except PathNotAllowedError as e:
-            raise HTTPException(status_code=400, detail=str(e)) from e
-        try:
-            full = resolve_under_root(root, rel)
-        except PathNotAllowedError as e:
-            raise HTTPException(status_code=400, detail=str(e)) from e
-        if not is_allowed(root, full, prefixes):
-            raise HTTPException(
-                status_code=400,
-                detail="Output path is not under a download output folder",
-            )
-        extra["ARCHIVE_OUT_ONEOFF"] = str(full)
-    else:
-        try:
-            validate_oneoff_output_dir(root, st0.download_dirs, prefixes)
-            extra.update(extra_env_for_oneoff(root, st0.download_dirs))
-        except PathNotAllowedError as e:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+    try:
+        validate_oneoff_output_dir(root, st0.download_dirs, prefixes)
+        extra.update(extra_env_for_oneoff(root, st0.download_dirs))
+    except PathNotAllowedError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    ensure_oneoff_conf(root)
 
     mgr = _get_manager()
     logger.info("oneoff start url=%s", url_norm[:80])
@@ -2746,6 +2744,7 @@ class GallerySourcesScheduleBody(BaseModel):
     day_of_week: int = Field(0, ge=0, le=6)
     hour: int = Field(2, ge=0, le=23)
     minute: int = Field(0, ge=0, le=59)
+    interval_hours: int = Field(4, ge=1, le=168)
     scheduled_max_run_sec: int | None = None
 
 
@@ -2773,8 +2772,11 @@ def galleries_sources_schedule_get() -> dict[str, Any]:
 def galleries_sources_schedule_save(body: GallerySourcesScheduleBody) -> dict[str, Any]:
     st = _get_state()
     freq = (body.frequency or "daily").strip().lower()
-    if freq not in ("daily", "weekly", "monthly"):
-        raise HTTPException(status_code=400, detail="frequency must be daily, weekly, or monthly")
+    if freq not in ("daily", "weekly", "monthly", "interval"):
+        raise HTTPException(
+            status_code=400,
+            detail="frequency must be daily, weekly, monthly, or interval",
+        )
     new_entry = ScheduleEntry(
         id=GALLERY_SOURCES_SCHEDULE_ID,
         job=GALLERY_SOURCES_SCHEDULE_JOB,
@@ -2783,6 +2785,7 @@ def galleries_sources_schedule_save(body: GallerySourcesScheduleBody) -> dict[st
         day_of_week=body.day_of_week,
         hour=body.hour,
         minute=body.minute,
+        interval_hours=body.interval_hours,
         enabled=body.enabled,
     )
     kept = [s for s in st.schedules if s.job != GALLERY_SOURCES_SCHEDULE_JOB]
@@ -2828,7 +2831,11 @@ def galleries_verification(rel: str = Query(..., description="Run folder rel, e.
 def api_oneoff_rolling() -> dict[str, Any]:
     st = _get_state()
     root = Path(st.archive_root).expanduser().resolve()
-    return oneoff_rolling_payload(root, state_allowed_prefixes(st))
+    return oneoff_rolling_payload(
+        root,
+        state_allowed_prefixes(st),
+        st.download_dirs,
+    )
 
 
 @app.post("/api/oneoff/cookie-reminder-ack")
@@ -2856,7 +2863,13 @@ async def run_stop() -> dict[str, Any]:
         await mgr.stop()
     except RuntimeError as e:
         raise HTTPException(status_code=409, detail=str(e)) from e
-    return {"ok": True}
+    status = await mgr.status()
+    phase = status.get("phase")
+    if phase == RunPhase.running.value:
+        await mgr.force_reset_running("stop left phase running")
+        status = await mgr.status()
+        phase = status.get("phase")
+    return {"ok": True, "phase": phase}
 
 
 @app.post("/api/run/force-reset")
@@ -3500,6 +3513,10 @@ def _ytdlp_conf_path() -> Path:
     return Path(_get_state().archive_root).expanduser().resolve() / "yt-dlp.conf"
 
 
+def _ytdlp_oneoff_conf_path() -> Path:
+    return Path(_get_state().archive_root).expanduser().resolve() / ONEOFF_CONF_FILENAME
+
+
 def _clip_text(s: str, max_len: int) -> str:
     if len(s) <= max_len:
         return s
@@ -3698,6 +3715,147 @@ def api_ytdlp_capture_user() -> dict[str, Any]:
         "preview": preview_cli(m),
         "serialized_preview": ser,
         "preserved_tail_preview": tail_prev,
+        "active_preset_id": "user_preferences",
+    }
+
+
+class YtdlpOneoffModelBody(BaseModel):
+    model: dict[str, Any]
+
+
+class YtdlpOneoffSaveBody(BaseModel):
+    model: dict[str, Any]
+    active_preset_id: str = "balanced"
+    human_note: str = ""
+
+
+class YtdlpOneoffApplyBody(BaseModel):
+    preset_id: str
+
+
+@app.get("/api/ytdlp-oneoff/setup")
+def api_ytdlp_oneoff_setup() -> dict[str, Any]:
+    root = Path(_get_state().archive_root).expanduser().resolve()
+    ensure_oneoff_conf(root)
+    p = _ytdlp_oneoff_conf_path()
+    text = p.read_text(encoding="utf-8", errors="replace")
+    managed, preserved_tail = parse_oneoff_conf(text)
+    if not managed:
+        managed = merged_oneoff_preset("balanced")
+    model = {**managed, "preserved_tail": preserved_tail}
+    ui = load_oneoff_ui_state()
+    banner_preset = extract_oneoff_banner_preset(text)
+    return {
+        "model": model,
+        "presets": ONEOFF_PRESET_META,
+        "active_preset_id": ui.active_preset_id,
+        "preset_from_last_save": banner_preset,
+        "format_presets": FORMAT_PRESETS,
+        "user_snapshot_present": ui.user_preferences_snapshot is not None,
+        "conf_path": str(p),
+        "conf_exists": True,
+        "preview": oneoff_conf_cli_preview(model),
+        "serialized_preview": serialize_oneoff_conf(
+            model,
+            preset_id=ui.active_preset_id,
+        ),
+        "batch_conf_note": (
+            "Single download loads yt-dlp.conf first, then this overlay. "
+            "Monthly batch jobs use yt-dlp.conf only."
+        ),
+    }
+
+
+@app.post("/api/ytdlp-oneoff/setup/save")
+async def api_ytdlp_oneoff_save(body: YtdlpOneoffSaveBody) -> dict[str, Any]:
+    await _ytdlp_require_idle()
+    st = _get_state()
+    root = Path(st.archive_root).expanduser().resolve()
+    ensure_oneoff_conf(root)
+    model = dict(body.model)
+    preserved_tail = str(model.pop("preserved_tail", "") or "")
+    out_text = serialize_oneoff_conf(
+        {**model, "preserved_tail": preserved_tail},
+        preset_id=body.active_preset_id,
+        human_note=body.human_note,
+    )
+    p = _ytdlp_oneoff_conf_path()
+    if p.is_file():
+        write_backup_copy(p, ONEOFF_CONF_FILENAME, st.editor_backup_max)
+    try:
+        p.write_text(out_text, encoding="utf-8", newline="\n")
+    except OSError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not write {ONEOFF_CONF_FILENAME}: {e}",
+        ) from e
+    save_oneoff_ui_state(
+        load_oneoff_ui_state().model_copy(
+            update={"active_preset_id": body.active_preset_id}
+        )
+    )
+    return {"ok": True}
+
+
+@app.post("/api/ytdlp-oneoff/setup/apply-preset")
+async def api_ytdlp_oneoff_apply_preset(body: YtdlpOneoffApplyBody) -> dict[str, Any]:
+    await _ytdlp_require_idle()
+    root = Path(_get_state().archive_root).expanduser().resolve()
+    ensure_oneoff_conf(root)
+    p = _ytdlp_oneoff_conf_path()
+    text = p.read_text(encoding="utf-8", errors="replace")
+    managed, preserved_tail = parse_oneoff_conf(text)
+    current = {**managed, "preserved_tail": preserved_tail}
+    ui = load_oneoff_ui_state()
+    if body.preset_id == "user_preferences":
+        if not ui.user_preferences_snapshot:
+            raise HTTPException(
+                status_code=400,
+                detail="Capture User preferences from disk first.",
+            )
+        model = dict(ui.user_preferences_snapshot)
+        model["preserved_tail"] = preserved_tail
+    elif body.preset_id not in {x["id"] for x in ONEOFF_PRESET_META}:
+        raise HTTPException(status_code=404, detail="Unknown preset")
+    else:
+        model = apply_oneoff_builtin_preset(current, body.preset_id)
+        model["preserved_tail"] = ""
+    out_text = serialize_oneoff_conf(model, preset_id=body.preset_id)
+    p.write_text(out_text, encoding="utf-8", newline="\n")
+    save_oneoff_ui_state(
+        ui.model_copy(update={"active_preset_id": body.preset_id})
+    )
+    return {
+        "model": model,
+        "preview": oneoff_conf_cli_preview(model),
+        "serialized_preview": out_text,
+        "active_preset_id": body.preset_id,
+    }
+
+
+@app.post("/api/ytdlp-oneoff/setup/capture-user")
+def api_ytdlp_oneoff_capture_user() -> dict[str, Any]:
+    p = _ytdlp_oneoff_conf_path()
+    if not p.is_file():
+        raise HTTPException(status_code=404, detail=f"{ONEOFF_CONF_FILENAME} not found")
+    text = p.read_text(encoding="utf-8", errors="replace")
+    managed, preserved_tail = parse_oneoff_conf(text)
+    snap = {**managed, "preserved_tail": preserved_tail}
+    ui = load_oneoff_ui_state()
+    save_oneoff_ui_state(
+        ui.model_copy(
+            update={
+                "user_preferences_snapshot": {
+                    k: v for k, v in snap.items() if k != "preserved_tail"
+                },
+                "active_preset_id": "user_preferences",
+            }
+        )
+    )
+    return {
+        "model": snap,
+        "preview": oneoff_conf_cli_preview(snap),
+        "serialized_preview": serialize_oneoff_conf(snap, preset_id="user_preferences"),
         "active_preset_id": "user_preferences",
     }
 

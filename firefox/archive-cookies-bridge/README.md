@@ -1,17 +1,18 @@
-# Archive cookies bridge
+# Archive Console Cookies
 
-Firefox extension fork of [cookies-txt](https://github.com/hrdl-github/cookies-txt) that pushes **YouTube + Google** Netscape cookies to **Archive Console** while a yt-dlp batch run is paused on cookie/auth errors.
+Firefox companion for **Archive Console** (fork of [cookies-txt](https://github.com/hrdl-github/cookies-txt)). Uses the same gold-arrow icon as the Console tray. Pushes **YouTube + Google** Netscape cookies while a yt-dlp batch run is paused on cookie/auth errors.
 
 Upstream export-to-file and clipboard behavior is unchanged. This fork adds:
 
 - Background poll of `GET /api/cookies/youtube-refresh`
 - Automatic `PUT /api/cookies/youtube` when `refresh_needed` or `preflight_needed` is true (before a run starts, or while paused mid-run)
+- Optional **reload of YouTube tab(s)** before export (default on) — helps with yt-dlp `The page needs to be reloaded` / stale player session
 - Popup **Send to Console** for manual/test export
-- Options page for Console URL and poll interval
+- Options page for Console URL, poll interval, and reload mode
 
 ## Prerequisites
 
-1. **Archive Console** running on loopback during batch jobs (default `http://127.0.0.1:8756`).
+1. **Archive Console** running on loopback during batch jobs (check **Settings → port**; this install uses `http://127.0.0.1:9876` unless you changed it).
 2. **YouTube batch** in Console: enable **ARCHIVE_PAUSE_ON_COOKIE_ERROR** and set poll interval (e.g. **15s**). Saved in `state.json` → `ytdlp_batch_run`.
 3. Firefox logged into YouTube in the **same profile** the extension uses.
 4. `archive_root` in Console points at your scripts folder (where `cookies.txt` lives).
@@ -31,11 +32,13 @@ For a persistent install, package/sign the extension or use your preferred Firef
 Before start (preflight, default in Console):
   → POST /api/run/start → Console writes .archive_needs_cookies.txt (preflight_before_run:<job>)
   → extension alarm (~10s) sees preflight_needed on GET /api/cookies/youtube-refresh
-  → export from open YouTube tab + PUT /api/cookies/youtube → yt-dlp batch spawns
+  → export from open **Watch Later** tab (or active YouTube tab) in that Firefox profile + PUT /api/cookies/youtube → yt-dlp batch spawns
 
-Mid-run (pause on cookie error):
+Mid-run (pause on cookie error / "page needs to be reloaded"):
   → archive driver writes .archive_needs_cookies.txt and pauses
-  → extension sees refresh_needed → same export/PUT path
+  → extension sees refresh_needed
+  → reloads export YouTube tab (or all YouTube tabs — Options) and waits for complete
+  → export + PUT /api/cookies/youtube
   → driver sees cookies.txt mtime change → cookies.run.txt + reload → resume
 ```
 
@@ -85,7 +88,9 @@ Allowed **while a job is running** (unlike `PUT /api/files/cookies.txt`).
 | Setting | Default | Notes |
 |---------|---------|--------|
 | Auto-poll | on | Master switch for background alarm |
-| Base URL | `http://127.0.0.1:8756` | Must match Console |
+| Reload YouTube tab(s) before export | on | Refresh player/session before `cookies.getAll` |
+| Which tabs to reload | export tab only | Or **all** open `youtube.com` / Music tabs |
+| Base URL | `http://127.0.0.1:9876` (match Console **Settings → port**) | Must match Console |
 | Poll interval | 0.167 min (~10s) | Should be ≤ Console cookie poll (15s) |
 | Cookie store ID | empty | Optional override; auto-export normally uses the open YouTube tab’s store |
 
@@ -105,7 +110,7 @@ Allowed **while a job is running** (unlike `PUT /api/files/cookies.txt`).
 | PUT 400 | Empty export or invalid Netscape format |
 | PUT OK but run stuck | Poll env off on driver; same file content (mtime unchanged) |
 | Extension silent | Console down; wrong port; auto-poll disabled |
-| yt-dlp still warns | Stale browser session — verify YouTube plays, re-export |
+| yt-dlp still warns | Stale browser session — reload YouTube tab, verify playback, re-export; also update yt-dlp if ancient |
 | Auto export wrong account | No YouTube tab open (fallback used) or override wrong store ID — keep Subscriptions (or any youtube.com tab) open |
 
 ## License

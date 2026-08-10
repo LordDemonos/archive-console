@@ -23,6 +23,8 @@ def test_monthly_watch_later_pip_step_before_ytdlp() -> None:
     scripts_root = Path(__file__).resolve().parent.parent.parent
     bat = scripts_root / "monthly_watch_later_archive.bat"
     text = bat.read_text(encoding="utf-8")
+    assert "_archive_python_env.bat" in text
+    assert "%ARCHIVE_PY%" in text
     assert "SKIP_PIP_UPDATE" in text
     pip_line = text.find("install --upgrade pip")
     ytdlp_line = text.find('yt-dlp[default]"')

@@ -1,10 +1,10 @@
 {
   "extDescription": {
-    "message": "Exportiert alle Cookies in einem Netscape HTTP Cookie File, das von curl, wget, youtube-dl usw. genutzt wird.",
+    "message": "Archive Console: YouTube-Cookies exportieren und cookies.txt für yt-dlp-Läufe aktualisieren.",
     "description": "Short description of the extension to be displayed in the UI and on AMO"
   },
   "buttonDescription": {
-    "message": "Cookies exportieren",
+    "message": "Archive Console Cookies",
     "description": "Tooltip of the browser toolbar icon."
   },
   "copyBtn": {
@@ -30,5 +30,13 @@
   "popupSitesContainerCurrent": {
     "message": "Aktueller Container und Website",
     "description": "Popup option text for exporting cookies only from the current site and current container"
+  },
+  "popupArchiveYoutube": {
+    "message": "YouTube + Google (yt-dlp)",
+    "description": "Popup row for YouTube-only export and Console PUT"
+  },
+  "popupArchiveConsoleBtn": {
+    "message": "Send to Console",
+    "description": "Push cookies.txt to Archive Console via localhost API"
   }
 }

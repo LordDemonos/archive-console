@@ -7,8 +7,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .download_output import effective_oneoff_root
 from .file_serve import MEDIA_BY_SUFFIX, is_playable_media_path
 from .paths import PathNotAllowedError, is_allowed, normalize_rel
+from .settings import DownloadDirsSettings
 
 REPORT_REL = "logs/oneoff_report/report.html"
 JSONL_REL = "logs/oneoff_report/summary.jsonl"
@@ -156,18 +158,36 @@ def _media_rel_for_ok_entry(
     )
 
 
+def _path_under_root_dir(path: Path, root_dir: Path) -> bool:
+    try:
+        path.resolve().relative_to(root_dir.resolve())
+        return True
+    except ValueError:
+        return False
+
+
 def last_ok_media_rel(
     archive_root: Path,
     entries: list[dict[str, Any]],
     allowed_prefixes: list[str],
+    oneoff_output_root: Path | None = None,
 ) -> str | None:
-    """Newest successful one-off row with an allowlisted playable file under archive_root."""
+    """Newest successful one-off row with media under the configured oneoff output root."""
+    out_root = oneoff_output_root
     for e in reversed(entries):
         if (e.get("outcome") or "") != "ok":
             continue
         rel = _media_rel_for_ok_entry(archive_root, e, allowed_prefixes)
-        if rel:
-            return rel
+        if not rel:
+            continue
+        if out_root is not None:
+            try:
+                full = (archive_root / rel).resolve()
+            except OSError:
+                continue
+            if not _path_under_root_dir(full, out_root):
+                continue
+        return rel
     return None
 
 
@@ -186,13 +206,26 @@ def rolling_stats(entries: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def oneoff_rolling_payload(
-    archive_root: Path, allowed_prefixes: list[str]
+    archive_root: Path,
+    allowed_prefixes: list[str],
+    download_dirs: DownloadDirsSettings,
 ) -> dict[str, Any]:
     root = archive_root.resolve()
     entries = _load_entries(root)
     report_path = root / "logs" / "oneoff_report" / "report.html"
     stats = rolling_stats(entries)
-    stats["last_media_rel"] = last_ok_media_rel(root, entries, allowed_prefixes)
+    try:
+        oneoff_root = effective_oneoff_root(root, download_dirs)
+    except PathNotAllowedError:
+        oneoff_root = None
+    stats["last_media_rel"] = last_ok_media_rel(
+        root, entries, allowed_prefixes, oneoff_root
+    )
+    stats["oneoff_output_rel"] = (
+        oneoff_root.relative_to(root).as_posix()
+        if oneoff_root is not None
+        else "oneoff"
+    )
     return {
         "report_rel": REPORT_REL,
         "report_exists": report_path.is_file(),

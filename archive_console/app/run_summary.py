@@ -5,7 +5,8 @@ Metric definitions (business-level, not process exit code):
   failed + private/unavailable (one count per queued video after playlist expansion).
 - **ok** — Downloaded (verified) + Skipped: finished without treating the item as an
   error row (skipped = already satisfied / intentionally skipped).
-- **fail** — Failed + Private / unavailable: errors or unavailable content per driver rules.
+- **fail** — Failed + Private / unavailable: real errors or unavailable content
+  (yt-dlp *warnings* such as SABR are not included).
 - **saved** — Downloaded (verified): media verified on disk (manifest file_verified_ok).
 
 Invariant: ``ok + fail == tried``. Source: ``logs/archive_run_*/summary.txt`` written by
@@ -29,6 +30,7 @@ _RE_ATTEMPTED = re.compile(r"^Attempted\s*\(approx\.\):\s*(\d+)\s*$", re.MULTILI
 _RE_DOWNLOADED = re.compile(r"^Downloaded\s*\(verified\):\s*(\d+)\s*$", re.MULTILINE)
 _RE_SKIPPED = re.compile(r"^Skipped:\s*(\d+)\s*$", re.MULTILINE)
 _RE_FAILED = re.compile(r"^Failed:\s*(\d+)\s*$", re.MULTILINE)
+_RE_WARNINGS = re.compile(r"^Warnings:\s*(\d+)\s*$", re.MULTILINE)
 _RE_PRIVATE = re.compile(
     r"^Private\s*/\s*unavailable:\s*(\d+)\s*$", re.MULTILINE
 )
@@ -48,6 +50,9 @@ def parse_summary_txt(text: str) -> dict[str, int] | None:
     skipped = int(m_s.group(1))
     failed = int(m_f.group(1))
     private_unavailable = int(m_p.group(1))
+    m_w = _RE_WARNINGS.search(text)
+    warnings = int(m_w.group(1)) if m_w else 0
+    # Warnings are informational and must not be part of Attempted / Failed.
     check = downloaded + skipped + failed + private_unavailable
     if check != attempted:
         return None
@@ -56,6 +61,7 @@ def parse_summary_txt(text: str) -> dict[str, int] | None:
         "downloaded": downloaded,
         "skipped": skipped,
         "failed": failed,
+        "warnings": warnings,
         "private_unavailable": private_unavailable,
     }
 

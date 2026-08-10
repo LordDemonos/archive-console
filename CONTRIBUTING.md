@@ -11,7 +11,7 @@ cookies, or download trees. Upstream: https://github.com/LordDemonos/archive-con
    `*.sample.txt` files (one URL or `youtube id` per line; see comments in samples).
 4. Copy `cookies.txt.example` to `cookies.txt` and add real Netscape-format cookies,
    or adjust `yt-dlp.conf` to use `--cookies-from-browser` (see yt-dlp docs).
-   Optional: load the Firefox extension under `firefox/archive-cookies-bridge/` to export cookies via Archive Console (see that folder’s README).
+   Optional: load the Firefox extension **Archive Console Cookies** under `firefox/archive-cookies-bridge/` to export cookies via Archive Console (see that folder’s README).
 5. Install Python 3.10+ on PATH. For **Archive Console**:
    - Run `start_archive_console.bat` once (creates `archive_console\.venv` and installs requirements).
    - Optional: copy `archive_console/state.json.example` to `archive_console/state.json` or let the UI create state on first run.

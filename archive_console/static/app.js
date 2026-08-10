@@ -833,7 +833,7 @@
     btnOneoffStart: document.getElementById("btnOneoffStart"),
     btnOneoffStop: document.getElementById("btnOneoffStop"),
     oneoffStartMsg: document.getElementById("oneoffStartMsg"),
-    oneoffOutputEffective: document.getElementById("oneoffOutputEffective"),
+    oneoffOutputBox: document.getElementById("oneoffOutputBox"),
     oneoffBrowseMsg: document.getElementById("oneoffBrowseMsg"),
     oneoffRollingSummary: document.getElementById("oneoffRollingSummary"),
     oneoffRollingActions: document.getElementById("oneoffRollingActions"),
@@ -872,6 +872,12 @@
     gallerySourcesMsg: document.getElementById("gallerySourcesMsg"),
     gallerySourcesScheduleEnabled: document.getElementById("gallerySourcesScheduleEnabled"),
     gallerySourcesScheduleFreq: document.getElementById("gallerySourcesScheduleFreq"),
+    gallerySourcesScheduleIntervalWrap: document.getElementById(
+      "gallerySourcesScheduleIntervalWrap"
+    ),
+    gallerySourcesScheduleIntervalHours: document.getElementById(
+      "gallerySourcesScheduleIntervalHours"
+    ),
     gallerySourcesScheduleDowWrap: document.getElementById("gallerySourcesScheduleDowWrap"),
     gallerySourcesScheduleDow: document.getElementById("gallerySourcesScheduleDow"),
     gallerySourcesScheduleDayWrap: document.getElementById("gallerySourcesScheduleDayWrap"),
@@ -4004,22 +4010,43 @@
       appendStreamLine("[console] Stop: " + (await r.text()));
       return;
     }
+    var stopBody = null;
+    try {
+      stopBody = await r.json();
+    } catch (_parseStop) {
+      void _parseStop;
+    }
     if (!r.ok) {
       appendStreamLine(
         "[console] Stop failed (" + r.status + ") — trying force-reset…"
+      );
+      await fetch("/api/run/force-reset", { method: "POST" });
+    } else if (stopBody && stopBody.phase === "running") {
+      appendStreamLine(
+        "[console] Stop reported success but job still running — force-reset…"
       );
       await fetch("/api/run/force-reset", { method: "POST" });
     }
     try {
       var st = await fetch("/api/run/status");
       if (st.ok) {
-        applyRunStatusFromServer(await st.json());
+        var sj = await st.json();
+        applyRunStatusFromServer(sj);
+        if (!sj || sj.phase !== "running") {
+          galleryBatchQueue = [];
+          galleryBatchTotal = 0;
+          activeStreamJob = null;
+          disableRunButtons(false);
+          editorJobRunning = false;
+          setEditorRunning(false);
+          stopRunStatusPoll();
+        }
       }
     } catch (_e) {
       void _e;
     }
     appendStreamLine(
-      "[console] Stop finished — Run galleries is enabled again if no job is running."
+      "[console] Stop finished — start buttons re-enable when no job is running."
     );
   }
 
@@ -4742,6 +4769,9 @@
       loadDownloadDirsForm();
       loadOneoffRolling();
       refreshOneoffOutputEffective();
+      if (typeof window.ytdlpOneoffSetupLoad === "function") {
+        window.ytdlpOneoffSetupLoad("oneoffYtdlpSetupMount");
+      }
       void refreshReminders().then(function () {
         scheduleOneoffCookieChecks();
       });
@@ -5253,7 +5283,14 @@
         }
         if (endedGalleries) {
           loadRunOverview();
-          if (galleryBatchQueue.length) {
+          if (canceled) {
+            galleryBatchQueue = [];
+            galleryBatchTotal = 0;
+            if (els.gallerySourcesMsg) {
+              els.gallerySourcesMsg.textContent =
+                "Batch stopped — remaining sources were not run.";
+            }
+          } else if (galleryBatchQueue.length) {
             continueGalleryBatchIfAny();
           } else {
             if (galleryBatchTotal > 0 && els.gallerySourcesMsg) {
@@ -5267,7 +5304,17 @@
       }
     };
     es.onerror = function () {
-      /* browser auto-reconnects EventSource */
+      /* browser auto-reconnects EventSource; resync mutex if we missed an end event */
+      fetch("/api/run/status", { credentials: "same-origin" })
+        .then(function (r) {
+          return r.ok ? r.json() : null;
+        })
+        .then(function (j) {
+          if (j) {
+            applyRunStatusFromServer(j);
+          }
+        })
+        .catch(function () {});
     };
   }
 
@@ -5659,36 +5706,81 @@
     }
   }
 
-  async function refreshOneoffOutputEffective() {
-    if (!els.oneoffOutputEffective) {
+  function oneoffConfiguredLabel(eff) {
+    if (!eff) {
+      return "—";
+    }
+    var c = eff.configured_rel;
+    if (c != null && String(c).trim()) {
+      return String(c).trim();
+    }
+    return "(default: " + (eff.default_rel || "oneoff") + ")";
+  }
+
+  function renderOneoffOutputBox(eff, opts) {
+    if (!els.oneoffOutputBox) {
+      return;
+    }
+    opts = opts || {};
+    var abs = (eff && eff.effective_abs) || "—";
+    var rel = oneoffConfiguredLabel(eff);
+    var pending = opts.pending_rel;
+    var pendingNote = "";
+    if (pending != null && String(pending).trim() !== String(eff && eff.configured_rel || "").trim()) {
+      pendingNote =
+        '<p class="oneoff-output-pending muted small"><strong>Unsaved:</strong> preview for <code>' +
+        esc(String(pending).trim() || "(default: oneoff)") +
+        "</code> — click <strong>Save output location</strong> to apply.</p>";
+    }
+    els.oneoffOutputBox.innerHTML =
+      '<dl class="oneoff-output-dl">' +
+      "<dt>Files download here</dt>" +
+      "<dd><code class=\"oneoff-output-path\">" +
+      esc(abs) +
+      "</code></dd>" +
+      "<dt>Relative to archive</dt>" +
+      "<dd>" +
+      esc(rel) +
+      "</dd>" +
+      "<dt>Subfolder pattern</dt>" +
+      "<dd><code>%(uploader)/%(title) - %(id).%(ext)</code></dd>" +
+      "</dl>" +
+      pendingNote;
+  }
+
+  async function refreshOneoffOutputEffective(previewPending) {
+    if (!els.oneoffOutputBox) {
       return;
     }
     try {
-      var r = await fetch("/api/settings/download-dirs/preview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(collectDownloadDirsPayload()),
-      });
+      if (previewPending) {
+        var pr = await fetch("/api/settings/download-dirs/preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(collectDownloadDirsPayload()),
+        });
+        if (pr.ok) {
+          var pj = await pr.json();
+          renderOneoffOutputBox(
+            (pj.download_dirs_effective || {}).oneoff,
+            { pending_rel: getOneoffDirFormValue() }
+          );
+          return;
+        }
+      }
+      var r = await fetch("/api/settings");
       if (!r.ok) {
+        els.oneoffOutputBox.innerHTML =
+          '<p class="muted small">Could not load output paths.</p>';
         return;
       }
       var j = await r.json();
-      var eff = (j.download_dirs_effective || {}).oneoff;
-      if (!eff) {
-        return;
-      }
-      var cr =
-        eff.configured_rel != null
-          ? eff.configured_rel
-          : "(default: " + (eff.default_rel || "oneoff") + ")";
-      var abs = eff.effective_abs || "—";
-      els.oneoffOutputEffective.textContent =
-        "Full path (files download here): " +
-        abs +
-        "\nRelative to archive: " +
-        cr;
+      renderOneoffOutputBox((j.download_dirs_effective || {}).oneoff, {});
     } catch {
-      /* ignore */
+      if (els.oneoffOutputBox) {
+        els.oneoffOutputBox.innerHTML =
+          '<p class="muted small">Could not load output paths.</p>';
+      }
     }
   }
 
@@ -7606,6 +7698,7 @@
     var freqEl = row.querySelector(".sch-freq");
     var dayWrap = row.querySelector(".sch-day-wrap");
     var dowWrap = row.querySelector(".sch-dow-wrap");
+    var intervalWrap = row.querySelector(".sch-interval-wrap");
     if (!freqEl) {
       return;
     }
@@ -7615,6 +7708,9 @@
     }
     if (dowWrap) {
       dowWrap.hidden = f !== "weekly";
+    }
+    if (intervalWrap) {
+      intervalWrap.hidden = f !== "interval";
     }
   }
 
@@ -7635,6 +7731,9 @@
     }
     if (els.gallerySourcesScheduleDowWrap) {
       els.gallerySourcesScheduleDowWrap.hidden = f !== "weekly";
+    }
+    if (els.gallerySourcesScheduleIntervalWrap) {
+      els.gallerySourcesScheduleIntervalWrap.hidden = f !== "interval";
     }
   }
 
@@ -7669,6 +7768,11 @@
       }
       if (els.gallerySourcesScheduleMin) {
         els.gallerySourcesScheduleMin.value = String(sch.minute != null ? sch.minute : 0);
+      }
+      if (els.gallerySourcesScheduleIntervalHours) {
+        els.gallerySourcesScheduleIntervalHours.value = String(
+          sch.interval_hours != null ? sch.interval_hours : 4
+        );
       }
     }
     if (els.gallerySourcesScheduleMaxHours) {
@@ -7743,6 +7847,17 @@
       minute: Math.min(
         59,
         Math.max(0, parseInt(els.gallerySourcesScheduleMin && els.gallerySourcesScheduleMin.value, 10) || 0)
+      ),
+      interval_hours: Math.min(
+        168,
+        Math.max(
+          1,
+          parseInt(
+            els.gallerySourcesScheduleIntervalHours &&
+              els.gallerySourcesScheduleIntervalHours.value,
+            10
+          ) || 4
+        )
       ),
       scheduled_max_run_sec: (function () {
         var maxH = Math.min(
@@ -8030,7 +8145,13 @@
         })
         .join("");
       var freq = s.frequency || "monthly";
-      var freqOpts = ["daily", "weekly", "monthly"]
+      var freqLabels = {
+        daily: "Daily",
+        weekly: "Weekly",
+        monthly: "Monthly",
+        interval: "Every N hours",
+      };
+      var freqOpts = ["daily", "weekly", "monthly", "interval"]
         .map(function (f) {
           return (
             "<option value=\"" +
@@ -8038,8 +8159,7 @@
             "\"" +
             (String(freq) === f ? " selected" : "") +
             ">" +
-            f.charAt(0).toUpperCase() +
-            f.slice(1) +
+            (freqLabels[f] || f) +
             "</option>"
           );
         })
@@ -8056,6 +8176,10 @@
           "</option>"
         );
       }).join("");
+      var intervalHours =
+        typeof s.interval_hours === "number" && s.interval_hours >= 1
+          ? s.interval_hours
+          : 4;
       row.innerHTML =
         "<input type=\"hidden\" class=\"sch-id\" value=\"" +
         esc(sid) +
@@ -8066,6 +8190,9 @@
         "<label class=\"field compact\"><span>Repeat</span><select class=\"sch-freq\">" +
         freqOpts +
         "</select></label>" +
+        "<label class=\"field compact sch-interval-wrap\"><span>Every (hours)</span><input type=\"number\" class=\"sch-interval-hours\" min=\"1\" max=\"168\" value=\"" +
+        esc(intervalHours) +
+        "\" /></label>" +
         "<label class=\"field compact sch-day-wrap\"><span>Day (1–31)</span><input type=\"number\" class=\"sch-day\" min=\"1\" max=\"31\" value=\"" +
         esc(s.day_of_month) +
         "\" /></label>" +
@@ -8112,12 +8239,18 @@
       var dow = row.querySelector(".sch-dow");
       var hour = row.querySelector(".sch-hour");
       var min = row.querySelector(".sch-min");
+      var intervalHoursEl = row.querySelector(".sch-interval-hours");
       var en = row.querySelector(".sch-en");
       if (!job) {
         return;
       }
       var frequency = (freq && freq.value) || "monthly";
-      if (frequency !== "daily" && frequency !== "weekly" && frequency !== "monthly") {
+      if (
+        frequency !== "daily" &&
+        frequency !== "weekly" &&
+        frequency !== "monthly" &&
+        frequency !== "interval"
+      ) {
         frequency = "monthly";
       }
       out.push({
@@ -8128,6 +8261,10 @@
         day_of_week: Math.min(6, Math.max(0, parseInt(dow && dow.value, 10) || 0)),
         hour: Math.min(23, Math.max(0, parseInt(hour && hour.value, 10) || 0)),
         minute: Math.min(59, Math.max(0, parseInt(min && min.value, 10) || 0)),
+        interval_hours: Math.min(
+          168,
+          Math.max(1, parseInt(intervalHoursEl && intervalHoursEl.value, 10) || 4)
+        ),
         enabled: !!(en && en.checked),
       });
     });
@@ -8966,6 +9103,9 @@
               "yt-dlp.conf editor script did not load. Hard-refresh (Ctrl+F5) or check the browser console / Network tab for /static/ytdlp_setup.js.";
           }
         }
+        if (typeof window.ytdlpOneoffSetupLoadAll === "function") {
+          window.ytdlpOneoffSetupLoadAll();
+        }
       }
       if (v === "gallerydl") {
         loadGallerydlFile();
@@ -9000,6 +9140,9 @@
         loadDownloadDirsForm();
         loadOneoffRolling();
         refreshOneoffOutputEffective();
+        if (typeof window.ytdlpOneoffSetupLoad === "function") {
+          window.ytdlpOneoffSetupLoad("oneoffYtdlpSetupMount");
+        }
         void refreshCookieReminder().then(function () {
           scheduleOneoffCookieChecks();
         });
@@ -9365,6 +9508,9 @@
   if (els.dlDirOneoffPanel) {
     els.dlDirOneoffPanel.addEventListener("change", syncOneoffInputsDirFromPanel);
     els.dlDirOneoffPanel.addEventListener("blur", syncOneoffInputsDirFromPanel);
+    els.dlDirOneoffPanel.addEventListener("input", function () {
+      void refreshOneoffOutputEffective(true);
+    });
   }
   if (els.dlDirOneoffInputs) {
     els.dlDirOneoffInputs.addEventListener("change", syncOneoffPanelDirFromInputs);
@@ -9501,7 +9647,6 @@
       }
       var body = {
         url: url,
-        output_rel: getOneoffDirFormValue(),
         dry_run: !!(els.optOneoffDryRun && els.optOneoffDryRun.checked),
         skip_pip_update: !!(els.optOneoffSkipPip && els.optOneoffSkipPip.checked),
         skip_ytdlp_update: !!(
@@ -9552,7 +9697,7 @@
         appendOneoffLogLine(
           "[console] Cookie preflight timed out: " +
             ((d503one.detail && String(d503one.detail)) ||
-              "enable Archive cookies bridge and keep a YouTube tab open.")
+              "enable Archive Console Cookies and keep a YouTube tab open.")
         );
         return;
       }
@@ -10586,7 +10731,7 @@
         appendLogLine(
           "[console] Cookie preflight timed out: " +
             ((d503run.detail && String(d503run.detail)) ||
-              "enable Archive cookies bridge and keep a YouTube tab open.")
+              "enable Archive Console Cookies and keep a YouTube tab open.")
         );
         return;
       }
@@ -11738,6 +11883,7 @@
         day_of_week: 0,
         hour: 2,
         minute: 0,
+        interval_hours: 4,
         enabled: false,
       });
       renderScheduleEditor(cur, [], YOUTUBE_SCHEDULE_JOBS);

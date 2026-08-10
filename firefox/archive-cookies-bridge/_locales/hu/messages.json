@@ -1,10 +1,10 @@
 {
   "extDescription": {
-    "message": "Az összes sütit exportálja egy Netscape HTTP Cookie Fájlba, amit olyan programok használnak, mint a curl, wget, youtube-dl és hasonlók.",
+    "message": "Archive Console companion: export YouTube cookies and auto-refresh cookies.txt for yt-dlp batch runs.",
     "description": "Short description of the extension to be displayed in the UI and on AMO"
   },
   "buttonDescription": {
-    "message": "Sütik exportálása",
+    "message": "Archive Console Cookies",
     "description": "Tooltip of the browser toolbar icon."
   },
   "copyBtn": {
@@ -30,5 +30,13 @@
   "popupSitesContainerCurrent": {
     "message": "Jelenlegi tároló és oldal",
     "description": "Popup option text for exporting cookies only from the current site and current container"
+  },
+  "popupArchiveYoutube": {
+    "message": "YouTube + Google (yt-dlp)",
+    "description": "Popup row for YouTube-only export and Console PUT"
+  },
+  "popupArchiveConsoleBtn": {
+    "message": "Send to Console",
+    "description": "Push cookies.txt to Archive Console via localhost API"
   }
 }

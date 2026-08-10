@@ -2967,9 +2967,61 @@ td.hist-stat-wide {
   display: none;
 }
 
-#view-oneoff .oneoff-output-effective {
-  white-space: pre-line;
-  margin: 0.35rem 0 0.25rem;
+#view-oneoff .oneoff-output-effective,
+.oneoff-output-box {
+  margin: 0.5rem 0 0.75rem;
+}
+
+.oneoff-output-dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(8rem, 11rem) 1fr;
+  gap: 0.35rem 0.75rem;
+  align-items: baseline;
+}
+
+.oneoff-output-dl dt {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.oneoff-output-dl dd {
+  margin: 0;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.oneoff-output-path {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.oneoff-output-pending {
+  margin: 0.65rem 0 0;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent-border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.oneoff-ytdlp-setup-mount .ytdlp-preset-card span.muted.small {
+  display: block;
+  margin-top: 0.15rem;
+  line-height: 1.35;
+}
+
+.oneoff-ytdlp-fmt-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  align-items: center;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.oneoff-format-card,
+.oneoff-output-card {
+  margin-top: 0.75rem;
 }
 
 #view-oneoff .oneoff-save-output-row {

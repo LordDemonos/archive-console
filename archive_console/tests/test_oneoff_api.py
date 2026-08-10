@@ -41,6 +41,12 @@ def oneoff_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
                     "require_cookie_confirm_manual": True,
                     "tray_notify_before_schedule": False,
                 },
+                "ytdlp_batch_run": {
+                    "pause_on_cookie_error": True,
+                    "cookie_auth_poll_sec": 15,
+                    "preflight_via_extension": False,
+                    "preflight_wait_sec": 120,
+                },
                 "schedules": [],
                 "run_history": [],
             }

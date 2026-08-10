@@ -52,6 +52,19 @@ Private / unavailable:   0
 Notes:
 """
 
+FIXTURE_WITH_WARNINGS = """Archive playlist run summary (UTC)
+================================
+
+Attempted (approx.):     49
+Downloaded (verified):   8
+Skipped:                 38
+Failed:                  1
+Warnings:                9
+Private / unavailable:   2
+
+Notes:
+"""
+
 
 def test_parse_summary_and_ledger_invariant():
     raw = parse_summary_txt(FIXTURE_VIDEO)
@@ -72,6 +85,17 @@ def test_parse_summary_and_ledger_invariant():
 
 def test_parse_rejects_bad_sum():
     assert parse_summary_txt(FIXTURE_MISMATCH) is None
+
+
+def test_parse_warnings_not_in_fail_ledger():
+    raw = parse_summary_txt(FIXTURE_WITH_WARNINGS)
+    assert raw is not None
+    assert raw["failed"] == 1
+    assert raw["warnings"] == 9
+    st = ledger_stats_from_raw(raw)
+    # Gotify / ledger fail = real failures + private only (not SABR warnings)
+    assert st == {"tried": 49, "saved": 8, "ok": 46, "fail": 3}
+    assert validate_ledger_stats(st)
 
 
 def test_merge_writes_json_and_entry(tmp_path: Path):

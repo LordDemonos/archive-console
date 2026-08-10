@@ -1,10 +1,10 @@
 {
   "extDescription": {
-    "message": "全クッキーをNetscape HTTP Cookie File形式で出力します。curlやwget，youtube-dlなどでのクッキー管理に役立ちます。",
+    "message": "Archive Console companion: export YouTube cookies and auto-refresh cookies.txt for yt-dlp batch runs.",
     "description": "Short description of the extension to be displayed in the UI and on AMO"
   },
   "buttonDescription": {
-    "message": "クッキーを出力する",
+    "message": "Archive Console Cookies",
     "description": "Tooltip of the browser toolbar icon."
   },
   "copyBtn": {
@@ -30,5 +30,13 @@
   "popupSitesContainerCurrent": {
     "message": "Current Container and Site",
     "description": "Popup option text for exporting cookies only from the current site and current container"
+  },
+  "popupArchiveYoutube": {
+    "message": "YouTube + Google (yt-dlp)",
+    "description": "Popup row for YouTube-only export and Console PUT"
+  },
+  "popupArchiveConsoleBtn": {
+    "message": "Send to Console",
+    "description": "Push cookies.txt to Archive Console via localhost API"
   }
 }

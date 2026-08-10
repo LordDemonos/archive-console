@@ -88,6 +88,9 @@ plus summary counts and sibling-run links.
 
 Summary numbers and section badges are aligned: Downloaded badge = verified rows
 (file_verified_ok=yes, including downloaded_merged), not raw manifest row count.
+Failed = real errors only; Warnings (e.g. SABR / missing progressive URLs) are separate
+and do not count toward Failed or Gotify/ledger fail. Attempted = downloaded + skipped +
+failed + private/unavailable (warnings excluded).
 run.log ends with a COUNT_CHECK line when counts match partitioned CSV rows (or lists mismatches).
 
 The summary <dl> and all tables are also pre-rendered in HTML so file:// works
@@ -208,6 +211,10 @@ When to change what (no AI required)
       deno is on PATH.
     — If EJS scripts won’t install from PyPI: see wiki “remote-components ejs:github”.
   Removed / private / account closed — Expected content loss; no yt-dlp fix.
+  aria2c exited with code 22 / googlevideo HTTP 403
+    — YouTube CDN often rejects aria2c. Prefer native downloader (leave
+      external-downloader empty in Archive Console yt-dlp.conf). Rerun the batch;
+      failed IDs are not written to playlists_downloaded.txt until verified.
 
 Optional dry run
 ----------------
@@ -260,6 +267,27 @@ Optional poll-path smoke: also set ``ARCHIVE_SELFTEST_COOKIE_PAUSE=1``.
 on Windows, ``--cookies-from-browser`` may fail if the browser profile is locked — prefer a
 file export or close extra profiles. See ``yt-dlp.conf`` comments on cookies.
 
+Download stall watchdog (archive_playlist_run.py)
+-------------------------------------------------
+Symptom: run.log stops updating for hours mid-video while the console still shows running
+(often during HLS ``[hlsnative]`` fragment downloads).
+
+Config (``yt-dlp.conf`` / Console yt-dlp settings):
+  ``--socket-timeout 30`` — fail hung HTTP reads so fragment retries can run.
+  ``--skip-unavailable-fragments`` — skip bad HLS/DASH segments instead of blocking.
+
+Driver env (optional):
+  ``ARCHIVE_DOWNLOAD_STALL_SEC`` (default ``900``) — no byte progress limit before interrupt.
+  ``ARCHIVE_DOWNLOAD_STALL_HEARTBEAT_SEC`` (default ``30``) — log while waiting on a file.
+  ``ARCHIVE_DOWNLOAD_STALL_MAX_RETRIES`` (default ``3``) — per-URL stall retries per run.
+  Set ``ARCHIVE_DOWNLOAD_STALL_SEC=0`` to disable the watchdog.
+
+On stall: logs an issue row (category ``stall``), **terminates the yt-dlp worker
+subprocess** (process tree on Windows), cleans partial files, and retries the same batch
+URL (download-archive skips completed IDs). After max retries, skips that URL and
+continues other entries in ``playlists_input.txt``. Parent process never blocks inside
+native HLS reads — recovery uses ``taskkill /T`` (Windows) or SIGTERM/kill (Unix).
+
 Failure families (for reading issues.csv / run.log)
 ---------------------------------------------------
   Auth / WL / session — playlist does not exist, sign in, cookies, bot check; see
@@ -267,6 +295,9 @@ Failure families (for reading issues.csv / run.log)
   Extractor / client — n challenge, EJS, SABR, Only images, PO token messages.
   Format / mux       — Requested format is not available, ffmpeg, merge.
   Network / throttle — 429, rate limit, timeouts.
+  Stalled HLS/DASH fragment — no byte progress for many minutes: see
+  "Download stall watchdog" above; yt-dlp.conf should include --socket-timeout and
+  --skip-unavailable-fragments.
   Removed content     — Video unavailable, removed by uploader, account terminated.
   Other               — See remediation column and full reason in run.log.
 

@@ -59,7 +59,7 @@ Follow **`logs\latest_run.txt`**, **`latest_run_channel.txt`**, or **`latest_run
 | **`CLEANUP_PR.md`** | Record of prior cleanups / references. |
 | **`ARCHIVE_PLAYLIST_RUN_LOGS.txt`** | Operator runbook. |
 | **`archive_console/ARCHIVE_CONSOLE.md`** | Archive Console behavior (shutdown, tray, cookies, player, API). |
-| **`firefox/archive-cookies-bridge/`** | Optional Firefox extension to export Netscape cookies into the archive tree. |
+| **`firefox/archive-cookies-bridge/`** | Optional Firefox extension (**Archive Console Cookies**) to export Netscape cookies into the archive tree. |
 | **`archive_cookies.py`** | Shared cookie path helpers used by drivers and Console. |
 | **`yt-dlp.conf`**, **`gallery-dl.conf`**, **`gifsky.conf`** (optional) | Shared CLI / tool config. |
 | **`docs/screenshots/`** | README UI captures (sanitized before publish if needed). |
@@ -85,7 +85,7 @@ Full behavior, **SHUTDOWN** stop, optional **`ARCHIVE_SHUTDOWN_TOKEN`**, and sec
 
 ### Cookies
 
-You maintain **`cookies.txt`** next to **`yt-dlp.conf`**. The Console can also write per-site cookie files under **`cookies\`** and accept exports from the in-repo Firefox extension (**`firefox/archive-cookies-bridge/`**). **Manual Run** can require confirming **`cookies.txt`** (**HTTP 428** until you confirm; dry-run skips). **Scheduled** runs use banners / optional **localhost-only** tray notify—see **ARCHIVE_CONSOLE.md**. Reminder snoozes are **short** by design (no “ignore cookies for a week” promise).
+You maintain **`cookies.txt`** next to **`yt-dlp.conf`**. The Console can also write per-site cookie files under **`cookies\`** and accept exports from the Firefox extension **Archive Console Cookies** (**`firefox/archive-cookies-bridge/`** — tray icon branding; can reload YouTube tabs before export). **Manual Run** can require confirming **`cookies.txt`** (**HTTP 428** until you confirm; dry-run skips). **Scheduled** runs use banners / optional **localhost-only** tray notify—see **ARCHIVE_CONSOLE.md**. Reminder snoozes are **short** by design (no “ignore cookies for a week” promise).
 
 ### Optional host tools
 

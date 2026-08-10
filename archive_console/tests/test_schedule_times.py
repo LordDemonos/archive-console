@@ -11,6 +11,7 @@ from app.schedule_times import (
     next_fire_local,
     next_monthly_fire_local,
     occurrence_date_local,
+    schedule_due_now,
     schedule_matches_moment,
 )
 from app.settings import ScheduleEntry
@@ -113,6 +114,18 @@ def test_schedule_matches_moment_daily() -> None:
     )
 
 
+def test_schedule_due_now_daily_catchup() -> None:
+    s = ScheduleEntry(enabled=True, frequency="daily", hour=3, minute=0)
+    tz = ZoneInfo("UTC")
+    assert not schedule_due_now(datetime(2025, 5, 25, 2, 59, tzinfo=tz), s)
+    assert schedule_due_now(datetime(2025, 5, 25, 3, 0, tzinfo=tz), s)
+    assert schedule_due_now(datetime(2025, 5, 25, 15, 30, tzinfo=tz), s)
+    assert not schedule_due_now(
+        datetime(2025, 5, 25, 3, 0, tzinfo=tz),
+        s.model_copy(update={"enabled": False}),
+    )
+
+
 def test_schedule_matches_moment_weekly() -> None:
     s = ScheduleEntry(enabled=True, frequency="weekly", day_of_week=6, hour=2, minute=0)
     tz = ZoneInfo("UTC")
@@ -123,3 +136,64 @@ def test_schedule_matches_moment_weekly() -> None:
 def test_legacy_schedule_defaults_to_monthly() -> None:
     s = ScheduleEntry(enabled=True, day_of_month=27, hour=1, minute=0)
     assert s.frequency == "monthly"
+
+
+def test_interval_next_fire_same_slot_minute() -> None:
+    s = ScheduleEntry(
+        enabled=True,
+        frequency="interval",
+        interval_hours=4,
+        hour=3,
+        minute=0,
+    )
+    tz = ZoneInfo("UTC")
+    now = datetime(2025, 5, 25, 3, 0, 30, tzinfo=tz)
+    nxt = next_fire_local(s, now=now)
+    assert nxt is not None
+    assert nxt == datetime(2025, 5, 25, 3, 0, tzinfo=tz)
+
+
+def test_interval_next_fire_rolls_forward() -> None:
+    s = ScheduleEntry(
+        enabled=True,
+        frequency="interval",
+        interval_hours=4,
+        hour=3,
+        minute=0,
+    )
+    tz = ZoneInfo("UTC")
+    now = datetime(2025, 5, 25, 3, 5, tzinfo=tz)
+    nxt = next_fire_local(s, now=now)
+    assert nxt is not None
+    assert nxt == datetime(2025, 5, 25, 7, 0, tzinfo=tz)
+
+
+def test_interval_due_within_window() -> None:
+    s = ScheduleEntry(
+        enabled=True,
+        frequency="interval",
+        interval_hours=4,
+        hour=3,
+        minute=0,
+    )
+    tz = ZoneInfo("UTC")
+    assert schedule_due_now(datetime(2025, 5, 25, 3, 0, tzinfo=tz), s)
+    assert schedule_due_now(datetime(2025, 5, 25, 5, 30, tzinfo=tz), s)
+    assert not schedule_matches_moment(datetime(2025, 5, 25, 5, 30, tzinfo=tz), s)
+    assert schedule_matches_moment(datetime(2025, 5, 25, 7, 0, tzinfo=tz), s)
+
+
+def test_interval_fire_occurrence_key_uses_slot() -> None:
+    from app.schedule_times import fire_occurrence_key
+
+    s = ScheduleEntry(
+        id="sch_i",
+        enabled=True,
+        frequency="interval",
+        interval_hours=4,
+        hour=3,
+        minute=0,
+    )
+    tz = ZoneInfo("UTC")
+    fire = datetime(2025, 5, 25, 5, 30, tzinfo=tz)
+    assert fire_occurrence_key(s, fire) == "sch_i:2025-05-25:3:0"

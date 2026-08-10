@@ -13,10 +13,13 @@ import html
 import json
 import os
 import pathlib
+import queue
 import re
+import subprocess
 import sys
 import threading
 import time
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable
 
@@ -80,9 +83,15 @@ _REMEDIATION_RULES: tuple[tuple[re.Pattern[str], str], ...] = (
         "(yt-dlp-ejs); keep player_client=tv,web_safari,mweb. See EJS wiki + ARCHIVE_PLAYLIST_RUN_LOGS.txt.",
     ),
     (
-        re.compile(r"challenge solving failed|\bn challenge\b|EJS|SABR", re.I),
+        re.compile(r"challenge solving failed|\bn challenge\b|No supported JavaScript runtime|yt-dlp-ejs", re.I),
         "YouTube n challenge: Node 20+ on PATH, --js-runtimes node in yt-dlp.conf, "
         "pip \"yt-dlp[default]\" for yt-dlp-ejs — https://github.com/yt-dlp/yt-dlp/wiki/EJS",
+    ),
+    (
+        re.compile(r"SABR-only streaming|forcing SABR streaming|missing a URL", re.I),
+        "SABR warning (often OK): YouTube hid some progressive URLs; yt-dlp usually "
+        "falls back to HLS/m3u8. Ensure Node + --js-runtimes node are working; update "
+        "yt-dlp. Not a failed download by itself — https://github.com/yt-dlp/yt-dlp/issues/12482",
     ),
     (
         re.compile(r"429|Too Many Requests|rate[- ]?limit", re.I),
@@ -141,6 +150,534 @@ ARCHIVE_COOKIE_AUTH_POLL_MAX_SEC_ENV = "ARCHIVE_COOKIE_AUTH_POLL_MAX_SEC"
 # Optional: poll cookies.txt mtime during a run and reload jar when you replace the source file.
 ARCHIVE_COOKIE_SOURCE_POLL_SEC_ENV = "ARCHIVE_COOKIE_SOURCE_POLL_SEC"
 
+ARCHIVE_DOWNLOAD_STALL_SEC_ENV = "ARCHIVE_DOWNLOAD_STALL_SEC"
+ARCHIVE_DOWNLOAD_STALL_HEARTBEAT_SEC_ENV = "ARCHIVE_DOWNLOAD_STALL_HEARTBEAT_SEC"
+ARCHIVE_DOWNLOAD_STALL_MAX_RETRIES_ENV = "ARCHIVE_DOWNLOAD_STALL_MAX_RETRIES"
+
+DEFAULT_DOWNLOAD_STALL_SEC = 900.0
+DEFAULT_DOWNLOAD_STALL_HEARTBEAT_SEC = 30.0
+DEFAULT_DOWNLOAD_STALL_MAX_RETRIES = 3
+
+STALL_EXIT_CODE = 124
+_WORKER_SNAPSHOT_MARKER = "__ARCHIVE_WORKER_SNAPSHOT__:"
+_DESTINATION_LINE_RE = re.compile(
+    r"^\[download\]\s+Destination:\s+(.+?)\s*$"
+)
+_DOWNLOADING_ITEM_RE = re.compile(
+    r"^\[download\]\s+Downloading item\s+\d+\s+of\s+\d+\s*$"
+)
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+def _emit_worker_stdout(line: str) -> None:
+    """Write UTF-8 to worker stdout (pipe-safe on Windows; parent decodes as UTF-8)."""
+    payload = line if line.endswith("\n") else line + "\n"
+    try:
+        sys.stdout.buffer.write(payload.encode("utf-8", errors="replace"))
+        sys.stdout.buffer.flush()
+    except (OSError, AttributeError, ValueError):
+        enc = getattr(sys.stdout, "encoding", None) or "utf-8"
+        try:
+            sys.stdout.write(payload.encode(enc, errors="replace").decode(enc, errors="replace"))
+            sys.stdout.flush()
+        except UnicodeEncodeError:
+            sys.stdout.write(payload.encode("ascii", errors="replace").decode("ascii"))
+            sys.stdout.flush()
+
+
+def _worker_subprocess_env() -> dict[str, str]:
+    return {
+        **os.environ,
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONIOENCODING": "utf-8",
+    }
+
+
+def _terminate_process_tree(proc: subprocess.Popen[str], *, grace_sec: float = 5.0) -> None:
+    """Terminate worker and child processes (aria2c/ffmpeg fragments)."""
+    if proc.poll() is not None:
+        return
+    if sys.platform == "win32":
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    else:
+        proc.terminate()
+        try:
+            proc.wait(timeout=grace_sec)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait(timeout=grace_sec)
+    if proc.poll() is None:
+        proc.kill()
+        proc.wait(timeout=grace_sec)
+
+
+def _pump_subprocess_stdout(pipe, out_q: queue.Queue) -> None:
+    try:
+        for line in pipe:
+            out_q.put(line)
+    finally:
+        out_q.put(None)
+
+
+def _cleanup_stall_partials(media_path: str | None) -> None:
+    """Remove incomplete partials for a stalled file so the next retry starts clean."""
+    if not media_path:
+        return
+    base = media_path.strip().strip('"')
+    if not base:
+        return
+    candidates = [base, base + ".part", base + ".ytdl"]
+    parent = os.path.dirname(base)
+    stem = os.path.basename(base)
+    if parent and os.path.isdir(parent):
+        try:
+            for name in os.listdir(parent):
+                if name.startswith(stem) and (
+                    ".part" in name or name.endswith(".ytdl")
+                ):
+                    candidates.append(os.path.join(parent, name))
+        except OSError:
+            pass
+    for path in dict.fromkeys(candidates):
+        try:
+            if os.path.isfile(path):
+                os.remove(path)
+        except OSError:
+            pass
+
+
+def _video_id_from_media_path(path: str | None) -> str:
+    if not path:
+        return ""
+    vid = _video_id_from_filename(path)
+    return vid or ""
+
+
+class _ActiveDownloadTracker:
+    """Track byte progress on the active destination file during HLS/DASH downloads."""
+
+    def __init__(self) -> None:
+        self.active_media_path: str | None = None
+        self._last_progress_mono = 0.0
+        self._last_size: int | None = None
+        self._last_heartbeat_mono = 0.0
+
+    def reset(self) -> None:
+        self.active_media_path = None
+        self._last_progress_mono = 0.0
+        self._last_size = None
+        self._last_heartbeat_mono = 0.0
+
+    def is_active(self) -> bool:
+        return bool(self.active_media_path)
+
+    def current_video_id(self) -> str:
+        return _video_id_from_media_path(self.active_media_path)
+
+    def idle_seconds(self) -> float:
+        if not self.active_media_path or not self._last_progress_mono:
+            return 0.0
+        return max(0.0, time.monotonic() - self._last_progress_mono)
+
+    def _current_size(self) -> int | None:
+        path = self.active_media_path
+        if not path:
+            return None
+        part = path + ".part"
+        for candidate in (part, path):
+            try:
+                if os.path.isfile(candidate):
+                    return os.path.getsize(candidate)
+            except OSError:
+                continue
+        return None
+
+    def _note_progress(self) -> None:
+        self._last_progress_mono = time.monotonic()
+
+    def on_stdout_line(self, line: str) -> None:
+        stripped = line.rstrip("\r\n")
+        dest = _DESTINATION_LINE_RE.match(stripped)
+        if dest:
+            self.active_media_path = dest.group(1).strip().strip('"')
+            self._last_size = self._current_size()
+            self._note_progress()
+            return
+        if _DOWNLOADING_ITEM_RE.match(stripped):
+            self.reset()
+            return
+        if "[FixupM3u8]" in stripped or "[download] 100%" in stripped:
+            self.reset()
+            return
+        if self.active_media_path:
+            size = self._current_size()
+            if size is not None and size != self._last_size:
+                self._last_size = size
+                self._note_progress()
+
+    def tick_file_progress(self) -> None:
+        if not self.active_media_path:
+            return
+        size = self._current_size()
+        if size is not None and size != self._last_size:
+            self._last_size = size
+            self._note_progress()
+
+    def maybe_log_heartbeat(self, reporter: "RunReporter", heartbeat_sec: float) -> None:
+        if not self.is_active():
+            return
+        now = time.monotonic()
+        idle = self.idle_seconds()
+        if idle < heartbeat_sec:
+            return
+        if now - self._last_heartbeat_mono < heartbeat_sec:
+            return
+        self._last_heartbeat_mono = now
+        reporter.log_line(
+            "[archive] yt-dlp still downloading "
+            f"(no byte progress for {int(idle)}s)…"
+        )
+
+
+@dataclass(frozen=True)
+class UrlRunResult:
+    exit_code: int
+    stalled: bool
+    snapshot_path: str | None = None
+    stalled_media_path: str | None = None
+
+
+class SubprocessStallGuard:
+    """
+    Run each batch URL in an isolated yt-dlp worker subprocess.
+
+    On stall: terminate the process tree, clean partials, return so the parent can retry
+    or skip (download-archive preserves completed IDs).
+    """
+
+    def __init__(self, reporter: "RunReporter") -> None:
+        self._reporter = reporter
+        self.stall_sec = _env_float(
+            ARCHIVE_DOWNLOAD_STALL_SEC_ENV, DEFAULT_DOWNLOAD_STALL_SEC
+        )
+        self.heartbeat_sec = _env_float(
+            ARCHIVE_DOWNLOAD_STALL_HEARTBEAT_SEC_ENV,
+            DEFAULT_DOWNLOAD_STALL_HEARTBEAT_SEC,
+        )
+        self.max_retries = max(
+            1,
+            _env_int(
+                ARCHIVE_DOWNLOAD_STALL_MAX_RETRIES_ENV,
+                DEFAULT_DOWNLOAD_STALL_MAX_RETRIES,
+            ),
+        )
+        self._enabled = self.stall_sec > 0
+
+    def log_startup_banner(self) -> None:
+        if not self._enabled:
+            return
+        self._reporter.log_line(
+            f"[archive] Download stall watchdog: no byte progress for "
+            f"{int(self.stall_sec)}s triggers interrupt "
+            f"(heartbeat every {int(self.heartbeat_sec)}s; "
+            f"{ARCHIVE_DOWNLOAD_STALL_SEC_ENV}=0 to disable)."
+        )
+
+    def _handle_worker_line(
+        self,
+        line: str,
+        tracker: _ActiveDownloadTracker,
+        snapshot_holder: list[str | None],
+    ) -> None:
+        if line.startswith(_WORKER_SNAPSHOT_MARKER):
+            snapshot_holder[0] = line[len(_WORKER_SNAPSHOT_MARKER) :].strip()
+            return
+        self._reporter.log_line(line.rstrip("\r\n"))
+        tracker.on_stdout_line(line)
+
+    def run_url(self, url: str, log_dir: str, *, dry_run: bool) -> UrlRunResult:
+        cmd = _worker_subprocess_cmd(url, log_dir, dry_run=dry_run)
+        env = _worker_subprocess_env()
+        proc = subprocess.Popen(
+            cmd,
+            cwd=SCRIPT_DIR,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+        )
+        assert proc.stdout is not None
+        out_q: queue.Queue = queue.Queue()
+        pump = threading.Thread(
+            target=_pump_subprocess_stdout,
+            args=(proc.stdout, out_q),
+            daemon=True,
+        )
+        pump.start()
+
+        tracker = _ActiveDownloadTracker()
+        snapshot_holder: list[str | None] = [None]
+        stalled = False
+        poll = min(max(0.05, self.heartbeat_sec), 30.0)
+
+        while True:
+            try:
+                line = out_q.get(timeout=poll)
+            except queue.Empty:
+                if proc.poll() is not None:
+                    while True:
+                        try:
+                            extra = out_q.get_nowait()
+                        except queue.Empty:
+                            break
+                        if extra is None:
+                            break
+                        self._handle_worker_line(extra, tracker, snapshot_holder)
+                    break
+                if not self._enabled:
+                    continue
+                tracker.tick_file_progress()
+                idle = tracker.idle_seconds()
+                if tracker.is_active():
+                    tracker.maybe_log_heartbeat(self._reporter, self.heartbeat_sec)
+                if tracker.is_active() and idle >= self.stall_sec:
+                    stalled = True
+                    vid = tracker.current_video_id()
+                    self._reporter.log_line(
+                        f"[WATCHDOG] Skipping item {vid or '?'} due to stall "
+                        f"(no file progress for {int(self.stall_sec)}s on {url!r})"
+                    )
+                    self._reporter.log_line(
+                        "[archive] Download stall watchdog: terminating yt-dlp worker "
+                        "process tree so the run can continue"
+                    )
+                    _terminate_process_tree(proc)
+                    break
+                continue
+
+            if line is None:
+                break
+            self._handle_worker_line(line, tracker, snapshot_holder)
+
+        pump.join(timeout=2.0)
+        if stalled and proc.poll() is None:
+            _terminate_process_tree(proc)
+        try:
+            proc.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            _terminate_process_tree(proc)
+            proc.wait(timeout=5)
+
+        snapshot_path = snapshot_holder[0]
+        if stalled:
+            _cleanup_stall_partials(tracker.active_media_path)
+            return UrlRunResult(
+                exit_code=STALL_EXIT_CODE,
+                stalled=True,
+                snapshot_path=snapshot_path,
+                stalled_media_path=tracker.active_media_path,
+            )
+
+        rc = proc.returncode if proc.returncode is not None else 1
+        return UrlRunResult(
+            exit_code=int(rc),
+            stalled=False,
+            snapshot_path=snapshot_path,
+        )
+
+
+def _worker_subprocess_cmd(url: str, log_dir: str, *, dry_run: bool) -> list[str]:
+    cmd = [
+        sys.executable,
+        os.path.abspath(__file__),
+        "--download-url",
+        url,
+        "--log-dir",
+        os.path.abspath(log_dir),
+    ]
+    if dry_run:
+        cmd.append("--dry-run")
+    return cmd
+
+
+def _write_worker_snapshot(snapshot_path: str, reporter: "RunReporter") -> None:
+    payload = {
+        "manifest": list(reporter._manifest_rows),
+        "issues": list(reporter._issues_rows),
+        "rerun_urls": sorted(reporter._rerun_urls),
+    }
+    with open(snapshot_path, "w", encoding="utf-8") as sf:
+        json.dump(payload, sf)
+
+
+def _build_ydl_opts_for_url(
+    url: str,
+    reporter: "RunReporter",
+) -> tuple[dict[str, Any], list[str]]:
+    argv = append_ytdlp_staged_cookies_argv(
+        _build_argv_for_url(SCRIPT_DIR, url),
+        SCRIPT_DIR,
+        log=reporter.log_line,
+    )
+    if _env_truthy("ARCHIVE_DRY_RUN"):
+        argv.append("--simulate")
+    po = yt_dlp.parse_options(argv)
+    ydl_opts = dict(po.ydl_opts)
+
+    def progress_hook(d: dict) -> None:
+        if d.get("status") != "finished":
+            return
+        info, path = _info_from_hook(d)
+        vid = _resolve_video_id(info, path)
+        if not path or not vid:
+            return
+        title = str(info.get("title") or "")
+        playlist_id = str(info.get("playlist_id") or "")
+        webpage = str(info.get("webpage_url") or info.get("original_url") or "")
+        extractor = str(info.get("extractor") or info.get("ie_key") or "")
+        size = d.get("total_bytes") or d.get("downloaded_bytes")
+        if size is None:
+            size = info.get("filesize") or info.get("filesize_approx")
+        try:
+            sz = int(size) if size is not None else -1
+        except (TypeError, ValueError):
+            sz = -1
+        reporter.record_manifest_row(
+            vid, title, path, sz, playlist_id, webpage, extractor
+        )
+
+    def postprocessor_hook(d: dict) -> None:
+        if d.get("status") != "finished":
+            return
+        info = d.get("info_dict") or {}
+        path = info.get("filepath") or info.get("_filename")
+        vid = _resolve_video_id(info, path)
+        if not path or not vid:
+            return
+        title = str(info.get("title") or "")
+        playlist_id = str(info.get("playlist_id") or "")
+        webpage = str(info.get("webpage_url") or "")
+        extractor = str(info.get("extractor") or info.get("ie_key") or "")
+        reporter.record_manifest_row(
+            vid, title, path, -1, playlist_id, webpage, extractor
+        )
+
+    ydl_opts["progress_hooks"] = list(ydl_opts.get("progress_hooks") or []) + [
+        progress_hook
+    ]
+    ydl_opts["postprocessor_hooks"] = list(ydl_opts.get("postprocessor_hooks") or []) + [
+        postprocessor_hook
+    ]
+    return ydl_opts, list(po.urls or [url])
+
+
+def _execute_single_url_download(url: str, reporter: "RunReporter") -> int:
+    ydl_opts, urls = _build_ydl_opts_for_url(url, reporter)
+    target = urls[0] if urls else url
+    rc = 0
+    with ManifestYoutubeDL(ydl_opts, reporter) as ydl:
+        try:
+            url_rc = ydl.download([target])
+            if url_rc:
+                rc = max(rc, int(url_rc))
+        except yt_dlp.utils.DownloadCancelled as e:
+            reporter.record_issue(
+                "cancelled",
+                "",
+                "",
+                "",
+                type(e).__name__ + ": " + str(e),
+                target,
+            )
+            rc = max(rc, 1)
+        else:
+            rc = max(rc, int(getattr(ydl, "_download_retcode", 0) or 0))
+    return rc
+
+
+def _worker_main(argv: list[str]) -> int:
+    url = ""
+    log_dir = ""
+    dry_run = False
+    i = 0
+    while i < len(argv):
+        arg = argv[i]
+        if arg == "--download-url" and i + 1 < len(argv):
+            url = argv[i + 1]
+            i += 2
+            continue
+        if arg == "--log-dir" and i + 1 < len(argv):
+            log_dir = argv[i + 1]
+            i += 2
+            continue
+        if arg == "--dry-run":
+            dry_run = True
+            i += 1
+            continue
+        i += 1
+    if not url or not log_dir:
+        print(
+            "worker: --download-url and --log-dir are required",
+            file=sys.stderr,
+            flush=True,
+        )
+        return 2
+
+    os.chdir(SCRIPT_DIR)
+    init_console()
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        except (OSError, ValueError):
+            pass
+    if dry_run:
+        os.environ["ARCHIVE_DRY_RUN"] = "1"
+    reporter = RunReporter(log_dir, worker_mode=True)
+    snapshot_path = os.path.join(log_dir, f".worker_snapshot_{os.getpid()}.json")
+    rc = 1
+    try:
+        rc = _execute_single_url_download(url, reporter)
+    except KeyboardInterrupt:
+        reporter.record_issue("interrupted", "", "", "", "KeyboardInterrupt", url)
+        rc = 1
+    except Exception as e:
+        reporter.record_issue("exception", "", "", "", repr(e), url)
+        rc = 1
+    finally:
+        try:
+            _write_worker_snapshot(snapshot_path, reporter)
+            print(f"{_WORKER_SNAPSHOT_MARKER}{snapshot_path}", flush=True)
+        except OSError as ex:
+            print(f"worker: failed to write snapshot: {ex!r}", file=sys.stderr, flush=True)
+        reporter.close()
+    return rc
+
 # yt-dlp / YouTube strings that strongly suggest cookies or login session — not bare HTTP 403.
 COOKIE_AUTH_LINE_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"sign\s+in\s+to\s+confirm", re.I),
@@ -158,6 +695,8 @@ COOKIE_AUTH_LINE_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"refresh\s+your\s+cookies", re.I),
     re.compile(r"cookies?\s+are\s+no\s+longer\s+valid", re.I),
     re.compile(r"rotated\s+in\s+the\s+browser", re.I),
+    # YouTube player/session challenge — extension reloads a YouTube tab then re-exports cookies
+    re.compile(r"the\s+page\s+needs\s+to\s+be\s+reloaded", re.I),
     # 403 only when auth-related tokens appear nearby on the same line
     re.compile(r"403(?:\s|$).{0,120}(?:cookie|login|sign\s*in|consent|bot|challenge)", re.I),
     re.compile(r"(?:cookie|login|sign\s*in|consent|bot|challenge).{0,120}403", re.I),
@@ -193,6 +732,7 @@ def _cookie_auth_selftest() -> int:
             "They have likely been rotated in the browser",
             True,
         ),
+        ("ERROR: [youtube] mG4_HQER6YA: The page needs to be reloaded.", True),
     )
     bad = [c for c in cases if looks_like_likely_cookie_auth_error(c[0]) != c[1]]
     if bad:
@@ -601,14 +1141,16 @@ def _report_navigation(log_dir: str) -> list[dict[str, str | bool]]:
 
 
 def _classify_issue_status(status: str, reason: str) -> str:
-    """Return bucket: skipped | private_unavailable | failed"""
+    """Return bucket: skipped | private_unavailable | warning | failed."""
     if status in ("skipped_archive", "skipped_file_exists", "match_filter"):
         return "skipped"
     if status == "unavailable_or_private":
         return "private_unavailable"
-    if status in ("error", "warning", "exception", "fatal", "cancelled", "interrupted"):
-        if PRIVATE_UNAVAILABLE_RE.search(reason):
-            return "private_unavailable"
+    if PRIVATE_UNAVAILABLE_RE.search(reason or ""):
+        return "private_unavailable"
+    if status == "warning":
+        return "warning"
+    if status in ("error", "exception", "fatal", "cancelled", "interrupted"):
         return "failed"
     if status in ("file_missing_after_hook", "file_missing_on_verify"):
         return "failed"
@@ -619,9 +1161,6 @@ def partition_issue_rows(
     issues_rows: list[dict[str, str]],
 ) -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
     """Split issues into tables that align with summary.txt counters."""
-    skipped_statuses = frozenset(
-        {"skipped_archive", "skipped_file_exists", "match_filter"}
-    )
     skipped: list[dict[str, str]] = []
     private: list[dict[str, str]] = []
     warnings: list[dict[str, str]] = []
@@ -629,13 +1168,12 @@ def partition_issue_rows(
     for r in issues_rows:
         st = r.get("status", "")
         reason = r.get("reason", "")
-        if st in skipped_statuses:
-            skipped.append(r)
-            continue
         bucket = _classify_issue_status(st, reason)
-        if bucket == "private_unavailable":
+        if bucket == "skipped":
+            skipped.append(r)
+        elif bucket == "private_unavailable":
             private.append(r)
-        elif st == "warning":
+        elif bucket == "warning":
             warnings.append(r)
         else:
             failed.append(r)
@@ -670,12 +1208,16 @@ def verify_summary_against_rows(
             f"summary private_unavailable={counts['private_unavailable']} "
             f"but private issue rows={len(private)}"
         )
-    if len(failed) + len(warnings) != counts["failed"]:
+    if len(failed) != counts["failed"]:
         errs.append(
-            f"summary failed={counts['failed']} but failed_strict+warning rows="
-            f"{len(failed)}+{len(warnings)}"
+            f"summary failed={counts['failed']} but failed issue rows={len(failed)}"
         )
-    recomputed = ver_down + len(skipped) + len(failed) + len(warnings) + len(private)
+    if len(warnings) != int(counts.get("warnings") or 0):
+        errs.append(
+            f"summary warnings={counts.get('warnings')} but warning issue rows={len(warnings)}"
+        )
+    # Warnings are informational (e.g. SABR) and do not count toward Attempted/Failed.
+    recomputed = ver_down + len(skipped) + len(failed) + len(private)
     if recomputed != counts["attempted"]:
         errs.append(
             f"summary attempted={counts['attempted']} but recomputed sum={recomputed}"
@@ -884,11 +1426,13 @@ def write_summary_text(
         f"Downloaded (verified):   {counts['downloaded']}",
         f"Skipped:                 {counts['skipped']}",
         f"Failed:                  {counts['failed']}",
+        f"Warnings:                {int(counts.get('warnings') or 0)}",
         f"Private / unavailable:   {counts['private_unavailable']}",
         "",
         "Notes:",
         "- 'Attempted' = verified downloaded + skipped + private/unavailable + failed.",
-        "  'Failed' in this file includes yt-dlp warnings; report.html splits Failed vs Warnings.",
+        "- 'Failed' = real errors only (not yt-dlp warnings such as SABR).",
+        "- 'Warnings' are listed separately and do not count as Failed (Gotify / ledger fail).",
         "- 'Downloaded' counts manifest rows where post-run verification succeeded "
         "(status downloaded or downloaded_merged).",
         "- See manifest.csv, issues.csv, and report.html (remediation column) for details.",
@@ -910,6 +1454,7 @@ def compute_summary_counts(
     )
     skipped = 0
     failed = 0
+    warnings = 0
     private_unavailable = 0
     for r in issues_rows:
         bucket = _classify_issue_status(r.get("status", ""), r.get("reason", ""))
@@ -917,14 +1462,18 @@ def compute_summary_counts(
             skipped += 1
         elif bucket == "private_unavailable":
             private_unavailable += 1
+        elif bucket == "warning":
+            warnings += 1
         else:
             failed += 1
+    # Warnings are not attempts (often attach to a video that still downloaded).
     attempted = downloaded + skipped + failed + private_unavailable
     return {
         "attempted": attempted,
         "downloaded": downloaded,
         "skipped": skipped,
         "failed": failed,
+        "warnings": warnings,
         "private_unavailable": private_unavailable,
     }
 
@@ -1004,6 +1553,7 @@ def build_static_report_fragments(payload: dict[str, Any]) -> dict[str, str]:
         ("Downloaded (verified)", s.get("downloaded")),
         ("Skipped", s.get("skipped")),
         ("Failed", s.get("failed")),
+        ("Warnings", s.get("warnings")),
         ("Private / unavailable", s.get("private_unavailable")),
     ]
     dl_parts: list[str] = []
@@ -1090,7 +1640,7 @@ def build_static_report_fragments(payload: dict[str, Any]) -> dict[str, str]:
             "Downloaded badge = verified on disk (file_verified_ok=yes), including "
             "<code>downloaded_merged</code> when the final muxed file replaced a hook-listed fragment. "
             "Table lists every manifest row. "
-            "Failed + Warnings badges sum to the summary line &quot;Failed&quot;. "
+            "Failed = real errors only; Warnings (e.g. SABR) are separate and do not count as Failed. "
             "Private / unavailable matches its summary line.</p>"
         ),
     }
@@ -1145,12 +1695,14 @@ class RunReporter:
         summary_heading: str | None = None,
         archive_sync_log_prefix: str = "[archive_playlist_run]",
         skip_download_archive_sync: bool = False,
+        worker_mode: bool = False,
     ):
         self.log_dir = log_dir
         self._archive_path = archive_path or playlists_downloaded_path()
         self._summary_heading = summary_heading or "Archive playlist run summary (UTC)"
         self._archive_sync_log_prefix = archive_sync_log_prefix
         self._skip_download_archive_sync = skip_download_archive_sync
+        self._worker_mode = worker_mode
         os.makedirs(log_dir, exist_ok=True)
         self.manifest_path = os.path.join(log_dir, "manifest.csv")
         self.issues_path = os.path.join(log_dir, "issues.csv")
@@ -1159,21 +1711,52 @@ class RunReporter:
         self.run_log_path = os.path.join(log_dir, "run.log")
         self.rerun_urls_path = os.path.join(log_dir, "rerun_urls.txt")
 
-        self._run_log = open(self.run_log_path, "w", encoding="utf-8")
+        if worker_mode:
+            self._run_log = open(os.devnull, "w", encoding="utf-8")
+        else:
+            self._run_log = open(self.run_log_path, "w", encoding="utf-8")
         self._manifest_rows: list[dict[str, str]] = []
         self._issues_rows: list[dict[str, str]] = []
         self._manifest_ids: set[str] = set()
         self._rerun_urls: set[str] = set()
         self._cookie_auth_pause_last_mono: float = 0.0
 
+    def merge_worker_snapshot(self, snapshot_path: str | None) -> None:
+        if not snapshot_path or not os.path.isfile(snapshot_path):
+            return
+        try:
+            with open(snapshot_path, encoding="utf-8") as sf:
+                payload = json.load(sf)
+        except (OSError, json.JSONDecodeError):
+            return
+        finally:
+            try:
+                os.remove(snapshot_path)
+            except OSError:
+                pass
+        for row in payload.get("manifest") or []:
+            vid = str(row.get("video_id") or "")
+            if vid and vid not in self._manifest_ids:
+                self._manifest_rows.append(dict(row))
+                self._manifest_ids.add(vid)
+        for row in payload.get("issues") or []:
+            self._issues_rows.append(dict(row))
+        for url in payload.get("rerun_urls") or []:
+            self.append_rerun(str(url))
+
     def close(self) -> None:
         self._run_log.close()
 
     def log_line(self, line: str) -> None:
+        if self._worker_mode:
+            _emit_worker_stdout(line)
+            return
         self._run_log.write(line)
         if not line.endswith("\n"):
             self._run_log.write("\n")
         self._run_log.flush()
+        if _env_truthy("ARCHIVE_CONSOLE_UNATTENDED"):
+            _emit_worker_stdout(line)
 
     def append_rerun(self, url: str | None) -> None:
         if url:
@@ -1491,6 +2074,8 @@ class ManifestYoutubeDL(YoutubeDL):
             self._reporter.log_line(plain)
             self._parse_screen_message(plain)
             self._handle_possible_cookie_auth_line(plain)
+        if self._reporter._worker_mode:
+            return
         msg_out = augment_ytdlp_console_message(str(message), plain)
         return super().to_screen(
             msg_out, skip_eol=skip_eol, quiet=quiet, only_once=only_once
@@ -1501,6 +2086,8 @@ class ManifestYoutubeDL(YoutubeDL):
         if plain:
             self._reporter.log_line(plain)
             self._trigger_cookie_auth_operator_pause_if_needed(plain)
+        if self._reporter._worker_mode:
+            return
         msg_out = augment_ytdlp_console_message(str(message), plain)
         return super().to_stderr(msg_out, only_once=only_once)
 
@@ -1575,6 +2162,22 @@ def _build_argv(script_dir: str) -> list[str]:
     ]
 
 
+def _build_argv_for_url(script_dir: str, url: str) -> list[str]:
+    return [
+        "--config-locations",
+        os.path.join(script_dir, "yt-dlp.conf"),
+        "--download-archive",
+        playlists_downloaded_path(),
+        "-o",
+        os.path.join(
+            _playlist_output_base(script_dir),
+            "%(playlist_id)s",
+            "%(upload_date)s - %(title)s - %(id)s.%(ext)s",
+        ),
+        url,
+    ]
+
+
 def _info_from_hook(d: dict) -> tuple[dict, str | None]:
     info = d.get("info_dict") or {}
     path = d.get("filename") or info.get("filepath")
@@ -1637,77 +2240,64 @@ def main() -> int:
         )
         return rc_pe
 
-    ydl_opts = dict(po.ydl_opts)
-
-    def progress_hook(d: dict):
-        if d.get("status") != "finished":
-            return
-        info, path = _info_from_hook(d)
-        vid = _resolve_video_id(info, path)
-        if not path or not vid:
-            return
-        title = str(info.get("title") or "")
-        playlist_id = str(info.get("playlist_id") or "")
-        webpage = str(info.get("webpage_url") or info.get("original_url") or "")
-        extractor = str(info.get("extractor") or info.get("ie_key") or "")
-        size = d.get("total_bytes") or d.get("downloaded_bytes")
-        if size is None:
-            size = info.get("filesize") or info.get("filesize_approx")
-        try:
-            sz = int(size) if size is not None else -1
-        except (TypeError, ValueError):
-            sz = -1
-        reporter.record_manifest_row(
-            vid, title, path, sz, playlist_id, webpage, extractor
-        )
-
-    def postprocessor_hook(d: dict):
-        if d.get("status") != "finished":
-            return
-        info = d.get("info_dict") or {}
-        path = info.get("filepath") or info.get("_filename")
-        vid = _resolve_video_id(info, path)
-        if not path or not vid:
-            return
-        title = str(info.get("title") or "")
-        playlist_id = str(info.get("playlist_id") or "")
-        webpage = str(info.get("webpage_url") or "")
-        extractor = str(info.get("extractor") or info.get("ie_key") or "")
-        reporter.record_manifest_row(
-            vid, title, path, -1, playlist_id, webpage, extractor
-        )
-
-    ydl_opts["progress_hooks"] = list(ydl_opts.get("progress_hooks") or []) + [progress_hook]
-    ydl_opts["postprocessor_hooks"] = list(ydl_opts.get("postprocessor_hooks") or []) + [
-        postprocessor_hook
-    ]
+    urls = list(po.urls or [])
+    stall_guard = SubprocessStallGuard(reporter)
+    stall_guard.log_startup_banner()
 
     rc = 0
-    try:
-        with ManifestYoutubeDL(ydl_opts, reporter) as ydl:
-            try:
-                ydl.download(po.urls)
-            except yt_dlp.utils.DownloadCancelled as e:
-                reporter.record_issue(
-                    "cancelled",
-                    "",
-                    "",
-                    "",
-                    type(e).__name__ + ": " + str(e),
-                    "",
-                )
-                rc = 1
-            else:
-                rc = ydl._download_retcode
-    except KeyboardInterrupt:
-        reporter.record_issue("interrupted", "", "", "", "KeyboardInterrupt", "")
+    if not urls:
+        reporter.record_issue("fatal", "", "", "", "No URLs to download (empty batch)", "")
         rc = 1
-    except Exception as e:
-        reporter.record_issue("exception", "", "", "", repr(e), "")
-        rc = 1
-    finally:
-        reporter.close()
-        reporter.finalize()
+    else:
+        dry_run = _env_truthy("ARCHIVE_DRY_RUN")
+        try:
+            for url in urls:
+                stall_retries = 0
+                while True:
+                    result = stall_guard.run_url(url, log_dir, dry_run=dry_run)
+                    reporter.merge_worker_snapshot(result.snapshot_path)
+                    if result.stalled:
+                        stall_retries += 1
+                        vid = _video_id_from_media_path(result.stalled_media_path)
+                        msg = (
+                            f"Download stall watchdog interrupted {url!r} "
+                            f"(attempt {stall_retries}/{stall_guard.max_retries})"
+                        )
+                        if vid:
+                            msg += f"; last item {vid}"
+                        reporter.log_line(f"[archive] {msg}")
+                        reporter.record_issue(
+                            "stall",
+                            vid,
+                            "",
+                            result.stalled_media_path or "",
+                            msg,
+                            url,
+                        )
+                        if stall_retries >= stall_guard.max_retries:
+                            reporter.log_line(
+                                "[archive] Skipping URL after repeated stalls: "
+                                f"{url!r}"
+                            )
+                            rc = max(rc, 1)
+                            break
+                        reporter.log_line(
+                            "[archive] Retrying URL after stall "
+                            "(download-archive skips completed IDs)…"
+                        )
+                        continue
+                    if result.exit_code:
+                        rc = max(rc, int(result.exit_code))
+                    break
+        except KeyboardInterrupt:
+            reporter.record_issue("interrupted", "", "", "", "KeyboardInterrupt", "")
+            rc = 1
+        except Exception as e:
+            reporter.record_issue("exception", "", "", "", repr(e), "")
+            rc = 1
+
+    reporter.close()
+    reporter.finalize()
 
     latest_path = os.path.join(SCRIPT_DIR, "logs", "latest_run.txt")
     try:
@@ -1730,4 +2320,6 @@ def main() -> int:
 if __name__ == "__main__":
     if _env_truthy("ARCHIVE_SELFTEST_COOKIE_AUTH"):
         raise SystemExit(_cookie_auth_selftest())
+    if "--download-url" in sys.argv:
+        raise SystemExit(_worker_main(sys.argv[1:]))
     raise SystemExit(main())
